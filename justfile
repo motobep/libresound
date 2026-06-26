@@ -1,4 +1,4 @@
-import 'ignore/scripts.just'
+import? 'ignore/scripts.just'
 
 [default]
 _list:

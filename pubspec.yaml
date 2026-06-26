@@ -15,8 +15,16 @@ dependencies:
   provider: ^6.0.0 # MIT
   path: ^1.8.2 # BSD-3-Clause
   path_provider: ^2.0.13 # BSD-3-Clause
-  audioplayers: 5.2.1 # MIT
-  audioplayers_android_exo: ^5.0.0
+  audioplayers: # MIT
+    git:
+      url: https://github.com/motobep/audioplayers.git
+      ref: v5_with_equalizer
+      path: packages/audioplayers
+  audioplayers_android_exo:
+    git:
+      url: https://github.com/motobep/audioplayers.git
+      ref: v5_with_equalizer
+      path: packages/audioplayers_android_exo
   mp3_info: ^0.2.1 # MIT
   id3tag: ^0.2.0 # MIT
   dart_tags: ^0.4.0 # MIT
@@ -29,10 +37,9 @@ dependencies:
   audio_service_mpris: ^0.2.0
   audio_session: 0.2.2 # MIT
   flutter_js: # MIT
-    path: ../flutter_js
-    # git:
-    #   url: https://github.com/motobep/flutter_js.git
-    #   ref: master
+    git:
+      url: https://github.com/motobep/flutter_js.git
+      ref: dart_quickjs
   # http: ^1.0.0 # BSD-3-Clause 
   archive: ^3.4.5 # MIT
   phosphor_flutter: ^2.1.0 # MIT
@@ -52,22 +59,11 @@ dependencies:
     path: ./libraries/m4a_tags_handler
 
 dependency_overrides:
-  audioplayers:
-    path: ../audioplayers/packages/audioplayers
-  audioplayers_android:
-    path: ../audioplayers/packages/audioplayers_android
-  audioplayers_android_exo:
-    path: ../audioplayers/packages/audioplayers_android_exo
-  audioplayers_darwin:
-    path: ../audioplayers/packages/audioplayers_darwin
-  audioplayers_linux:
-    path: ../audioplayers/packages/audioplayers_linux
   audioplayers_platform_interface:
-    path: ../audioplayers/packages/audioplayers_platform_interface
-  audioplayers_web:
-    path: ../audioplayers/packages/audioplayers_web
-  audioplayers_windows:
-    path: ../audioplayers/packages/audioplayers_windows
+    git:
+      url: https://github.com/motobep/audioplayers.git
+      ref: v5_with_equalizer
+      path: packages/audioplayers_platform_interface
 
 dev_dependencies:
   flutter_test:

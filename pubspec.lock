@@ -84,58 +84,69 @@ packages:
   audioplayers:
     dependency: "direct main"
     description:
-      path: "../audioplayers/packages/audioplayers"
-      relative: true
-    source: path
+      path: "packages/audioplayers"
+      ref: v5_with_equalizer
+      resolved-ref: "2b25e510ead183ebeed538b2b74dbf41641e9591"
+      url: "https://github.com/motobep/audioplayers.git"
+    source: git
     version: "5.2.1"
   audioplayers_android:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "../audioplayers/packages/audioplayers_android"
-      relative: true
-    source: path
+      name: audioplayers_android
+      sha256: b00e1a0e11365d88576320ec2d8c192bc21f1afb6c0e5995d1c57ae63156acb5
+      url: "https://pub.dev"
+    source: hosted
     version: "4.0.3"
   audioplayers_android_exo:
     dependency: "direct main"
     description:
-      path: "../audioplayers/packages/audioplayers_android_exo"
-      relative: true
-    source: path
+      path: "packages/audioplayers_android_exo"
+      ref: v5_with_equalizer
+      resolved-ref: fa10b7922e54e636932e10f0101be9ed04b05087
+      url: "https://github.com/motobep/audioplayers.git"
+    source: git
     version: "0.1.3"
   audioplayers_darwin:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "../audioplayers/packages/audioplayers_darwin"
-      relative: true
-    source: path
+      name: audioplayers_darwin
+      sha256: "3034e99a6df8d101da0f5082dcca0a2a99db62ab1d4ddb3277bed3f6f81afe08"
+      url: "https://pub.dev"
+    source: hosted
     version: "5.0.2"
   audioplayers_linux:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "../audioplayers/packages/audioplayers_linux"
-      relative: true
-    source: path
+      name: audioplayers_linux
+      sha256: "60787e73fefc4d2e0b9c02c69885402177e818e4e27ef087074cf27c02246c9e"
+      url: "https://pub.dev"
+    source: hosted
     version: "3.1.0"
   audioplayers_platform_interface:
     dependency: "direct overridden"
     description:
-      path: "../audioplayers/packages/audioplayers_platform_interface"
-      relative: true
-    source: path
+      path: "packages/audioplayers_platform_interface"
+      ref: v5_with_equalizer
+      resolved-ref: "2b25e510ead183ebeed538b2b74dbf41641e9591"
+      url: "https://github.com/motobep/audioplayers.git"
+    source: git
     version: "6.1.0"
   audioplayers_web:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "../audioplayers/packages/audioplayers_web"
-      relative: true
-    source: path
+      name: audioplayers_web
+      sha256: "22cd0173e54d92bd9b2c80b1204eb1eb159ece87475ab58c9788a70ec43c2a62"
+      url: "https://pub.dev"
+    source: hosted
     version: "4.1.0"
   audioplayers_windows:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "../audioplayers/packages/audioplayers_windows"
-      relative: true
-    source: path
+      name: audioplayers_windows
+      sha256: "9536812c9103563644ada2ef45ae523806b0745f7a78e89d1b5fb1951de90e1a"
+      url: "https://pub.dev"
+    source: hosted
     version: "3.1.0"
   boolean_selector:
     dependency: transitive
@@ -329,9 +340,11 @@ packages:
   flutter_js:
     dependency: "direct main"
     description:
-      path: "../flutter_js"
-      relative: true
-    source: path
+      path: "."
+      ref: dart_quickjs
+      resolved-ref: "62cc687bf9e67dc6fbdbc0678e92a790d1fe206b"
+      url: "https://github.com/motobep/flutter_js.git"
+    source: git
     version: "0.8.5"
   flutter_launcher_icons:
     dependency: "direct dev"
