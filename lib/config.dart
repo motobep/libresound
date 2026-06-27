@@ -12,7 +12,7 @@ const LogLevel logLevel = LogLevel.dev;
 const bool isLogToFile = true;
 const bool isLogDebug = false;
 const bool isLogTrace = false;
-const bool isLogView = true;
+const bool isLogView = false;
 const bool isLogBuild = false;
 const int maxLogFileSize = 50 * 1024 * 1024; // 50 mb
 
