@@ -64,6 +64,16 @@ dependency_overrides:
       url: https://github.com/motobep/audioplayers.git
       ref: v5_with_equalizer
       path: packages/audioplayers_platform_interface
+  audioplayers_linux:
+    git:
+      url: https://github.com/motobep/audioplayers.git
+      ref: v5_with_equalizer
+      path: packages/audioplayers_linux
+  audioplayers_windows:
+    git:
+      url: https://github.com/motobep/audioplayers.git
+      ref: v5_with_equalizer
+      path: packages/audioplayers_windows
 
 dev_dependencies:
   flutter_test:

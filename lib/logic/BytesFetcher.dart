@@ -121,7 +121,7 @@ Future<HttpClientRequest> _makeHttpClientRequest(
   Uri url = Uri.parse(url_str);
   String method = options.containsKey('method') ? options['method'] : 'GET';
   // TODO: Use one client
-  gLogger.blue('($method, $url, $options)');
+  gLogger.debug('($method, $url, $options)');
   // var client = HttpClient();
   var client = makeHttpClient(proxy: proxy, isTls1_3: isTls1_3);
   final request = await client.openUrl(method.toUpperCase(), url);

@@ -116,12 +116,11 @@ packages:
     source: hosted
     version: "5.0.2"
   audioplayers_linux:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: audioplayers_linux
-      sha256: "60787e73fefc4d2e0b9c02c69885402177e818e4e27ef087074cf27c02246c9e"
-      url: "https://pub.dev"
-    source: hosted
+      path: "../audioplayers/packages/audioplayers_linux"
+      relative: true
+    source: path
     version: "3.1.0"
   audioplayers_platform_interface:
     dependency: "direct overridden"
@@ -141,12 +140,13 @@ packages:
     source: hosted
     version: "4.1.0"
   audioplayers_windows:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: audioplayers_windows
-      sha256: "9536812c9103563644ada2ef45ae523806b0745f7a78e89d1b5fb1951de90e1a"
-      url: "https://pub.dev"
-    source: hosted
+      path: "packages/audioplayers_windows"
+      ref: v5_with_equalizer
+      resolved-ref: "2b25e510ead183ebeed538b2b74dbf41641e9591"
+      url: "https://github.com/motobep/audioplayers.git"
+    source: git
     version: "3.1.0"
   boolean_selector:
     dependency: transitive

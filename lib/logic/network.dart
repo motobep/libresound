@@ -102,6 +102,7 @@ Map<String, String> pickProxyConfig(Map<String, String>? proxy, bool useEnv) {
         ? {
             'http_proxy': Platform.environment['http_proxy'] ?? '',
             'https_proxy': Platform.environment['https_proxy'] ?? '',
+            'no_proxy': Platform.environment['no_proxy'] ?? '',
           }
         : {};
   }

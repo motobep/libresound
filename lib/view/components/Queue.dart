@@ -277,7 +277,7 @@ class _QueueState extends State<Queue> {
 
             _debouncer.run(() {
               // FIXME: calls repeatedly when queue height is less than queue max height
-              gLogger.blue('Put scroll on current mi');
+              gLogger.debug('Put scroll on current mi');
               var currentItemOffset = currentTrackIdx * CONFIG.itemExtent;
               appState.queueScrollOffset = currentItemOffset;
               if (_scrollController != null && _scrollController!.hasClients) {
