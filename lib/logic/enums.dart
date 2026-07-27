@@ -1,3 +1,24 @@
+/*
+Think about it
+Replace with
+
+enum PlayState {
+  playing,
+  pause,
+
+  // stopped: // states in which we cannot play for some reason
+  notReady, -> restsart | error state
+  endOfQueue; -> restart from 1st mi
+
+  idle, // initial state
+}
+ // set to show loading
+ // can be attached to playing, pause
+ // can be unset with notifying source
+ isLoading
+
+*/
+
 enum PlayState {
   playing,
   pause,

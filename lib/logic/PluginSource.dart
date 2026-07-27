@@ -245,6 +245,16 @@ class PluginSource implements Source {
         PlayState state = PlayState.fromString(stateStr);
         await playback.stopWith_n(state);
       },
+
+      /// @Unstable
+      'playback.resumeAsync': (_) async {
+        await playback.resume();
+      },
+
+      /// @Unstable
+      'playback.pauseAsync': (_) async {
+        await playback.pause();
+      },
       'playback.setUrlSourceAsync': (o) async {
         var mi = _miJsToDart(o);
         await playback.setUrlSourceAsync(mi);

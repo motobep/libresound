@@ -58,14 +58,14 @@ class PlaybackPlayer {
 
   /// Resumes. Changes playState to playing.
   Future<void> resume() async {
-    assert(playState == PlayState.pause);
+    assert(playState == PlayState.pause || playState == PlayState.loading);
     playState = PlayState.playing;
     await audioPlayer.resume();
   }
 
   /// Pauses. Changes playState to pause.
   Future<void> pause() async {
-    assert(playState == PlayState.playing);
+    assert(playState == PlayState.playing || playState == PlayState.loading);
     await audioPlayer.pause();
     playState = PlayState.pause;
   }

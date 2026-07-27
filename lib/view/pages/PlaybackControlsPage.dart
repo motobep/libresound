@@ -330,6 +330,10 @@ class _ImagesCarousel extends StatelessWidget {
     bool isLoading = context.select<DownloadsState, bool>((downloadsState) =>
         downloadsState.hasPlayId(musicItem.sourceId, musicItem.id));
 
+    final playState =
+        context.select<PlaybackState, PlayState>((s) => s.playback.playState);
+    bool isLoadingPlayState = playState == PlayState.loading;
+
     double width = MediaQuery.of(context).size.width;
 
     bool isPlaybackControlsOpened = context.select<AppState, bool>(
@@ -384,7 +388,7 @@ class _ImagesCarousel extends StatelessWidget {
                   radius: appearanceState.coverRadius,
                 ),
               ),
-              isLoading
+              isLoading || isLoadingPlayState
                   ? Container(
                       color: const Color(0x32000000),
                       width: imgSize,

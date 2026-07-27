@@ -101,11 +101,9 @@ packages:
   audioplayers_android_exo:
     dependency: "direct main"
     description:
-      path: "packages/audioplayers_android_exo"
-      ref: v5_with_equalizer
-      resolved-ref: fa10b7922e54e636932e10f0101be9ed04b05087
-      url: "https://github.com/motobep/audioplayers.git"
-    source: git
+      path: "../audioplayers/packages/audioplayers_android_exo"
+      relative: true
+    source: path
     version: "0.1.3"
   audioplayers_darwin:
     dependency: transitive

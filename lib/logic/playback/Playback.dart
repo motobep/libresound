@@ -22,30 +22,36 @@ class Playback {
     _progressCounter.addListener(onUpdateCallback, type: 'update');
     _progressCounter.addListener(onEndCallback, type: 'end');
 
-    _playback.audioPlayer.eventStream.listen((state) {
-      // if (state.eventType != AudioEventType.position)
-      // logger.warn('eventStream: $state');
-      if (state.eventType == AudioEventType.seekComplete) {
-        logger.warn('seekComplete="$state"');
-      }
-      if (state.eventType == AudioEventType.log &&
-          Platform.isLinux &&
-          state.logMessage != null &&
-          state.logMessage!.contains('Could not set playback to position')) {
-        logger.warn('Bad seek: ${state}');
+    _playback.audioPlayer.eventStream.listen(
+      (state) {
+        // if (state.eventType != AudioEventType.position)
+        // logger.warn('eventStream: $state');
+        if (state.eventType == AudioEventType.seekComplete) {
+          logger.warn('seekComplete="$state"');
+        }
+        if (state.eventType == AudioEventType.log &&
+            Platform.isLinux &&
+            state.logMessage != null &&
+            state.logMessage!.contains('Could not set playback to position')) {
+          logger.warn('Bad seek: ${state}');
 
-        final pattern = RegExp(r'\((-?\d+)\)');
-        final match = pattern.firstMatch(state.logMessage!);
-        int fromMs = int.parse(match!.group(1)!);
-        if (fromMs < 0) return;
+          final pattern = RegExp(r'\((-?\d+)\)');
+          final match = pattern.firstMatch(state.logMessage!);
+          int fromMs = int.parse(match!.group(1)!);
+          if (fromMs < 0) return;
 
-        logger.warn('Reverting counter to ($fromMs)');
-        setPosition(fromMs);
+          logger.warn('Reverting counter to ($fromMs)');
+          setPosition(fromMs);
 
-        update();
-        _updateNotificationsState();
-      }
-    });
+          update();
+          _updateNotificationsState();
+        }
+      },
+      onError: (Object error, StackTrace stack) {
+        logger.exception('AudioPlayer event error', error, stack);
+        stopWith_n(PlayState.notReady);
+      },
+    );
 
     // _playback.audioPlayer.onPlayerStateChanged.listen((state) {
     //   logger.warn('PlayerState: $state');
@@ -312,9 +318,20 @@ class Playback {
     _updateNotificationsState();
   }
 
+  /// @Unstable
+  Future<void> resume() async {
+    return await _resume();
+  }
+
+  /// @Unstable
+  Future<void> pause() async {
+    return await _pause();
+  }
+
   /// Throws
   Future<void> _resume() async {
-    assert(playState == PlayState.pause);
+    assert(playState == PlayState.pause || playState == PlayState.loading,
+        '_resume playState: $playState');
     try {
       await getSourceByMi(getCurrentMusicItem())
           .triggerEventAsync('BeforeResumeAsync', {});
@@ -336,6 +353,8 @@ class Playback {
   }
 
   Future<void> _pause() async {
+    assert(playState == PlayState.playing || playState == PlayState.loading,
+        '_pause playState: $playState');
     try {
       await getSourceByMi(getCurrentMusicItem())
           .triggerEventAsync('BeforePauseAsync', {});

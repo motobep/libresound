@@ -1,11 +1,13 @@
 import 'dart:math';
 
 import 'package:m4a_tags_handler/Tags.dart';
+import 'package:music_player/logic/enums.dart';
 import 'package:music_player/states/AppState.dart';
 import 'package:music_player/states/AppearanceState.dart';
 import 'package:music_player/states/DownloadsState.dart';
 
 import 'package:flutter/material.dart';
+import 'package:music_player/states/PlaybackState.dart' show PlaybackState;
 import 'package:music_player/view/components/dialogs.dart' show CoverDialog;
 import 'package:provider/provider.dart';
 
@@ -26,6 +28,11 @@ class TrackDescription extends StatelessWidget {
     final appState = Provider.of<AppState>(context, listen: false);
     bool isLoading = context.select<DownloadsState, bool>((downloadsState) =>
         downloadsState.hasPlayId(musicItem.sourceId, musicItem.id));
+
+    final playState =
+        context.select<PlaybackState, PlayState>((s) => s.playback.playState);
+    bool isLoadingPlayState = playState == PlayState.loading;
+
     return Row(
       children: [
         InkWell(
@@ -44,7 +51,7 @@ class TrackDescription extends StatelessWidget {
             margin: const EdgeInsets.only(right: 10),
             child: Stack(alignment: Alignment.center, children: <Widget>[
               Thumbnail(picture: musicItem.tags.picture, size: imgSize),
-              isLoading
+              isLoading || isLoadingPlayState
                   ? Container(
                       color: const Color(0x32000000),
                       child: const Center(
