@@ -1,7 +1,7 @@
 name: m4a_tags_handler
 
 environment:
-  sdk: '>=2.18.6 <3.0.0'
+  sdk: '>=3.0.0 <=3.29.1'
 
 dependencies:
   test: ^1.25.2

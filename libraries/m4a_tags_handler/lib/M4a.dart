@@ -82,20 +82,64 @@ class M4aTagsHandler {
 
     for (var child in atom.children) {
       int headerLen = child.getHeaderLength();
-      final header = AtomData(Uint8List(
+      final headerData = AtomData(Uint8List(
           headerLen)); // NOTE: can be optimized with allocating memory for entire atom
 
       final data = _recursiveBuilder(child);
       int atomLen = data.lengthInBytes + headerLen;
-      header.setUint32(0, atomLen);
+      headerData.setUint32(0, atomLen);
 
       // Writing control chars
       for (var j = 0; j < 4; j++) {
-        header.setUint8(4 + j, child.name.codeUnitAt(j));
+        headerData.setUint8(4 + j, child.name.codeUnitAt(j));
       }
 
-      AtomData mgegAtom = concatBuffers(header, data);
+      AtomData mgegAtom = concatBuffers(headerData, data);
       output = concatBuffers(output, mgegAtom);
+    }
+
+    return output;
+  }
+
+  AtomData build2() {
+    return _recursiveBuilder2(root);
+  }
+
+  AtomData _recursiveBuilder2(Atom atom) {
+    if (atom.data != null) {
+      return atom.data!;
+    }
+
+    // Flatten tree and collect metadata
+    final List<(int headerLen, AtomData data, Atom child)> childInfo = [];
+    int totalSize = 0;
+
+    for (var child in atom.children) {
+      int headerLen = child.getHeaderLength();
+      final data = _recursiveBuilder2(child);
+      childInfo.add((headerLen, data, child));
+      totalSize += headerLen + data.lengthInBytes;
+    }
+
+    final output = AtomData(Uint8List(totalSize));
+    int offset = 0;
+
+    // Write sequentially
+    for (var (headerLen, data, child) in childInfo) {
+      final atomLen = data.lengthInBytes + headerLen;
+
+      // Fill length
+      output.setUint32(offset, atomLen);
+
+      // Fill header
+      for (var j = 0; j < 4; j++) {
+        output.setUint8(offset + 4 + j, child.name.codeUnitAt(j));
+      }
+      offset += headerLen;
+
+      // Fill body
+      output.buffer.setRange(offset, offset + data.lengthInBytes, data.buffer);
+      offset += data.lengthInBytes;
     }
 
     return output;

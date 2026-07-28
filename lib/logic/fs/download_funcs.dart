@@ -50,7 +50,9 @@ Future<List<int>> _addTags(List<int> bytes, MusicItem item) async {
     Tags tags = item.tags;
     // tags.show();
     m4a.setTags(tags);
-    newBytes = m4a.build().buffer;
+
+    // newBytes = m4a.build().buffer;
+    newBytes = m4a.build2().buffer;
   } else {
     assert(false, 'Wrong extension: ${item.extension}');
     newBytes = []; // To shut up linter
