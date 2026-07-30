@@ -367,15 +367,19 @@ class FsSource implements Source {
 
   final _fsSearchTabs = FsTabsNames.list;
 
+  String _fsSearchTabsTranslation(String tabName) {
+    assert(FsTabsNames.list.contains(tabName), 'Wrong tabName: "$tabName"');
+    return {
+      FsTabsNames.all: lang.Tracks,
+      FsTabsNames.playlists: lang.Playlists,
+      FsTabsNames.artists: lang.Artists,
+      FsTabsNames.albums: lang.Albums,
+    }[tabName]!;
+  }
+
   @override
   List<String> getSearchTabs() {
-    final _fsSearchTabsForUser = [
-      lang.Tracks,
-      lang.Playlists,
-      lang.Artists,
-      lang.Albums,
-    ];
-    return _fsSearchTabsForUser;
+    return _fsSearchTabs.map((t) => _fsSearchTabsTranslation(t)).toList();
   }
 
   /// No side effects

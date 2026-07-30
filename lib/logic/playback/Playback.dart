@@ -400,6 +400,7 @@ class Playback {
     MusicItem mi = getCurrentMusicItem();
     logger.log('Playing "${mi.title}", id="${mi.id}"');
 
+    // TODO: use mutex
     // Delegate play to source
     _isProcessing = true;
     try {

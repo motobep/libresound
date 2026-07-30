@@ -227,6 +227,7 @@ class _SearchAutocomplete extends State<SearchAutocomplete> {
             focusNode: widget.focusNode,
             style: const TextStyle(fontSize: 14),
             cursorColor: Colors.grey,
+            selectAllOnFocus: false,
             decoration: InputDecoration(
               constraints: const BoxConstraints(maxHeight: 42),
               contentPadding: widget.contentPadding,
@@ -242,9 +243,7 @@ class _SearchAutocomplete extends State<SearchAutocomplete> {
                 onPressed: () {
                   // On clear search text
                   _textEditingController.text = '';
-                  setState(() {
-                    suggestions = [];
-                  });
+                  setSuggestions(_textEditingController.text);
                 },
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
