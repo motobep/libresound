@@ -380,29 +380,14 @@ class _ImagesCarousel extends StatelessWidget {
           ),
           itemBuilder: (ctx, index, realIdx) {
             var el = playback.queue.getMusicItem(index);
-            return Stack(alignment: Alignment.center, children: <Widget>[
-              SizedBox(
-                width: imgSize,
-                child: Cover(
-                  picture: el.picture,
-                  radius: appearanceState.coverRadius,
-                ),
-              ),
-              isLoading || isLoadingPlayState
-                  ? Container(
-                      color: const Color(0x32000000),
-                      width: imgSize,
-                      height: imgSize,
-                      child: const Center(
-                        child: SizedBox(
-                          width: 50,
-                          height: 50,
-                          child: CircularProgressIndicator(strokeWidth: 4),
-                        ),
-                      ),
-                    )
-                  : const SizedBox.shrink(),
-            ]);
+            return CoverGuarded(
+              musicItem: el,
+              imgSize: imgSize,
+              imgRadius: appearanceState.coverRadius,
+              loaderSize: 50,
+              loaderStrokeWidth: 4,
+              imageBrokenSize: imgSize * 0.4,
+            );
           }),
     );
   }

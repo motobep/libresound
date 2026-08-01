@@ -242,7 +242,7 @@ class MaterialAppThemed extends StatelessWidget {
         scaffoldBackgroundColor: colors[ColorType.bg],
         cardColor: colors[ColorType.bg],
         appBarTheme: AppBarTheme(
-          color: colors[ColorType.bg],
+          backgroundColor: colors[ColorType.bg],
           foregroundColor: colors[ColorType.primary],
           toolbarHeight: 54,
           scrolledUnderElevation: 0,

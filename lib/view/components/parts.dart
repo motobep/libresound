@@ -9,6 +9,8 @@ import 'package:music_player/states/DownloadsState.dart';
 import 'package:flutter/material.dart';
 import 'package:music_player/states/PlaybackState.dart' show PlaybackState;
 import 'package:music_player/view/components/dialogs.dart' show CoverDialog;
+import 'package:phosphor_flutter/phosphor_flutter.dart'
+    show PhosphorIconsRegular;
 import 'package:provider/provider.dart';
 
 import 'package:music_player/logic/MusicItem.dart';
@@ -26,12 +28,8 @@ class TrackDescription extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context, listen: false);
-    bool isLoading = context.select<DownloadsState, bool>((downloadsState) =>
-        downloadsState.hasPlayId(musicItem.sourceId, musicItem.id));
-
-    final playState =
-        context.select<PlaybackState, PlayState>((s) => s.playback.playState);
-    bool isLoadingPlayState = playState == PlayState.loading;
+    final appearanceState =
+        Provider.of<AppearanceState>(context, listen: false);
 
     var progressFormatted = context
         .select<PlaybackState, String>((s) => s.playback.progressFormatted);
@@ -56,21 +54,14 @@ class TrackDescription extends StatelessWidget {
             width: imgSize,
             height: imgSize,
             margin: const EdgeInsets.only(right: 10),
-            child: Stack(alignment: Alignment.center, children: <Widget>[
-              Thumbnail(picture: musicItem.tags.picture, size: imgSize),
-              isLoading || isLoadingPlayState
-                  ? Container(
-                      color: const Color(0x32000000),
-                      child: const Center(
-                        child: SizedBox(
-                          width: 25,
-                          height: 25,
-                          child: CircularProgressIndicator(strokeWidth: 3),
-                        ),
-                      ),
-                    )
-                  : const SizedBox.shrink(),
-            ]),
+            child: CoverGuarded(
+              musicItem: musicItem,
+              imgSize: imgSize,
+              imgRadius: appearanceState.thumbnailRadius,
+              loaderSize: 25,
+              loaderStrokeWidth: 3,
+              imageBrokenSize: imgSize * 0.6,
+            ),
           ),
         ),
         Expanded(
@@ -112,6 +103,70 @@ class _TrackDescriptionText extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+class CoverGuarded extends StatelessWidget {
+  const CoverGuarded({
+    super.key,
+    required this.musicItem,
+    required this.imgSize,
+    required this.imgRadius,
+    required this.loaderSize,
+    required this.loaderStrokeWidth,
+    required this.imageBrokenSize,
+  });
+
+  final MusicItem musicItem;
+  final double imgSize;
+  final double imgRadius;
+  final double loaderSize;
+  final double loaderStrokeWidth;
+  final double imageBrokenSize;
+
+  @override
+  Widget build(BuildContext context) {
+    bool isLoading = context.select<DownloadsState, bool>((downloadsState) =>
+        downloadsState.hasPlayId(musicItem.sourceId, musicItem.id));
+    final playState =
+        context.select<PlaybackState, PlayState>((s) => s.playback.playState);
+    bool isLoadingPlayState = playState == PlayState.loading;
+
+    bool isShowLoader = isLoading || isLoadingPlayState;
+    bool isShowBroken = !isShowLoader && (playState == PlayState.notReady);
+
+    return Stack(alignment: Alignment.center, children: <Widget>[
+      SizedBox(
+        width: imgSize,
+        child: Cover(
+          picture: musicItem.tags.picture,
+          radius: imgRadius,
+        ),
+      ),
+      if (isShowBroken)
+        Container(
+          color: const Color(0x32000000),
+          width: imgSize,
+          height: imgSize,
+          child: Center(
+            child: Icon(PhosphorIconsRegular.imageBroken,
+                size: imageBrokenSize, color: Colors.red),
+          ),
+        ),
+      if (isShowLoader)
+        Container(
+          color: const Color(0x32000000),
+          width: imgSize,
+          height: imgSize,
+          child: Center(
+            child: SizedBox(
+              width: loaderSize,
+              height: loaderSize,
+              child: CircularProgressIndicator(strokeWidth: loaderStrokeWidth),
+            ),
+          ),
+        ),
+    ]);
   }
 }
 
