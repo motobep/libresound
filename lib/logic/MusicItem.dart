@@ -10,8 +10,7 @@ import 'package:music_player/logic/Item.dart';
 import 'package:music_player/logic/KeyValue.dart';
 import 'package:music_player/logic/fs/files.dart' as fs;
 import 'package:music_player/logic/lang.dart';
-import 'package:music_player/logic/utils.dart'
-    show formatBottomLine, formatDuration;
+import 'package:music_player/logic/utils.dart' show formatDuration;
 
 /* Proposal: Tile type to represent gui for MusicItem and GroupItem.
 It will have link to the original object */
@@ -80,8 +79,8 @@ class MusicItem implements Item {
   String extension;
 
   @override
-  String? get subtitle {
-    return _subtitle ?? formatBottomLine(time, artistName);
+  String get subtitle {
+    return _subtitle ?? artistName;
   }
 
   String? _subtitle;

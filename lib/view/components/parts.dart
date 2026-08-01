@@ -33,6 +33,13 @@ class TrackDescription extends StatelessWidget {
         context.select<PlaybackState, PlayState>((s) => s.playback.playState);
     bool isLoadingPlayState = playState == PlayState.loading;
 
+    var progressFormatted = context
+        .select<PlaybackState, String>((s) => s.playback.progressFormatted);
+
+    String subtitle = appState.isWide
+        ? '${progressFormatted} / ${musicItem.time} · ${musicItem.subtitle}'
+        : musicItem.subtitle;
+
     return Row(
       children: [
         InkWell(
@@ -69,7 +76,7 @@ class TrackDescription extends StatelessWidget {
         Expanded(
           child: _TrackDescriptionText(
             title: musicItem.title,
-            subtitle: musicItem.subtitle ?? '',
+            subtitle: subtitle,
           ),
         ),
       ],
