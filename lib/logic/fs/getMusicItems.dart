@@ -133,7 +133,8 @@ Tags _joinTags(Tags a, Tags b) {
 }
 
 Tags _getId3V1Tags(File file) {
-  Uint8List contents = Uint8List(128);
+  const int TAGS_LEN = 128;
+  Uint8List contents = Uint8List(TAGS_LEN);
   try {
     contents = file.readAsBytesSync();
   } on FileSystemException {
@@ -142,7 +143,7 @@ Tags _getId3V1Tags(File file) {
     throw Exception('Unexpected exception while reading music file $e');
   }
 
-  var meta = contents.sublist(contents.length - 128);
+  var meta = contents.sublist(contents.length - TAGS_LEN);
   if (meta[0] == 'T'.codeUnitAt(0) &&
       meta[1] == 'A'.codeUnitAt(0) &&
       meta[2] == 'G'.codeUnitAt(0)) {
