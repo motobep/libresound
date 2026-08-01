@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:music_player/logger.dart';
+import 'package:music_player/states/AppState.dart' show AppState;
 import 'package:music_player/view/App.dart' show navigatorKey;
+import 'package:provider/provider.dart' show Provider;
 
 /// WARNING: bad behavior if used wrong across async gaps
 Future<void> _showSnackBarAsBottomSheet(
@@ -66,35 +68,54 @@ Future<void> _showSnackBarAsBottomSheetNoContext(String message) async {
 void showSnackBarNoContext(String msg) {
   var context = navigatorKey.currentContext!;
   var messenger = ScaffoldMessenger.of(context);
-  messenger.showSnackBar(getSnackBar(msg));
+  messenger.showSnackBar(getSnackBar(context, msg));
 }
 
 void showSnackBar(String msg, BuildContext context) {
   var messenger = ScaffoldMessenger.of(context);
-  messenger.showSnackBar(getSnackBar(msg));
+  messenger.showSnackBar(getSnackBar(context, msg));
 }
 
 void Function(String) getSnackBarMessangerFunc(BuildContext context) {
   var messenger = ScaffoldMessenger.of(context);
   return (String msg) {
-    messenger.showSnackBar(getSnackBar(msg));
+    messenger.showSnackBar(getSnackBar(context, msg));
   };
 }
 
-SnackBar getSnackBar(String msg) {
+SnackBar getSnackBar(BuildContext context, String msg) {
+  final cs = ColorScheme.of(context);
+
+  AppState appState = Provider.of<AppState>(context, listen: false);
+
+  var alignment = Alignment.center;
+  var margin = const EdgeInsets.only(bottom: 50.0, left: 15, right: 15);
+  if (appState.isWide) {
+    margin = const EdgeInsets.only(bottom: 90.0, left: 25, right: 25);
+  }
+
   final snackBar = SnackBar(
-    content: Text(msg, style: const TextStyle(color: Colors.white)),
-    backgroundColor: const Color(0xff282832),
+    content: Align(
+      alignment: alignment,
+      child: Container(
+        decoration: BoxDecoration(
+          color: cs.surface,
+          border: Border.all(color: cs.primary, width: 1.0),
+          borderRadius: BorderRadius.circular(2.0),
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 11.0,
+          vertical: 11.0,
+        ),
+        child: Text(msg, style: TextStyle(color: cs.onSurface)),
+      ),
+    ),
+    elevation: 0,
+    backgroundColor: Colors.transparent,
+    padding: const EdgeInsets.only(),
     duration: const Duration(milliseconds: 1500),
     behavior: SnackBarBehavior.floating,
-    margin: const EdgeInsets.only(bottom: 50.0, left: 15, right: 15),
-    padding: const EdgeInsets.symmetric(
-      horizontal: 11.0, // Inner padding for SnackBar content.
-      vertical: 11.0, // Inner padding for SnackBar content.
-    ),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(8.0),
-    ),
+    margin: margin,
     dismissDirection: DismissDirection.horizontal,
   );
   return snackBar;
