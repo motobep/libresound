@@ -1,6 +1,7 @@
 import 'package:music_player/logger.dart' show gLogger;
 import 'package:music_player/logic/PluginManager.dart' show PluginManager;
 import 'package:music_player/logic/plugins.dart';
+import 'package:music_player/main.dart' show config;
 import 'package:music_player/states/focus_states/SimpleListNavigator.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
@@ -95,6 +96,8 @@ class _SidebarState extends State<Sidebar> {
             : null,
       ),
       _Btn(lang.Files, PhosphorIconsThin.folders),
+      if (appState.sources.containsKey(CONFIG.tempFsSourceId))
+        _Btn(lang.Selected_folder, PhosphorIconsThin.folderDashed),
     ];
     var sourcesInfo = [
       for (var p in pluginSources)

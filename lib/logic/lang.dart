@@ -9,6 +9,7 @@ abstract class Lang {
   abstract String Sync;
   abstract String Plugins;
   abstract String Files;
+  abstract String Selected_folder;
   abstract String Search;
 
   abstract String Unknown_Title;
@@ -274,6 +275,7 @@ class EnLang implements Lang {
   String Sync = 'Sync';
   String Plugins = 'Plugins';
   String Files = 'Filesystem';
+  String Selected_folder = 'Selected folder';
   String Search = 'Search';
 
   // Music item
@@ -564,6 +566,7 @@ class RuLang implements Lang {
   String Sync = 'Синхронизация';
   String Plugins = 'Плагины';
   String Files = 'Файлы';
+  String Selected_folder = 'Выбранная папка';
   String Search = 'Поиск';
 
   // Music item
@@ -648,8 +651,7 @@ class RuLang implements Lang {
   String Music_folder = 'Папка Музыки';
   String Downloads_folder = 'Папка Загрузок';
   String tracks__genetive = 'треков';
-  String phrase__no_music_in_folder =
-      '''В папке "{}" нет музыкальных файлов.
+  String phrase__no_music_in_folder = '''В папке "{}" нет музыкальных файлов.
 Пожалуйста, добавьте музыку в эту папку или выберите другую папку в Настройках.''';
 
   String Enabled = 'Включено';

@@ -26,10 +26,11 @@ class Config {
 
   String _appDir = '';
   Directory? _musicSourceDir;
+  Directory? _cliDir;
 
-  Directory? get musicSourceDir {
-    return _musicSourceDir;
-  }
+  Directory? get musicSourceDir => _musicSourceDir;
+
+  Directory? get cliDir => _cliDir;
 
   String get appDir {
     return _appDir;
@@ -130,16 +131,21 @@ class Config {
 
   Future<void> _loadMusicSourceDir() async {
     // Cli Dir
-    String cliDir = '';
+    String cliDirPath = '';
     if (cliArgs.isNotEmpty) {
       logger.log('cliArgs isNotEmpty');
       String path = cliArgs[0];
 
-      final dir = Directory(path);
-      if (!dir.existsSync()) {
-        logger.warn('cliArgs dir: Directory $dir doesn\'t exist');
+      final type = FileSystemEntity.typeSync(path);
+      File(path).exists;
+      if (type == FileSystemEntityType.directory) {
+        final dir = Directory(path);
+        cliDirPath = dir.absolute.path;
+        // } else if (type == FileSystemEntityType.file) {
+        //   final file = File(path);
+        //   cliDirPath = file.absolute.parent.path;
       } else {
-        cliDir = dir.absolute.path;
+        logger.warn('cliArgs: Directory/File "$path" doesn\'t exist');
       }
     }
 
@@ -148,14 +154,13 @@ class Config {
     if (envDir != '' &&
         isValidAbsolutePath(envDir) &&
         Directory(envDir).existsSync()) {
-      cliDir = envDir;
+      cliDirPath = envDir;
     }
 
-    if (cliDir != '') {
-      logger.log('cli SOURCE_DIR=$cliDir');
-      var musicDir = removeTrailingSlash(cliDir);
-      setMusicSourceDir(musicDir);
-      return;
+    // Set cli dir
+    if (cliDirPath != '') {
+      logger.log('cli SOURCE_DIR=$cliDirPath');
+      _cliDir = Directory(cliDirPath);
     }
 
     // Config Dir
@@ -216,6 +221,10 @@ class Config {
 
   bool isMusicSourceDirValid() {
     return musicSourceDir != null && musicSourceDir!.existsSync();
+  }
+
+  bool isCliDirValid() {
+    return cliDir != null && cliDir!.existsSync();
   }
 
   /// Throws [MissingPlatformDirectoryException]

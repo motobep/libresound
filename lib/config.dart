@@ -2,8 +2,8 @@ import 'package:file/local.dart';
 import 'package:file/memory.dart';
 import 'package:music_player/logic/enums.dart' show LogLevel;
 
-const smallBreakpoint = 600;
 const String fsSourceId = 'FsSource';
+const String tempFsSourceId = 'TempFsSource';
 
 const VersionMode mode = String.fromEnvironment('build_mode') == 'prod'
     ? VersionMode.prod

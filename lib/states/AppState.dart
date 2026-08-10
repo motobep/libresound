@@ -37,17 +37,35 @@ class AppState extends ChangeNotifier {
 
     logger.log('Creating FsSource');
     fsSource = FsSource(
+      sourceId: CONFIG.fsSourceId,
       playback: playback,
       toThisSourceAsync: () => toSource(fsSource.sourceId),
       reloadFsSource: reloadFsSource,
       update: update,
+      getMusicSourceDir: () => config.musicSourceDir,
+      isMusicSourceValid: config.isMusicSourceDirValid,
     );
     sources[fsSource.sourceId] = fsSource;
 
+    currentSource = sources[fsSource.sourceId]!;
+
+    if (_isAddTempFsSource()) {
+      logger.log('Creating TempFsSource');
+      tempFsSource = FsSource(
+        sourceId: CONFIG.tempFsSourceId,
+        playback: playback,
+        toThisSourceAsync: () => toSource(CONFIG.tempFsSourceId),
+        reloadFsSource: reloadFsSource,
+        update: update,
+        getMusicSourceDir: () => config.cliDir,
+        isMusicSourceValid: config.isCliDirValid,
+      );
+      sources[tempFsSource!.sourceId] = tempFsSource!;
+      currentSource = sources[tempFsSource!.sourceId]!;
+    }
+
     logger.log('Creating directories for plugins');
     plugins.ensurePluginDirectoriesCreated(config.pluginsDir);
-
-    currentSource = sources[fsSource.sourceId]!;
 
     playback.getSourceByMi = getSourceByMi;
 
@@ -55,6 +73,11 @@ class AppState extends ChangeNotifier {
     queueSheetController.addListener(_queueSheetListener);
 
     _initAsync();
+  }
+
+  bool _isAddTempFsSource() {
+    return config.isCliDirValid() &&
+        config.cliDir?.path != config.musicSourceDir?.path;
   }
 
   PageDescr get currPage {
@@ -80,6 +103,7 @@ class AppState extends ChangeNotifier {
   Map<String, Source> sources = {};
   late Source currentSource;
   late FsSource fsSource;
+  FsSource? tempFsSource;
 
   Playback playback;
   late PluginManager pluginManager;
@@ -158,6 +182,9 @@ class AppState extends ChangeNotifier {
     final prevSourceId = currentSource.sourceId;
     sources = {};
     sources[fsSource.sourceId] = fsSource;
+    if (_isAddTempFsSource() && tempFsSource != null) {
+      sources[tempFsSource!.sourceId] = tempFsSource!;
+    }
     await _loadPlugins(loadOnlyNew
         ? pluginManager.getNewInstalledPlugins()
         : pluginManager.getInstalledPlugins());
@@ -276,9 +303,9 @@ class AppState extends ChangeNotifier {
 
     if (CONFIG.isDev()) {
       // Set here source for dubugging
-      await changeSource(fsSource.sourceId);
+      await changeSource(currentSource.sourceId);
     } else {
-      await changeSource(fsSource.sourceId);
+      await changeSource(currentSource.sourceId);
     }
     await _loadPlugins(pluginManager.getInstalledPlugins());
     if (!CONFIG.isDisableDownloadPlugins &&

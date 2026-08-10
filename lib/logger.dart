@@ -29,7 +29,7 @@ class Logger {
     assert(!isAssertLogFile || logFilepath != null,
         'logFilepath must not be null');
 
-    final str = '${CONSTS.colorMap[color]}$prefix$s\x1B[0m';
+    final str = '$prefix${CONSTS.colorMap[color]}$s\x1B[0m';
     if (Platform.isLinux) {
       stdout.writeln(str);
     } else {

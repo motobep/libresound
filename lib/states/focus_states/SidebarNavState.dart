@@ -41,6 +41,7 @@ class SidebarNavStatePattern extends KeyboardStateBase {
     } else {
       _isLocked = true;
     }
+    update();
   }
 
   void _initHandlers() {

@@ -1,6 +1,6 @@
 // ignore_for_file: no_leading_underscores_for_local_identifiers
 
-import 'dart:io' show File, Platform;
+import 'dart:io' show File, Platform, Directory;
 import 'dart:math';
 
 import 'package:audioplayers/audioplayers.dart'
@@ -38,11 +38,14 @@ import 'package:music_player/main.dart' show config;
 
 class FsSource implements Source {
   FsSource({
+    required this.sourceId,
     required this.playback,
     required this.toThisSourceAsync,
     required this.reloadFsSource,
     required this.update,
-  });
+    required this.getMusicSourceDir,
+    required this.isMusicSourceValid,
+  }) : logger = Logger(prefix: '📗 $sourceId: ');
 
   Playback playback;
   Future<void> Function() toThisSourceAsync;
@@ -54,7 +57,7 @@ class FsSource implements Source {
   }
 
   @override
-  String sourceId = CONFIG.fsSourceId;
+  String sourceId;
 
   @override
   bool isShowPreloader = false;
@@ -73,10 +76,13 @@ class FsSource implements Source {
   @override
   JsonStorage propertyStorage = JsonStorage.empty();
 
+  Directory? Function() getMusicSourceDir;
+  bool Function() isMusicSourceValid;
+
   @override
   Future<void> chooseSourceAsync() async {
     logger.blue('chooseSourceAsync');
-    if (!config.isMusicSourceDirValid()) return;
+    if (!isMusicSourceValid()) return;
     if (errorMsg != '') errorMsg = '';
 
     playlistHandler = PlaylistHandler(config, this);
@@ -96,7 +102,7 @@ class FsSource implements Source {
 
   @override
   Future<void> reloadAsync() async {
-    if (!config.isMusicSourceDirValid()) return;
+    if (!isMusicSourceValid()) return;
     if (errorMsg != '') errorMsg = '';
 
     playlistHandler = PlaylistHandler(config, this);
@@ -113,7 +119,7 @@ class FsSource implements Source {
 
   Future<void> reinitAsync() async {
     logger.blue('reinitAsync');
-    if (!config.isMusicSourceDirValid()) return;
+    if (!isMusicSourceValid()) return;
     if (errorMsg != '') errorMsg = '';
 
     playlistHandler = PlaylistHandler(config, this);
@@ -249,8 +255,8 @@ class FsSource implements Source {
 
   // States
   String get _sourceDirPath {
-    assert(config.musicSourceDir != null, 'musicSourceDir is null');
-    return config.musicSourceDir!.path;
+    assert(getMusicSourceDir() != null, 'musicSourceDir is null');
+    return getMusicSourceDir()!.path;
   }
 
   late PlaylistHandler playlistHandler;
@@ -1188,7 +1194,7 @@ class FsSource implements Source {
     assert(FsStacks.list.contains(name), 'Wrong stack: $name');
   }
 
-  static final Logger logger = Logger(prefix: '📗 FsSource: ');
+  Logger logger;
 }
 
 bool _compareFilesArrays(List<File> a, List<File> b) {
@@ -1201,7 +1207,7 @@ bool _compareFilesArrays(List<File> a, List<File> b) {
 
 class PlaylistHandler {
   PlaylistHandler(Config config, this.fsSource)
-      : fsPlaylist = FsPlaylist(config.musicSourceDir!.path),
+      : fsPlaylist = FsPlaylist(fsSource.getMusicSourceDir()!.path),
         updateCurrPage = fsSource.updateCurrPage,
         _loadCurrPage = fsSource.loadCurrPage,
         _recentPlaylistsStorage = PriorityStorage(
@@ -1251,10 +1257,10 @@ class PlaylistHandler {
   }
 
   bool favouritesMiExists(MusicItem mi) {
-    assert(config.musicSourceDir != null, 'musicSourceDir is null');
+    assert(fsSource.getMusicSourceDir() != null, 'musicSourceDir is null');
 
     List<String> filepaths = m3u.getPlaylistFilepaths(
-        CONFIG.favouritesPlaylist, config.musicSourceDir!.path);
+        CONFIG.favouritesPlaylist, fsSource.getMusicSourceDir()!.path);
     return filepaths.contains(mi.filepath!);
   }
 
