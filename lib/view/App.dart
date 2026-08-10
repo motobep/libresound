@@ -218,6 +218,9 @@ class MaterialAppThemed extends StatelessWidget {
           trackHeight: 2.0,
           thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8.0),
           overlayShape: const RoundSliderOverlayShape(overlayRadius: 0.0),
+          valueIndicatorTextStyle: TextStyle(
+            color: colors[ColorType.bg],
+          ),
         ),
         checkboxTheme: CheckboxTheme.of(context).copyWith(
           checkColor: WidgetStateProperty.all(primary),

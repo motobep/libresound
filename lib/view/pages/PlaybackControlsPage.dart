@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:music_player/logger.dart';
+import 'package:music_player/logic/utils.dart' show formatDuration;
 import 'package:music_player/states/SelectionState.dart';
 import 'package:provider/provider.dart';
 
@@ -435,7 +436,12 @@ class _PlaybackSliderState extends State<PlaybackSlider> {
         var progressRatio =
             ctx.select<PlaybackState, double>((s) => s.playback.progressRatio);
         final v = isChanging ? changingValue : progressRatio;
+        final label = formatDuration(Duration(
+          milliseconds: playback.progressCounter.toMilliSecs(v),
+        ));
         return Slider(
+          showValueIndicator: ShowValueIndicator.onDrag,
+          label: '  $label  ',
           value: v,
           onChanged: isIdle
               ? null
