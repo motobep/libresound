@@ -72,7 +72,12 @@ class ListButton extends StatelessWidget {
 
     List<InlineSpan> children = [
       const TextSpan(text: '   '),
-      TextSpan(text: text),
+      TextSpan(
+        text: text,
+        style: const TextStyle(
+          fontWeight: FontWeight.w400,
+        ),
+      ),
     ];
     if (icon != null) {
       children.insert(
@@ -91,7 +96,7 @@ class ListButton extends StatelessWidget {
                   : null,
               alignment: Alignment.centerLeft,
               foregroundColor: WidgetStateColor.resolveWith(
-                  (states) => ColorScheme.of(context).primary),
+                  (states) => ColorScheme.of(context).onSurface),
               overlayColor: WidgetStateColor.resolveWith(
                   (states) => appearanceState.hoverColor()),
               padding:

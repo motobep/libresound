@@ -118,6 +118,11 @@ class SectionsWrapper extends StatelessWidget {
         child: RefreshIndicator(
             strokeWidth: 2.0,
             child: customScrollView,
+            // TODO: consider padding
+            // child: Padding(
+            //   padding: const EdgeInsets.symmetric(horizontal: 100.0),
+            //   child: customScrollView,
+            // ),
             onRefresh: () async {
               await appState.currentSource.reloadAsync();
             }),

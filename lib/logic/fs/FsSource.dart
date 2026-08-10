@@ -75,6 +75,7 @@ class FsSource implements Source {
 
   @override
   Future<void> chooseSourceAsync() async {
+    logger.blue('chooseSourceAsync');
     if (!config.isMusicSourceDirValid()) return;
     if (errorMsg != '') errorMsg = '';
 
@@ -85,8 +86,12 @@ class FsSource implements Source {
       files = newFiles;
       await _loadMusicItemsAsync(_sourceDirPath);
     }
-    _checkIsMusicItemsEmpty();
+    // Probably can do better than this flag variable usage
+    if (!_isLoadingMusicItems) {
+      _checkIsMusicItemsEmpty();
+    }
     loadCurrPage();
+    logger.blue('End chooseSourceAsync');
   }
 
   @override
@@ -100,11 +105,14 @@ class FsSource implements Source {
     _checkIsMusicItemsEmpty();
 
     currPage.updateIdx++;
+    _setShowPreloader_n(true);
     loadCurrPage();
-    update();
+    _setShowPreloader_n(false);
+    // update();
   }
 
   Future<void> reinitAsync() async {
+    logger.blue('reinitAsync');
     if (!config.isMusicSourceDirValid()) return;
     if (errorMsg != '') errorMsg = '';
 
@@ -118,8 +126,11 @@ class FsSource implements Source {
     _pageStacks.addAll(_getEmptyPageStacks());
 
     currPage.updateIdx++;
+    _setShowPreloader_n(true);
     loadCurrPage();
-    update();
+    _setShowPreloader_n(false);
+    // update();
+    logger.blue('End reinitAsync');
   }
 
   void _setShowPreloader_n(bool val) {
@@ -166,42 +177,54 @@ class FsSource implements Source {
     return all;
   }
 
+  bool _isLoadingMusicItems = false;
+
   Future<void> _loadMusicItemsAsync(String sourceDir) async {
-    _allMusicItems = [];
+    logger.blue('_loadMusicItemsAsync() - $_isLoadingMusicItems');
+    if (_isLoadingMusicItems) {
+      logger.warn('Already loading music items. sourceDir: $sourceDir');
+      return;
+    }
+    _isLoadingMusicItems = true;
+    try {
+      _allMusicItems = [];
 
-    KeyValue cachedInfo = cache.getCachedInfo();
-    // log('cachedInfo:\n$cachedInfo');
-    final isolatesNumber = min(Platform.numberOfProcessors - 2, 4);
+      KeyValue cachedInfo = cache.getCachedInfo();
+      // log('cachedInfo:\n$cachedInfo');
+      final isolatesNumber = min(Platform.numberOfProcessors - 2, 4);
 
-    if (cachedInfo.isNotEmpty &&
-        cachedInfo.keys.contains(sourceDir) &&
-        CONFIG.isCacheMusic) {
-      KeyValue cachedInfoEntry = cachedInfo[sourceDir];
-      _allMusicItems =
-          await compute(getMusicItemsWithCacheAsync, (files, cachedInfoEntry));
-      logger.log('Got music files from cache');
-    } else {
-      if (files.length >= isolatesNumber) {
-        _allMusicItems = await _computeManyMusicItems(
-            files, min(files.length, isolatesNumber));
+      if (cachedInfo.isNotEmpty &&
+          cachedInfo.keys.contains(sourceDir) &&
+          CONFIG.isCacheMusic) {
+        KeyValue cachedInfoEntry = cachedInfo[sourceDir];
+        _allMusicItems = await compute(
+            getMusicItemsWithCacheAsync, (files, cachedInfoEntry));
+        logger.log('Got music files from cache');
       } else {
-        _allMusicItems = await compute(getMusicItemsAsync, files);
+        if (files.length >= isolatesNumber) {
+          _allMusicItems = await _computeManyMusicItems(
+              files, min(files.length, isolatesNumber));
+        } else {
+          _allMusicItems = await compute(getMusicItemsAsync, files);
+        }
+        logger.log('Got music files without cache');
       }
-      logger.log('Got music files without cache');
+
+      // Set duration for the rest
+      for (var mi in _allMusicItems) {
+        if (mi.duration != const Duration(seconds: 0)) continue;
+        await _setDurationWithPlayer(mi);
+      }
+
+      _allMusicItems
+          .removeWhere((el) => el.duration == const Duration(seconds: 0));
+
+      sortMusicItems();
+
+      cache.writeCachedInfoToFile(_allMusicItems, sourceDir);
+    } finally {
+      _isLoadingMusicItems = false;
     }
-
-    // Set duration for the rest
-    for (var mi in _allMusicItems) {
-      if (mi.duration != const Duration(seconds: 0)) continue;
-      await _setDurationWithPlayer(mi);
-    }
-
-    _allMusicItems
-        .removeWhere((el) => el.duration == const Duration(seconds: 0));
-
-    sortMusicItems();
-
-    cache.writeCachedInfoToFile(_allMusicItems, sourceDir);
   }
 
   void _checkIsMusicItemsEmpty() {

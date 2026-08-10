@@ -51,9 +51,9 @@ class BytesFetcher<T> {
           return val;
         },
         getChunk: () async {
-          logger.log('> Calling fetchChunk in fetch() <');
+          // logger.log('> Calling fetchChunk in fetch() <');
           final val = (await fetchChunk(response));
-          logger.log('val: ${val?.length}');
+          // logger.log('val: ${val?.length}');
           return val;
         },
         abort: abort,
