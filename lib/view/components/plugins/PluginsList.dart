@@ -50,7 +50,7 @@ class PluginsList extends StatelessWidget {
                 children: [
                   Expanded(
                     child: SelectableText(
-                      "[ ${el['name']} ]",
+                      "${el['name']}",
                       style: TextStyle(
                         fontSize: 16,
                         letterSpacing: 0.75,
@@ -70,12 +70,12 @@ class PluginsList extends StatelessWidget {
                   ),
                   const SizedBox(width: 12.0),
                   ToPageButton(
-                    lang.Info,
+                    '',
                     onTap: () {
                       onInfoTap(el['name']);
                     },
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 10.0, horizontal: 10.0),
+                    padding: const EdgeInsets.only(
+                        top: 10.0, bottom: 10.0, right: 10.0),
                   ),
                 ],
               ),
@@ -89,7 +89,8 @@ class PluginsList extends StatelessWidget {
                       // letterSpacing: 0.75,
                       color: colorScheme.primary),
                 ),
-              SelectableText(el['langs_longtitle'] ?? el['longtitle'] ?? el['title'],
+              SelectableText(
+                  el['langs_longtitle'] ?? el['longtitle'] ?? el['title'],
                   style: const TextStyle(fontSize: 18, letterSpacing: 0.75)),
               const SizedBox(width: 8.0),
               SelectableText(

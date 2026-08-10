@@ -237,7 +237,6 @@ abstract class Lang {
   abstract String Unpacked_size;
   abstract String Deleted_User;
 
-  abstract String Info;
   abstract String Approved_by;
 
   abstract String phrase__plugin_welcome;
@@ -523,7 +522,6 @@ Please add music to this folder or select a different folder in the Settings.'''
   String Unpacked_size = 'Unpacked size';
   String Deleted_User = 'Deleted User';
 
-  String Info = 'Info';
   String Approved_by = 'Approved by';
 
   String phrase__plugin_welcome = 'Welcome to the plugins (extensions) page.';
@@ -809,7 +807,6 @@ class RuLang implements Lang {
   String Unpacked_size = 'Распакованный размер';
   String Deleted_User = 'Удаленный пользователь';
 
-  String Info = 'Информация';
   String Approved_by = 'Одобрено';
 
   String phrase__plugin_welcome =
