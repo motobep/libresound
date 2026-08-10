@@ -85,6 +85,7 @@ class VolumeControlsState extends State<VolumeControls> {
           Padding(
             padding: const EdgeInsets.only(left: 10.0, right: 12),
             child: InkWell(
+              mouseCursor: SystemMouseCursors.click,
               onTap: () {
                 if (!isMuted) {
                   playback.setVolume(0);

@@ -150,15 +150,22 @@ class _SearchAutocomplete extends State<SearchAutocomplete> {
     final position = _targetRenderBox!.localToGlobal(Offset.zero);
     var boxWidth = _targetRenderBox!.size.width;
 
-    final textBtnStyle = TextButton.styleFrom(
-      foregroundColor: ColorScheme.of(context).onSurface,
-      overlayColor: appearanceState.lerpBgColor(0.45),
-      padding: const EdgeInsets.all(0),
-    );
-
     bool isShowSuggestions =
         suggestions.isNotEmpty && widget.focusNode.hasFocus;
     bool isRoundCorners = !isShowSuggestions || widget.isWideSuggestions;
+
+    final xTextBtnStyle = TextButton.styleFrom(
+      foregroundColor: ColorScheme.of(context).onSurface,
+      overlayColor: appearanceState.lerpBgColor(0.45),
+      padding: const EdgeInsets.only(left: 3, right: 5),
+      minimumSize: const Size.square(0),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topRight: const Radius.circular(borderRadius),
+          bottomRight: Radius.circular(isRoundCorners ? borderRadius : 0),
+        ),
+      ),
+    );
 
     return OverlayPortal(
       controller: _tooltipController,
@@ -239,7 +246,7 @@ class _SearchAutocomplete extends State<SearchAutocomplete> {
                   const TextStyle(color: Colors.grey, fontSize: 14, height: 1),
               prefixIcon: widget.prefixIcon,
               suffixIcon: TextButton(
-                style: textBtnStyle,
+                style: xTextBtnStyle,
                 onPressed: () {
                   // On clear search text
                   _textEditingController.text = '';

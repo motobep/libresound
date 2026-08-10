@@ -60,6 +60,7 @@ class ActionsBottomSheet extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(4),
             ),
+            enabledMouseCursor: SystemMouseCursors.click,
           ),
         ),
         child: PopScope(
@@ -120,6 +121,7 @@ class _ActionsDialog extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(4),
             ),
+            enabledMouseCursor: SystemMouseCursors.click,
           ),
         ),
         child: PopScope(
@@ -205,6 +207,7 @@ void showActionsContextMenu(BuildContext context, Offset pos) {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(4),
                       ),
+                      enabledMouseCursor: SystemMouseCursors.click,
                     ),
                   ),
                   child: IntrinsicWidth(

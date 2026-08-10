@@ -192,6 +192,7 @@ class MaterialAppThemed extends StatelessWidget {
           style: TextButton.styleFrom(
             overlayColor: WidgetStateColor.resolveWith(
                 (_) => appearanceState.hoverColor()),
+            enabledMouseCursor: SystemMouseCursors.click,
           ),
         ),
         textButtonTheme: TextButtonThemeData(
@@ -203,6 +204,7 @@ class MaterialAppThemed extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(4),
             ),
+            enabledMouseCursor: SystemMouseCursors.click,
           ),
         ),
         sliderTheme: SliderTheme.of(context).copyWith(

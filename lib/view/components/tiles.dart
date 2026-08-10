@@ -233,6 +233,7 @@ class BigTile extends StatelessWidget {
         var pos = details.globalPosition;
         onAction?.call(pos);
       },
+      mouseCursor: SystemMouseCursors.click,
       child: Container(
         color: isFocused ? focusColor : null,
         width: width,
@@ -450,6 +451,7 @@ class _WideMiTileState extends State<WideMiTile> {
         }
         setState(() {});
       },
+      mouseCursor: SystemMouseCursors.click,
       child: Container(
         height: widget.height,
         padding: const EdgeInsets.only(left: 16.0, right: 18.0),
