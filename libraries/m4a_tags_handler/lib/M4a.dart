@@ -221,15 +221,20 @@ class M4aTagsHandler {
 
     if (isMdatOffested) {
       offset = root.ensureChild('moov.udta').getByteLength() - offset;
-      final stco = root.ensureChild('moov.trak.mdia.minf.stbl.stco');
+      final moov = root.getChild('moov');
+      final traks = moov.getChildren('trak');
 
-      AtomData a = stco.data!;
-      a.seek(8);
-      while (a.position < a.lengthInBytes) {
-        log('Offsetting stco [pos: ${a.position}] data by $offset bytes.');
-        final current = offset + a.getUint32(a.position);
-        a.setUint32(a.position, current);
-        a.position += 4;
+      for (var trak in traks) {
+        final stco = trak.ensureChild('mdia.minf.stbl.stco');
+
+        AtomData a = stco.data!;
+        a.seek(8);
+        while (a.position < a.lengthInBytes) {
+          log('Offsetting stco [pos: ${a.position}] data by $offset bytes.');
+          final current = offset + a.getUint32(a.position);
+          a.setUint32(a.position, current);
+          a.position += 4;
+        }
       }
     }
 

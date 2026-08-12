@@ -88,6 +88,10 @@ class Atom {
     return getChildByIdx(getChildIdx(name));
   }
 
+  List<Atom> getChildren(String name) {
+    return children.where((child) => child.name == name).toList();
+  }
+
   bool hasChild(String name) {
     return getChildIdx(name) != -1;
   }
