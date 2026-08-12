@@ -211,6 +211,19 @@ class AppearanceBody extends StatelessWidget {
                   onChangeEnd: (value) {
                     appearanceState.changeCoverRadius(value);
                   }),
+              if (CONFIG.isDev()) ...[
+                const SizedBox(height: 20),
+                const Text(
+                    'Content padding (Only wide displays) (Experimental)'),
+                const SizedBox(height: 10),
+                DoubleSlider(
+                    initial: appearanceState.contentPaddingBaseHor,
+                    range: 50,
+                    onChangeEnd: (value) {
+                      appearanceState.changeContentPaddingBaseHor(value);
+                    }),
+              ],
+              const SizedBox(height: 50),
             ],
           ),
         ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:music_player/logic/enums.dart';
 import 'package:music_player/states/AppearanceState.dart';
 import 'package:music_player/view/components/buttons.dart';
@@ -27,7 +28,8 @@ class Tabs extends StatelessWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: EdgeInsets.symmetric(
+          horizontal: appearanceState.contentPaddingBaseHor + 10, vertical: 4),
       decoration: BoxDecoration(
         color: ColorScheme.of(context).surface,
         border: Border(

@@ -197,6 +197,8 @@ const pageHeaderHeight = 150.0;
 const pagePaddingHor = 12.0;
 const pagePaddingVert = 15.0;
 
+const defaultContentPaddingBaseHor = 0.0;
+
 const String androidDefaultMusicDir = '/storage/emulated/0/Music';
 const String androidDefaultDownloadsDir = '/storage/emulated/0/Download';
 

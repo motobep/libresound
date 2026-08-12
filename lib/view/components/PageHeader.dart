@@ -54,10 +54,11 @@ class PageHeader extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.only(
-          bottom: header.picture != null ? 18.0 : 0.0,
-          top: 12.0,
-          left: 12.0,
-          right: 12.0),
+        bottom: header.picture != null ? 18.0 : 0.0,
+        top: 12.0 + 10,
+        left: 12 + appearanceState.contentPaddingBaseHor,
+        right: 12 + appearanceState.contentPaddingBaseHor,
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

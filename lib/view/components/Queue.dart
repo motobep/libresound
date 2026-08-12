@@ -113,7 +113,7 @@ class _QueueState extends State<Queue> {
       if (queueScrollOffset != -1.0) {
         scrollOffset = queueScrollOffset;
       } else {
-        gLogger.log('First queue init');
+        gLogger.debug('First queue init');
         final double initialScrollOffset =
             Queue.tileHeight * currentTrackIdx.toDouble();
         scrollOffset = initialScrollOffset;
@@ -150,7 +150,7 @@ class _QueueState extends State<Queue> {
         return (props, _scrollController!);
       };
       if (queueScrollOffset == -1.0) {
-        gLogger.log('First queue init: put focus index in scroll');
+        gLogger.debug('First queue init: put focus index in scroll');
         focusState.queueNavState.listNav.putFocusInScroll(props);
       }
 

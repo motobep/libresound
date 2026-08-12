@@ -44,6 +44,7 @@ class AppearanceState extends ChangeNotifier {
   String fontPath = CONFIG.fontFamilyDefault;
   double thumbnailRadius = 4;
   double coverRadius = 10;
+  double contentPaddingBaseHor = CONFIG.defaultContentPaddingBaseHor;
 
   final AppState appState;
   final Playback playback;
@@ -66,7 +67,22 @@ class AppearanceState extends ChangeNotifier {
     }
     thumbnailRadius = _getPropWithWarn('thumbnailRadius') ?? thumbnailRadius;
     coverRadius = _getPropWithWarn('coverRadius') ?? coverRadius;
+    contentPaddingBaseHor =
+        _getPropWithWarn('contentPaddingBaseHor') ?? contentPaddingBaseHor;
     loadFont();
+
+    // TODO: think about content padding
+    /* if (CONFIG.isDev()) {
+      appState.addListener(() {
+        logger.debug('appState update');
+        if (appState.isWide) {
+          contentPaddingBaseHor = _getPropWithWarn('contentPaddingBaseHor') ??
+              contentPaddingBaseHor;
+        } else {
+          contentPaddingBaseHor = 0;
+        }
+      });
+    } */
   }
 
   void setColors() {
@@ -252,15 +268,19 @@ class AppearanceState extends ChangeNotifier {
   void changeThumbnailRadius(double radius) {
     thumbnailRadius = radius;
     notifyListeners();
-
     config.saveProperty('thumbnailRadius', thumbnailRadius);
   }
 
   void changeCoverRadius(double radius) {
     coverRadius = radius;
     notifyListeners();
-
     config.saveProperty('coverRadius', coverRadius);
+  }
+
+  void changeContentPaddingBaseHor(double v) {
+    contentPaddingBaseHor = v;
+    notifyListeners();
+    config.saveProperty('contentPaddingBaseHor', contentPaddingBaseHor);
   }
 
   // Ambient

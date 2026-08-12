@@ -86,6 +86,8 @@ class _TopTabsState extends State<TopTabs> {
           color: appearanceState.chosenTabColor(),
         )),
       ),
+      padding: EdgeInsets.symmetric(
+          horizontal: appearanceState.contentPaddingBaseHor + 10),
       child: Scrollbar(
         thickness: 2.0,
         controller: scrollController,

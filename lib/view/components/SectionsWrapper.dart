@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:music_player/logger.dart';
 import 'package:music_player/logic/Debouncer.dart';
 import 'package:music_player/logic/EventRegistrar.dart';
+import 'package:music_player/states/AppearanceState.dart';
 import 'package:music_player/states/focus_states/SimpleListNavigator.dart';
 import 'package:music_player/view/components/PageHeader.dart';
 import 'package:provider/provider.dart';
@@ -37,6 +38,8 @@ class SectionsWrapper extends StatelessWidget {
       gLogger.build('SectionsWrapper LayoutBuilder');
       AppState appState = Provider.of<AppState>(context, listen: false);
       List<SectionDescr> sectionlist = currMusicPage.sectionlist;
+      final appearanceState =
+          Provider.of<AppearanceState>(context, listen: false);
 
       // To keep Scroll
       final ScrollController scrollController = ScrollController(
@@ -78,11 +81,18 @@ class SectionsWrapper extends StatelessWidget {
           };
         }
 
-        sliver = ItemsListView(currMusicPage);
+        sliver = SliverPadding(
+          padding: EdgeInsets.symmetric(
+              horizontal: appearanceState.contentPaddingBaseHor),
+          sliver: ItemsListView(currMusicPage),
+        );
       } else {
         sliver = SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.only(left: 4.0, right: 8.0, top: 8),
+            padding: EdgeInsets.only(
+                left: appearanceState.contentPaddingBaseHor,
+                right: 4 + appearanceState.contentPaddingBaseHor,
+                top: 8),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -118,17 +128,12 @@ class SectionsWrapper extends StatelessWidget {
         child: RefreshIndicator(
             strokeWidth: 2.0,
             child: customScrollView,
-            // TODO: consider padding
-            // child: Padding(
-            //   padding: const EdgeInsets.symmetric(horizontal: 100.0),
-            //   child: customScrollView,
-            // ),
             onRefresh: () async {
               await appState.currentSource.reloadAsync();
             }),
         onNotification: (notification) {
           _scrollEndDebouncer.run(() {
-            gLogger.blue('source scrollend');
+            gLogger.debug('source scrollend');
             for (var l
                 in eventRegistrar.musicSourceContentsScrollEndListeners) {
               l({
