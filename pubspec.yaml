@@ -30,6 +30,7 @@ dependencies:
   dart_tags: ^0.4.0 # MIT
   file_picker: ^9.0.2 # MIT
   permission_handler: ^11.4.0 # MIT
+  photo_manager: ^3.12.0
   window_manager: ^0.3.1 # MIT
   device_info_plus: ^11.1.0 # BSD-3-Clause
   flutter_cache_manager: ^3.3.0 # MIT
@@ -54,6 +55,8 @@ dependencies:
     git:
       url: https://github.com/fryette/webview_cookie_manager.git
       ref: master
+  collection: ^1.19.1
+  crypto: ^3.0.6
 
   m4a_tags_handler:
     path: ./libraries/m4a_tags_handler

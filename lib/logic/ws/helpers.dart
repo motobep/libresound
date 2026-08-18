@@ -15,12 +15,14 @@ Uint8List makePayloadFromString(String s) {
   return Uint8List.fromList(sbytes);
 }
 
+/// Used only in dev environment
 void prepare_directory(String s) {
   fileSystem.directory(pivotD(s)).createSync(recursive: true);
   deleteAll(pivotD(s));
   copyDirPreserveLastModified(constD(s), pivotD(s));
 }
 
+/// Used only in dev environment
 void deleteAll(String dir) {
   var all = scanDirFilepaths(dir);
   for (var file in all) {

@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:music_player/config.dart' as CONFIG;
 import 'package:music_player/logic/utils.dart';
 import 'package:music_player/logic/fs/files.dart' as fs;
+import 'package:path/path.dart' as pathPkg;
 import 'package:music_player/logic/getDeviceInfo.dart';
 
 import 'network.dart' as network;
@@ -24,20 +25,23 @@ class Config {
   ConfigMap config = {};
   List<String> cliArgs = [];
 
-  String _appDir = '';
+  String _appDirpath = '';
   Directory? _musicSourceDir;
   Directory? _cliDir;
+  Directory? _playlistsDir;
 
   Directory? get musicSourceDir => _musicSourceDir;
 
   Directory? get cliDir => _cliDir;
 
+  Directory? get playlistsDir => _playlistsDir;
+
   String get appDir {
-    return _appDir;
+    return _appDirpath;
   }
 
   String get pluginsDir {
-    return '$_appDir/plugins';
+    return '$_appDirpath/plugins';
   }
 
   String get pluginsInstalledDir {
@@ -52,21 +56,49 @@ class Config {
     return '$appDir/cached_file_info.json';
   }
 
-  bool setMusicSourceDir(String dir) {
+  bool setDirsFromSourceDir(String dir) {
+    bool ok = _setMusicSourceDir(dir);
+    _setPlaylistsDirFromSource(dir);
+    return ok;
+  }
+
+  bool _setMusicSourceDir(String dir) {
     _musicSourceDir = Directory(dir);
     return saveProperty('musicSourceDir', _musicSourceDir!.path);
   }
 
+  void _setPlaylistsDirFromSource(String dir) {
+    if (Platform.isAndroid || CONFIG.isUseNestedPlaylistsDir) {
+      // _playlistsDir = Directory('$dir/LibreSound/playlists');
+      if (![CONFIG.androidDefaultMusicDir, CONFIG.androidDefaultDownloadsDir]
+          .contains(dir)) {
+        logger.error('Unsupported dir: $dir');
+      }
+      final filename = pathPkg.basename(dir);
+      _playlistsDir = Directory('$appDir/playlists/$filename');
+    } else {
+      _playlistsDir = Directory(dir);
+    }
+    logger.blue('_playlistsDir: $_playlistsDir');
+    if (!_playlistsDir!.existsSync()) {
+      _playlistsDir!.createSync(recursive: true);
+    }
+  }
+
   String get configFilepath {
-    return '$_appDir/config.json';
+    return '$_appDirpath/config.json';
   }
 
   String get keyMappingsFilepath {
-    return '$_appDir/keyMappings.json';
+    return '$_appDirpath/keyMappings.json';
   }
 
   String get logFilepath {
-    return '$_appDir/log.txt';
+    return '$_appDirpath/log.txt';
+  }
+
+  String get ignorePlaylistsIndexFilepath {
+    return '${_playlistsDir!.path}/ignore_shared_playlists.json';
   }
 
   Future<void> init() async {
@@ -80,7 +112,7 @@ class Config {
 
   /// Throws
   Future<void> _initConfigMap() async {
-    _appDir = await _getAppDir();
+    _appDirpath = await _getAppDir();
 
     File configFile = File(configFilepath);
     if (!configFile.existsSync()) {
@@ -167,7 +199,7 @@ class Config {
     String dir = config['musicSourceDir'];
     if (isValidAbsolutePath(dir) && Directory(dir).existsSync()) {
       var musicDir = removeTrailingSlash(dir);
-      setMusicSourceDir(musicDir);
+      setDirsFromSourceDir(musicDir);
     } else {
       logger.log('WARN: Downloads directory is null');
       logger.log('INFO: Asking to choose music directory');

@@ -4,8 +4,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:path/path.dart' as pathPkg;
+import 'package:crypto/crypto.dart' as crypto;
+import 'package:collection/collection.dart';
+
 import 'package:music_player/logger.dart';
 import 'package:music_player/logic/KeyValue.dart';
+import 'package:music_player/logic/fs/m3u.dart' as m3u;
 import 'package:music_player/logic/lang.dart';
 import 'package:music_player/logic/ws/FileDTO.dart';
 import 'package:music_player/logic/ws/FileListInfoDTO.dart';
@@ -15,6 +20,7 @@ import 'package:music_player/config.dart' show fileSystem;
 import 'package:music_player/logic/UiNotification.dart';
 import 'package:music_player/logic/enums.dart';
 import 'package:music_player/logic/fs/files.dart' as fs;
+import 'package:music_player/logic/fs/filesHighLevel.dart' as fsHighLevel;
 import 'package:music_player/logic/network.dart' as network;
 import 'package:music_player/logic/ws/Message.dart';
 import 'package:music_player/logic/ws/WsChannel.dart';
@@ -33,6 +39,7 @@ class WsHandler {
   WsHandler(
     this.ip,
     this.getMusicSourceDir, {
+    required this.getPlaylistsDir,
     required this.notifyUiCallback,
     required this.interruptCallback,
     required this.connectHandler,
@@ -42,14 +49,15 @@ class WsHandler {
   WsHandler.test(
     this.ip,
     this.getMusicSourceDir, {
+    required this.getPlaylistsDir,
     required this.notifyUiCallback,
     required this.interruptCallback,
   }) {
     connectHandler = () {
-      trace('test - connectHandler');
+      logger.trace('test - connectHandler');
     };
     closeHandler = () {
-      trace('test - closeHandler');
+      logger.trace('test - closeHandler');
     };
   }
 
@@ -60,6 +68,7 @@ class WsHandler {
   }
 
   String Function() getMusicSourceDir;
+  String Function() getPlaylistsDir;
 
   final void Function(UiNotification) notifyUiCallback;
   final Future<String> Function(String) interruptCallback;
@@ -85,6 +94,7 @@ class WsHandler {
   Future<void> startServer() async {
     assert(socketsServer == null, 'Server must be null');
     _loggingName = 'Server';
+    logger = Logger(prefix: ' 🎯 WS [$_loggingName]:');
 
     var port = await network.getUnusedPort(ip);
     socketsServer = await ServerSocket.bind(ip, port);
@@ -100,35 +110,34 @@ class WsHandler {
             WsChannel.serverType);
         _listen(_listenHandler);
       } on SocketException catch (e) {
-        error(e.message);
+        logger.error(e.message);
         assert(false, 'shouldn\'t be here');
         rethrow;
       } catch (e) {
-        error(e);
+        logger.error(e);
         assert(false, 'shouldn\'t be here');
         rethrow;
       }
       _onServerConnectHandler();
     }, onDone: () {
-      log('socketsServer done');
+      logger.log('socketsServer done');
     }, onError: (e) {
-      error('socketsServer error: $e');
+      logger.error('socketsServer error: $e');
     });
 
-    trace(
-        'Serving at tcp server://${socketsServer!.address.host}:${socketsServer!.port}',
-        color: 'blue');
+    logger.trace(
+        'Serving at tcp server://${socketsServer!.address.host}:${socketsServer!.port}');
   }
 
   Future<void> stopServer() async {
     assert(socketsServer != null);
-    log('Stopping server');
+    logger.log('Stopping server');
     await socketsServer!.close();
     socketsServer = null;
   }
 
   Future<void> _onServerConnectHandler() async {
-    trace('Connection established', color: 'blue');
+    logger.trace('Connection established');
     connectHandler();
   }
   // SERVER end
@@ -136,23 +145,24 @@ class WsHandler {
   // CLIENT start
   Future<bool> connect(String ip, int port) async {
     _loggingName = 'Client';
+    logger = Logger(prefix: ' 🔎 WS [$_loggingName]:');
 
-    trace('Connecting to $ip:$port', color: 'blue');
+    logger.trace('Connecting to $ip:$port');
     try {
       currChannel = WsChannel(
           WebSocket.fromUpgradedSocket((await Socket.connect(ip, port)),
               serverSide: false),
           WsChannel.clientType);
     } on SocketException {
-      error('Exception connecting to server: SocketException');
+      logger.error('Exception connecting to server: SocketException');
       return false;
     } catch (e) {
-      error('Unexpected exception in connect(): $e');
+      logger.error('Unexpected exception in connect(): $e');
       return false;
     }
 
     _listen(_listenHandler);
-    trace('Connection established', color: 'blue');
+    logger.trace('Connection established');
 
     connectHandler();
     return true;
@@ -162,7 +172,7 @@ class WsHandler {
   Future<void> closeCurrChannel() async {
     assert(currChannel != null, 'Currrent channel is null');
     await currChannel!.close();
-    trace('Currrent channel closed');
+    logger.trace('Currrent channel closed');
   }
 
   StreamSubscription<dynamic>? _listen(void Function(dynamic)? listenHandler) {
@@ -173,13 +183,13 @@ class WsHandler {
   }
 
   Future<void> _onDoneHandler() async {
-    trace('Stream done');
+    logger.trace('Stream done');
     assert(currChannel != null, 'Currrent channel is null');
 
     var readyState = currChannel!.socket.readyState;
     var closeCode = currChannel!.socket.closeCode;
 
-    log('readyState=$readyState, closeCode=$closeCode');
+    logger.log('readyState=$readyState, closeCode=$closeCode');
 
     if (isConnectionOpenOrConnecting()) {
       currChannel!.close();
@@ -190,10 +200,10 @@ class WsHandler {
   }
 
   Future<void> _onErrorHandler(e) async {
-    error('Error in stream: $e');
+    logger.error('Error in stream: $e');
     await closeCurrChannel();
     isSyncing = false;
-    log('use closeHandler() in _onErrorHandler()?');
+    logger.log('use closeHandler() in _onErrorHandler()?');
     // QUESTION: Should here be closeHandler() ?
   }
 
@@ -203,10 +213,11 @@ class WsHandler {
 
     switch (header['type']) {
       case 'START_SYNCING':
+        logger.log('START_SYNCING.version=${header['version']}');
         isSyncing = true;
         _syncPriority = SyncPriority.none;
         _notify(SyncNotify.start);
-        _sendType('ACK');
+        _send(ackStartSyncMsg);
         break;
       case 'END_SYNCING':
         isSyncing = false;
@@ -223,6 +234,14 @@ class WsHandler {
         _syncPriority = message.header['priority'];
         await _executeNextTransaction();
         break;
+      case 'ACK_START_SYNCING':
+        logger.log('ACK_START_SYNCING.version=${header['version']}');
+
+        // If it's END_SYNCING ACK we don't have transactions
+        if (_transactionQueue.isNotEmpty) {
+          await _executeNextTransaction();
+        }
+        break;
       case 'ACK':
         // If it's END_SYNCING ACK we don't have transactions
         if (_transactionQueue.isNotEmpty) {
@@ -233,15 +252,15 @@ class WsHandler {
       case 'GET_FILE_LIST':
         final target = header['target'];
         try {
-          FileListInfoDTO dto =
-              _fetchFileListInfoDtos(getMusicSourceDir(), target);
+          FileInfoList dto = _fetchFileInfoList(target);
+          // TODO: test check
           var resp =
               Message({'type': 'FILE_LIST', 'target': target}, dto.toBytes());
           _send(resp);
 
-          log('Uploading file list $target');
+          logger.log('Uploading file list $target');
         } catch (e) {
-          error('Error during GET_FILE_LIST: $e');
+          logger.error('Error during GET_FILE_LIST: $e');
 
           Message msg;
           switch (e.runtimeType) {
@@ -268,11 +287,10 @@ class WsHandler {
         break;
       case 'FILE_LIST':
         final String target = header['target'];
-        trace('FILE_LIST: $target', color: 'yellow');
-        _fileListInfoMap[target] =
-            FileListInfoDTO.fromBytes(message.body).toFileDTOSet();
+        logger.trace('FILE_LIST: $target');
+        _fileInfoListMap[target] = FileInfoList.fromBytes(message.body);
 
-        log('Downloading file list $target');
+        logger.log('Downloading file list $target');
         await _executeNextTransaction();
         break;
       case 'REQUEST_FILE':
@@ -286,20 +304,48 @@ class WsHandler {
         if (_isTest &&
             CONFIG.isDev() &&
             filename == 'Server-non_existent.mp3') {
-          String path = '${getMusicSourceDir()}/$filename';
-          fs.deleteFile(path);
+          String dirpath = _getDirpathForFilename(filename);
+          String path = '$dirpath/$filename';
+          await fsHighLevel.deleteFilesAsync([path]);
         }
 
         // Send file
-        trace('Sending file: "$filename"');
+        logger.trace('Sending file: "$filename"');
         try {
-          FileDTO dto = FileDTO.fromFile(
-              fileSystem.file('${getMusicSourceDir()}/$filename'));
+          final dirpath = _getDirpathForFilename(filename);
+
+          final originalFile = fileSystem.file('$dirpath/$filename');
+          FileDTO dto;
+          if (filename.endsWith('.m3u')) {
+            // Unprefix m3u records
+            gLogger.debug('send m3u ${filename}');
+            // TODO: handle possible exception
+            String contents = originalFile.readAsStringSync();
+
+            String musicDirRelativeToPlaylistsDir =
+                pathPkg.relative(getMusicSourceDir(), from: getPlaylistsDir());
+            gLogger.debug('send relative: $musicDirRelativeToPlaylistsDir');
+            var (newContents, err) = m3u.unPrefixM3uPaths(
+                contents, '$musicDirRelativeToPlaylistsDir/');
+            if (err != null) {
+              gLogger.exception('Failed prefixing', err);
+              dto = FileDTO.fromFile(originalFile);
+            } else {
+              // gLogger.warn('contents: $contents');
+              // gLogger.blue('newContents: $newContents');
+              Uint8List bContents = utf8.encode(newContents);
+
+              dto = FileDTO(filename, bContents);
+            }
+          } else {
+            dto = FileDTO.fromFile(originalFile);
+          }
+          // TODO: test check
           var msg = Message({'type': 'FILE'}, dto.toBytes());
           _send(msg);
         } catch (e) {
-          error('Error during REQUEST_FILE: $e');
-          error('  runtimeType: ${e.runtimeType}');
+          logger.error('Error during REQUEST_FILE: $e');
+          logger.error('  runtimeType: ${e.runtimeType}');
 
           Message msg;
           switch (e.runtimeType) {
@@ -338,11 +384,31 @@ class WsHandler {
       case 'FILE':
         // Saving
         FileDTO dto = FileDTO.fromBytes(message.body);
-        trace('Saving file: "${dto.filename}"');
-        var f = fileSystem.file('${getMusicSourceDir()}/${dto.filename}');
-        fs.writeToFileAsBytes(f, dto.bContents);
-        DateTime time = DateTime.fromMillisecondsSinceEpoch(dto.modified);
-        f.setLastModifiedSync(time);
+        logger.trace('Saving file: "${dto.filename}"');
+        final dirpath = _getDirpathForFilename(dto.filename);
+        var f = fileSystem.file('$dirpath/${dto.filename}');
+        // TODO: test check
+
+        if (dto.filename.endsWith('.m3u')) {
+          // Prefix m3u records
+          gLogger.debug('file m3u ${dto.filename}');
+          String contents = utf8.decode(dto.bContents);
+
+          String musicDirRelativeToPlaylistsDir =
+              pathPkg.relative(getMusicSourceDir(), from: getPlaylistsDir());
+          gLogger.debug('file relative: $musicDirRelativeToPlaylistsDir');
+          var (newContents, err) =
+              m3u.prefixM3uPaths(contents, musicDirRelativeToPlaylistsDir);
+          if (err != null) {
+            gLogger.exception('Failed prefixing', err);
+          } else {
+            // gLogger.warn('contents: $contents');
+            // gLogger.blue('newContents: $newContents');
+            fs.writeToFile(f.path, newContents);
+          }
+        } else {
+          fs.writeToFileAsBytes(f, dto.bContents);
+        }
 
         await _executeNextTransaction();
         break;
@@ -352,7 +418,7 @@ class WsHandler {
         String prefix = '(${lang.Error_from_partner})';
         String errName = err['name'];
         String errNameForUser = _exceptionToText[errName] ?? errName;
-        error('Error from partner: $errName');
+        logger.error('Error from partner: $errName');
         if (errName == 'PathAccessException' ||
             errName == 'PathNotFoundException' ||
             errName == 'FetchDirectoryFilesException') {
@@ -373,12 +439,17 @@ class WsHandler {
     }
   }
 
-  bool _checkPlaylistsConfilcts(Set<FileDTO> gotSet, Set<FileDTO> mySet) {
-    for (var gotDto in gotSet) {
-      for (var myDto in mySet) {
-        if (gotDto.filename == myDto.filename) {
-          if (gotDto.modified != myDto.modified) {
-            trace('gotDto: $gotDto; myDto $myDto');
+  bool _checkPlaylistsConfilcts(FileInfoList got, FileInfoList my) {
+    const eq = ListEquality();
+    for (var g in got.list) {
+      for (var m in my.list) {
+        if (g.filename == m.filename) {
+          if (g.size != m.size) {
+            logger.blue('size diff - gotDto: $g; myDto $m');
+            return true;
+          }
+          if (!eq.equals(g.hash, m.hash)) {
+            logger.blue('hash diff - gotDto: $g; myDto $m');
             return true;
           }
           break;
@@ -447,13 +518,16 @@ class WsHandler {
     _executeNextTransaction();
   }
 
-  static Message startSyncMsg = Message.header({'type': 'START_SYNCING'});
+  static Message startSyncMsg =
+      Message.header({'type': 'START_SYNCING', 'version': CONFIG.syncVersion});
+  static Message ackStartSyncMsg = Message.header(
+      {'type': 'ACK_START_SYNCING', 'version': CONFIG.syncVersion});
   static Message endSyncMsg = Message.header({'type': 'END_SYNCING'});
 
-  final Map<String, Set<FileDTO>> _fileListInfoMap = {
-    '.mp3': {},
-    '.m4a': {},
-    '.m3u': {},
+  final Map<String, FileInfoList> _fileInfoListMap = {
+    '.mp3': FileInfoList(),
+    '.m4a': FileInfoList(),
+    '.m3u': FileInfoList(),
   };
 
   static Message getMp3Msg =
@@ -473,7 +547,7 @@ class WsHandler {
   }
 
   Future<void> _executeNextTransaction() async {
-    trace('Transactions amount: ${_transactionQueue.length}');
+    logger.trace('Transactions amount: ${_transactionQueue.length}');
     assert(_transactionQueue.isNotEmpty, 'Must have transactions');
 
     var msg = _transactionQueue.removeFirst();
@@ -489,17 +563,17 @@ class WsHandler {
         return;
       case '_DIFF':
         for (var target in fs.allowedExt) {
-          if (_fileListInfoMap[target]!.isEmpty) {
+          if (_fileInfoListMap[target]!.list.isEmpty) {
             continue;
           }
           try {
-            Set<FileDTO> got = _fileListInfoMap[target]!;
-            Set<FileDTO> my =
-                _fetchFileListInfoDtos(getMusicSourceDir(), target)
-                    .toFileDTOSet();
+            FileInfoList got = _fileInfoListMap[target]!;
+            FileInfoList my = _fetchFileInfoList(target);
+            // TODO: test check
 
             if (target != '.m3u') {
-              _fileListInfoMap[target] = FileDTO.filenameDifference(got, my);
+              _fileInfoListMap[target] =
+                  FileInfoList.filenameDifference(got, my);
             } else {
               if (_syncPriority == SyncPriority.none &&
                   _checkPlaylistsConfilcts(got, my)) {
@@ -507,19 +581,20 @@ class WsHandler {
                 assert(_syncPriority != SyncPriority.none,
                     'Must be chosen SyncPriority');
               }
-              trace('SyncPriority: $_syncPriority');
+              logger.trace('SyncPriority: $_syncPriority');
 
               // Take difference
               if (_syncPriority == SyncPriority.partner) {
-                // log('partner');
-                _fileListInfoMap['.m3u'] = got.difference(my);
+                // logger.log('partner');
+                _fileInfoListMap['.m3u'] = FileInfoList.fullDifference(got, my);
               } else {
-                // log('else');
-                _fileListInfoMap['.m3u'] = FileDTO.filenameDifference(got, my);
+                // logger.log('else');
+                _fileInfoListMap['.m3u'] =
+                    FileInfoList.filenameDifference(got, my);
               }
             }
           } catch (e) {
-            error(e);
+            logger.exception('Diff', e);
 
             switch (e.runtimeType) {
               case fs.FetchDirectoryFilesException:
@@ -537,13 +612,12 @@ class WsHandler {
       case '_CLEAN_DIFF':
         for (var target in fs.allowedExt) {
           try {
-            Set<FileDTO> got = _fileListInfoMap[target]!;
-            Set<FileDTO> my =
-                _fetchFileListInfoDtos(getMusicSourceDir(), target)
-                    .toFileDTOSet();
-            _fileListInfoMap[target] = FileDTO.filenameDifference(my, got);
+            FileInfoList got = _fileInfoListMap[target]!;
+            FileInfoList my = _fetchFileInfoList(target);
+            // TODO: test check
+            _fileInfoListMap[target] = FileInfoList.filenameDifference(my, got);
           } catch (e) {
-            error(e);
+            logger.exception('Clean diff', e);
 
             switch (e.runtimeType) {
               case fs.FetchDirectoryFilesException:
@@ -559,16 +633,16 @@ class WsHandler {
         await _executeNextTransaction();
         return;
       case '_DOWNLOAD_FILES':
-        trace(_fileListInfoMap);
+        logger.trace(_fileInfoListMap);
 
-        _prependFileListsToTransacitonQueue(_fileListInfoMap, fs.allowedExt);
+        _prependFileListsToTransacitonQueue(_fileInfoListMap, fs.allowedExt);
         await _executeNextTransaction();
         return;
       case '_CLEAN_FILES':
         _notify(SyncNotify.setText, lang.Cleaning_files);
-        _cleanFiles(_fileListInfoMap['.m3u']);
-        _cleanFiles(_fileListInfoMap['.m4a']);
-        _cleanFiles(_fileListInfoMap['.mp3']);
+        await _cleanFilesAsync(_fileInfoListMap['.m3u']);
+        await _cleanFilesAsync(_fileInfoListMap['.m4a']);
+        await _cleanFilesAsync(_fileInfoListMap['.mp3']);
         await _executeNextTransaction();
         return;
       case 'REQUEST_FILE':
@@ -593,36 +667,41 @@ class WsHandler {
   }
 
   void _prependFileListsToTransacitonQueue(
-      Map<String, Set<FileDTO>> fileListInfoMap, List<String> targets) {
+      Map<String, FileInfoList> fileListInfoMap, List<String> targets) {
     int all = 0;
     for (var t in targets) {
-      var fileListInfo = fileListInfoMap[t]!;
-      all += fileListInfo.length;
+      var fileInfoList = fileListInfoMap[t]!;
+      all += fileInfoList.list.length;
     }
     int i = all;
     for (var t in targets) {
-      var fileListInfo = fileListInfoMap[t]!;
-      for (var el in fileListInfo) {
+      var fileInfoList = fileListInfoMap[t]!;
+      for (var el in fileInfoList.list) {
         var msg = Message.header({
           'type': 'REQUEST_FILE',
           'filename': el.filename,
           'progress': '$i/$all'
         });
-        trace('Adding: $msg');
+        logger.trace('Adding: $msg');
         _transactionQueue.addFirst(msg);
         i--;
       }
     }
   }
 
-  void _cleanFiles(Set<FileDTO>? fileListInfo) {
-    if (fileListInfo != null && fileListInfo.isNotEmpty) {
-      for (var el in fileListInfo) {
-        String filename = el.filename;
-        trace('Deleting file: $filename');
-        fs.deleteFile('${getMusicSourceDir()}/$filename');
-      }
-    }
+  Future<void> _cleanFilesAsync(FileInfoList? fileInfoList) async {
+    if (fileInfoList == null || fileInfoList.list.isEmpty) return;
+
+    final arr = fileInfoList.list;
+    // TODO: test check
+    final fname = arr.first.filename;
+    String dirpath = _getDirpathForFilename(fname);
+    List<String> paths = arr.map((el) {
+      String filename = el.filename;
+      return '${dirpath}/$filename';
+    }).toList();
+    logger.trace('Deleting files: $paths');
+    await fsHighLevel.deleteFilesAsync(paths);
   }
 
   void _sendType(String type) {
@@ -631,12 +710,12 @@ class WsHandler {
   }
 
   void _send(Message msg) {
-    trace('_send() - msg: $msg');
+    logger.trace('_send() - msg: $msg');
     assert(currChannel != null, 'Currrent channel is null');
     try {
       currChannel!.sendAsBinary(msg.toBytes());
     } catch (e) {
-      error('Exception in _send(): $e');
+      logger.error('Exception in _send(): $e');
     }
   }
 
@@ -655,30 +734,79 @@ class WsHandler {
     notifyUiCallback(UiNotification(type, body: body));
   }
 
-  void log(s, {String color = ''}) {
-    if (_loggingName == 'Server') {
-      gLogger.log(' 🎯 WS [$_loggingName]: $s', color);
-    } else if (_loggingName == 'Client') {
-      gLogger.log(' 🔎 WS [$_loggingName]: $s', color);
+  late Logger logger = Logger(prefix: 'WS [$_loggingName]:');
+
+  String _getDirpathForFilename(String filename) {
+    if (filename.endsWith('.m3u')) {
+      return getPlaylistsDir();
+    } else if (filename.endsWith('.mp3') || filename.endsWith('.m4a')) {
+      return getMusicSourceDir();
     } else {
-      gLogger.log('WS [$_loggingName]: $s', color);
+      assert(true, 'Bad extension for filename: $filename');
+      return getMusicSourceDir();
     }
   }
 
-  void trace(s, {String color = ''}) {
-    if (CONFIG.isLogTrace) {
-      log(s, color: color);
+  String _getDirpathForExtension(String extension) {
+    assert(fs.allowedExt.contains(extension), 'Bad extension: $extension');
+    if (extension.endsWith('.m3u')) {
+      return getPlaylistsDir();
+    } else {
+      return getMusicSourceDir();
     }
   }
 
-  void error(s) => log(s, color: 'red');
+  /// Throws
+  FileInfoList _fetchFileInfoList(String ext) {
+    if (_isTest && CONFIG.isDev() && ext == '.m4a') {
+      throw fs.FetchDirectoryFilesException('Dev Test exception');
+    }
+
+    String dirpath = _getDirpathForExtension(ext);
+    List<File> files = fs.fetchFilesFromDirByExt(dirpath, ext);
+    if (ext == '.m3u') {
+      List<FileInfo> list = [];
+      for (var f in files) {
+        String filename = pathPkg.basename(f.path);
+
+        final bytes = f.readAsBytesSync();
+        String contents = utf8.decode(bytes);
+
+        String musicDirRelativeToPlaylistsDir =
+            pathPkg.relative(getMusicSourceDir(), from: getPlaylistsDir());
+        // gLogger.blue(
+        //     '_fetchFileInfoList relative: $musicDirRelativeToPlaylistsDir');
+        var (newContents, err) =
+            m3u.unPrefixM3uPaths(contents, '$musicDirRelativeToPlaylistsDir/');
+        Uint8List newBytes = utf8.encode(newContents);
+
+        // gLogger.log('before:\n$contents\n\nafter:\n$newContents');
+
+        List<int> hash = hashBytes(newBytes).bytes;
+        var info = FileInfo(
+          filename,
+          newContents.length,
+          hash,
+        );
+        list.add(info);
+      }
+      return FileInfoList(list);
+    }
+    return _infoForAudio(files);
+  }
+
+  static FileInfoList _infoForAudio(List<File> files) {
+    List<FileInfo> list = [];
+    for (var f in files) {
+      String filename = pathPkg.basename(f.path);
+      // Empty values for audio
+      FileInfo l = FileInfo(filename, -1, []);
+      list.add(l);
+    }
+    return FileInfoList(list);
+  }
 }
 
-/// Throws
-FileListInfoDTO _fetchFileListInfoDtos(String sourceDir, String ext) {
-  if (_isTest && CONFIG.isDev() && ext == '.m4a') {
-    throw fs.FetchDirectoryFilesException('Dev Test exception');
-  }
-  List<File> files = fs.fetchFilesFromDirByExt(sourceDir, ext);
-  return FileListInfoDTO.fromFiles(files);
+crypto.Digest hashBytes(List<int> bytes) {
+  return crypto.sha256.convert(bytes);
 }

@@ -4,11 +4,24 @@ import 'dart:convert';
 import 'package:music_player/logger.dart';
 import 'package:music_player/logic/KeyValue.dart';
 
+/// Manages json file.
+/// Creates file for given [filepath] in constructor if it doesn't exist.
+/// **NOTICE**: constructor throws.
+///
+/// Main methods:
+/// - [getProperty(String name)]
+/// - [saveProperty(String name, dynamic value)]
 class JsonStorage {
   final File _storageFile;
   KeyValue map = {};
 
-  /// Throws
+  /// Manages json file.
+  /// Creates file for given [filepath] in constructor if it doesn't exist.
+  /// **NOTICE**: constructor throws.
+  ///
+  /// Main methods:
+  /// - [getProperty(String name)]
+  /// - [saveProperty(String name, dynamic value)]
   JsonStorage(String filepath) : _storageFile = File(filepath) {
     if (!_storageFile.existsSync()) {
       log('INFO: Creating config file');
@@ -56,6 +69,6 @@ class JsonStorage {
   }
 
   void log(s) {
-    gLogger.log('PluginStorage: $s');
+    gLogger.log('JsonStorage: $s');
   }
 }

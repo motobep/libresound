@@ -1,6 +1,10 @@
 import 'package:provider/provider.dart';
+import 'package:path/path.dart' as p;
+import 'package:file/file.dart' as filePkg;
+import 'package:music_player/logic/fs/filesHighLevel.dart' as fsHighLevel;
 
 import 'package:music_player/logger.dart';
+import 'package:music_player/config.dart' show fileSystem;
 import 'package:music_player/logic/DialogDescr.dart' show ItemAction;
 import 'package:music_player/logic/GroupItem.dart';
 import 'package:music_player/logic/Item.dart';
@@ -18,7 +22,8 @@ import 'package:music_player/states/AppState.dart' show AppState;
 import 'package:music_player/states/FocusState.dart';
 import 'package:music_player/states/SelectionState.dart';
 
-import 'package:flutter/material.dart' show Offset, showDialog;
+import 'package:flutter/material.dart'
+    show Offset, showDialog, Padding, EdgeInsets, Text;
 import 'package:music_player/view/App.dart' show navigatorKey;
 
 // WARNING FIXME later: view in logic
@@ -235,8 +240,51 @@ Future<String?> saveMiAsync(MusicItem mi, List<int> bytes) async {
     return 'INVALID_SOURCE_DIR';
   }
   try {
-    await saveWebFileCached(filepath, mi);
-    bool ok = await writeBytesWithTagsToFile(bytes, filepath, mi);
+    // TODO: remove comment
+    // await saveWebFileCached(filepath, mi);
+    // TODO: Refactor
+    var f = fileSystem.file(filepath);
+    if (f.existsSync()) {
+      filePkg.File? renamedFile;
+      for (var i = 1; i < 65536; i++) {
+        String base = p.withoutExtension(f.path);
+        String ext = p.extension(f.path);
+        String renamedPath = '${base} ($i)${ext}';
+        logger.log('saveMiAsync: testing renamed path "$renamedPath"');
+        renamedFile = fileSystem.file(renamedPath);
+        if (!renamedFile.existsSync()) {
+          break;
+        }
+      }
+      if (renamedFile == null) {
+        throw Exception('So lucky to have this many files');
+      }
+      logger.warn('saveMiAsync: file "${f.path}" exists');
+      String? dialogResult = await showDialog<String>(
+        context: context,
+        builder: (context) => dialogs.RenameFileDialog(
+          fileOriginal: f.path,
+          fileRenamed: renamedFile!.path,
+        ),
+      );
+      if (dialogResult != null && dialogResult == 'overwrite') {
+        logger.log('overwrite');
+        bool ok = await fsHighLevel.deleteFilesAsync([f.path]);
+        if (!ok) {
+          logger.error("saveMiAsync: couldn't delete file '${f.path}'");
+        }
+      } else if (dialogResult != null && dialogResult == 'rename') {
+        logger.log('rename');
+        f = renamedFile;
+      } else {
+        logger.warn('canceled');
+        return 'FILE_WRITE_FAILED';
+      }
+    }
+    if (f.existsSync()) {
+      logger.error('Should not exist at this point of time');
+    }
+    bool ok = await writeBytesWithTagsToFile(bytes, f.path, mi);
     if (!ok) {
       return 'FILE_WRITE_FAILED';
     }

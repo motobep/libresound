@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:music_player/main.dart';
 import 'package:path/path.dart' as path;
 import 'package:intl/intl.dart';
 
@@ -16,13 +15,20 @@ class Logger {
   Logger({this.prefix = ''}) {
     assert(!isAssertLogFile || logFilepath != null,
         'logFilepath must not be null');
+  }
 
-    isLogToFile =
-        config.getProperty('logging.isLogToFile') ?? CONFIG.isLogToFile;
-    isLogDebug = config.getProperty('logging.isLogDebug') ?? CONFIG.isLogDebug;
-    isLogTrace = config.getProperty('logging.isLogTrace') ?? CONFIG.isLogTrace;
-    isLogView = config.getProperty('logging.isLogView') ?? CONFIG.isLogView;
-    isLogBuild = config.getProperty('logging.isLogBuild') ?? CONFIG.isLogBuild;
+  static setLogLevels({
+    bool? isLogToFile,
+    bool? isLogDebug,
+    bool? isLogTrace,
+    bool? isLogView,
+    bool? isLogBuild,
+  }) {
+    Logger.isLogToFile = isLogToFile ?? Logger.isLogToFile;
+    Logger.isLogDebug = isLogDebug ?? Logger.isLogDebug;
+    Logger.isLogTrace = isLogTrace ?? Logger.isLogTrace;
+    Logger.isLogView = isLogView ?? Logger.isLogView;
+    Logger.isLogBuild = isLogBuild ?? Logger.isLogBuild;
   }
 
   void log(s, [String color = '']) {

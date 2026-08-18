@@ -6,6 +6,8 @@ import 'dart:math';
 import 'package:audioplayers/audioplayers.dart'
     show AudioPlayer, DeviceFileSource;
 import 'package:flutter/foundation.dart' show compute;
+import 'package:music_player/logic/fs/m3u.dart' as m3u;
+import 'package:path/path.dart' as pathPkg;
 import 'package:m4a_tags_handler/Tags.dart';
 import 'package:music_player/logger.dart';
 import 'package:music_player/logic/Config.dart';
@@ -26,7 +28,7 @@ import 'package:music_player/logic/PriorityStorage.dart';
 import 'package:music_player/logic/fs/FsPlaylist.dart';
 import 'package:music_player/logic/fs/cache.dart' as cache;
 import 'package:music_player/logic/fs/files.dart' as fs;
-import 'package:music_player/logic/fs/m3u.dart' as m3u;
+import 'package:music_player/logic/fs/filesHighLevel.dart' as fsHighLevel;
 import 'package:music_player/logic/fs/getMusicItems.dart'
     show getMusicItemsAsync, getMusicItemsWithCacheAsync;
 import 'package:music_player/logic/KeyValue.dart';
@@ -44,6 +46,7 @@ class FsSource implements Source {
     required this.reloadFsSource,
     required this.update,
     required this.getMusicSourceDir,
+    required this.getPlaylistsDir,
     required this.isMusicSourceValid,
   }) : logger = Logger(prefix: '📗 $sourceId: ');
 
@@ -77,6 +80,7 @@ class FsSource implements Source {
   JsonStorage propertyStorage = JsonStorage.empty();
 
   Directory? Function() getMusicSourceDir;
+  Directory? Function() getPlaylistsDir;
   bool Function() isMusicSourceValid;
 
   @override
@@ -613,11 +617,11 @@ class FsSource implements Source {
 
       // Cleaning non-existing m3u entries
       List<String> filepaths =
-          m3u.getPlaylistFilepaths(groupName, _sourceDirPath);
-      List<String> notFound =
-          FsPlaylist.getNotFoundPlaylistFiles(filepaths, tracklist);
-      if (notFound.isNotEmpty) {
-        playlistHandler.fsPlaylist.savePlaylist(groupName, tracklist);
+          playlistHandler.fsPlaylist.getPlaylistFilepaths(groupName);
+      List<String> notFoundMiFilepaths =
+          FsPlaylist.getNotFoundMisFilesInPlaylist(filepaths, tracklist);
+      if (notFoundMiFilepaths.isNotEmpty) {
+        playlistHandler.savePlaylistFromTracklist(groupName, tracklist);
       }
     }
   }
@@ -787,7 +791,7 @@ class FsSource implements Source {
     switch (tabName) {
       case FsStacks.playlists:
         List<String> filepaths =
-            m3u.getPlaylistFilepaths(groupName, _sourceDirPath);
+            playlistHandler.fsPlaylist.getPlaylistFilepaths(groupName);
         List<MusicItem> playlistMIs = _getPlaylistMusicItems(filepaths);
         return playlistMIs;
       case FsStacks.artists:
@@ -947,11 +951,15 @@ class FsSource implements Source {
                 assert(path != null, 'Fs Music item must contain path');
 
                 logger.log('Deleting item: $path');
-                var ok = fs.deleteFile(path!);
+                var ok = await fsHighLevel.deleteFilesAsync([path!]);
                 if (ok) {
-                  // remove items from queue
-                  playback.removeItemsFromQueue([index]);
+                  if (playback.queue.isNotEmpty) {
+                    // FIXME: remove by queue index
+                    playback.removeItemsFromQueue([index]);
+                  }
                   await reloadFsSource();
+                } else {
+                  logger.warn('Not ok while deleting');
                 }
               },
               onCancel: () async {
@@ -1118,16 +1126,17 @@ class FsSource implements Source {
               onConfirm: () async {
                 cancel();
                 dialogFuncs.closeDialog();
-                for (var mi in toDelete) {
-                  var path = mi.filepath;
-                  assert(path != null, 'Fs Music item must contain path');
-
-                  logger.log('Deleting item: $path');
-                  var ok = fs.deleteFile(path!);
-                  if (!ok) {
-                    logger.log('Not ok while deleting $path');
-                  }
+                List<String> paths = toDelete.map((mi) {
+                  assert(
+                      mi.filepath != null, 'Fs Music item must contain path');
+                  return mi.filepath!;
+                }).toList();
+                logger.log('Deleting items: $paths');
+                var ok = await fsHighLevel.deleteFilesAsync(paths);
+                if (!ok) {
+                  logger.warn('Not ok while deleting $paths');
                 }
+                // FIXME: remove queue indexed items
                 var queueList = indexedItemsMap[CONSTS.queueSectionIdx];
                 if (queueList != null) {
                   // remove items from queue
@@ -1207,13 +1216,85 @@ bool _compareFilesArrays(List<File> a, List<File> b) {
 
 class PlaylistHandler {
   PlaylistHandler(Config config, this.fsSource)
-      : fsPlaylist = FsPlaylist(fsSource.getMusicSourceDir()!.path),
+      : fsPlaylist = FsPlaylist(fsSource.getPlaylistsDir()!.path),
         updateCurrPage = fsSource.updateCurrPage,
         _loadCurrPage = fsSource.loadCurrPage,
         _recentPlaylistsStorage = PriorityStorage(
             'recentPlaylistsNames', CONFIG.maxRecentPlaylistsLength, config) {
     _recentPlaylistsStorage.load();
+
+    // gLogger.debug('PlaylistHandler constructor');
+
+    // Part bellow basically only needed for Android
+    var sourceDir = fsSource.getMusicSourceDir()!;
+    if (sourceDir.absolute.path == fsSource.getPlaylistsDir()?.absolute.path) {
+      gLogger.log(sourceDir.absolute.path);
+      gLogger.log(fsSource.getPlaylistsDir()?.absolute.path);
+      gLogger.log('music dir == playlists dir. Returning');
+      return;
+    }
+
+    // TODO: make it not automatic
+    var entities = sourceDir.listSync();
+    List<String> externalPlaylistsPaths = [];
+    gLogger.log('Getting external playlists');
+    for (var entity in entities) {
+      if (entity is File && entity.path.endsWith('.m3u')) {
+        // gLogger.log('ent: ${entity.path}');
+        externalPlaylistsPaths.add(entity.path);
+      }
+    }
+
+    String playlistsDirPath = fsPlaylist.playlistsDirPath;
+    final playlistsDir = Directory(playlistsDirPath);
+    assert(playlistsDir.existsSync(),
+        'playlistsDir "$playlistsDirPath" doesn\'t exist');
+
+    String indexPath = config.ignorePlaylistsIndexFilepath;
+    gLogger.log('indexPath: $indexPath');
+    File ignoreIndexFile = File(indexPath);
+    gLogger.log(
+        'ignoreIndexFile (${ignoreIndexFile.path}): ${ignoreIndexFile.existsSync()}');
+    try {
+      ignoreIndex = JsonStorage(indexPath);
+      List<String> ignoreArr =
+          (ignoreIndex!.getProperty('ignore') ?? []).cast<String>();
+      // Copy external file to playlists folder
+
+      String musicDirRelativeToPlaylistsDir =
+          pathPkg.relative(sourceDir.path, from: playlistsDirPath);
+      gLogger
+          .debug('playlistsDirPathRelative: $musicDirRelativeToPlaylistsDir');
+      for (var p in externalPlaylistsPaths) {
+        try {
+          String filename = pathPkg.basename(p);
+          if (ignoreArr.contains(filename)) {
+            continue;
+          }
+          // TODO: test check
+          var f = File('$playlistsDirPath/$filename');
+          final fileToCopy = CONFIG.fileSystem.file(p);
+          if (!f.existsSync()) {
+            String contents = fileToCopy.readAsStringSync();
+            var (newContents, err) =
+                m3u.prefixM3uPaths(contents, musicDirRelativeToPlaylistsDir);
+            if (err != null) {
+              gLogger.exception('Failed prefixing', err);
+              continue;
+            }
+            f.writeAsString(newContents);
+          }
+        } catch (e, s) {
+          gLogger.exception('index.json in loop', e, s);
+          continue;
+        }
+      }
+    } catch (e, s) {
+      gLogger.exception('ignore_shared_playlists', e, s);
+    }
   }
+
+  JsonStorage? ignoreIndex;
 
   // States
   final FsSource fsSource;
@@ -1236,59 +1317,76 @@ class PlaylistHandler {
         .toList();
   }
 
-  void loadPlaylist(String playlistName, List<MusicItem> musicItems) {
-    _currPlaylist = Playlist(playlistName, musicItems);
+  void loadPlaylist(String name, List<MusicItem> musicItems) {
+    _currPlaylist = Playlist(name, musicItems);
   }
 
+  /// Modifies fs playlist
   void createPlaylist_n(String name) {
     fsPlaylist.createPlaylist(name);
     _loadCurrPage();
     updateCurrPage();
+
+    _whenModified(name);
   }
 
+  /// Modifies fs playlist
   void createPlaylist(String name) {
     fsPlaylist.createPlaylist(name);
+
+    _whenModified(name);
   }
 
+  /// Modifies fs playlist
   void deletePlaylist_n(String name) {
     fsPlaylist.deletePlaylist(name);
+    // TODO: test check. make others
     _loadCurrPage();
     updateCurrPage();
+
+    _whenModified(name);
   }
 
   bool favouritesMiExists(MusicItem mi) {
-    assert(fsSource.getMusicSourceDir() != null, 'musicSourceDir is null');
-
-    List<String> filepaths = m3u.getPlaylistFilepaths(
-        CONFIG.favouritesPlaylist, fsSource.getMusicSourceDir()!.path);
+    List<String> filepaths =
+        fsPlaylist.getPlaylistFilepaths(CONFIG.favouritesPlaylist);
     return filepaths.contains(mi.filepath!);
   }
 
+  /// Modifies fs playlist
   void favouritesAddMis_n(List<MusicItem> items) {
     String name = CONFIG.favouritesPlaylist;
     if (!fsPlaylist.existsPlaylist(name)) {
       fsPlaylist.createPlaylist(name);
     }
     addItemlistToPlaylist_n(items, name);
+
+    _whenModified(name);
   }
 
+  /// Modifies fs playlist
   void favouritesDeleteMis_n(List<MusicItem> mis) {
     String name = CONFIG.favouritesPlaylist;
     assert(fsPlaylist.existsPlaylist(name), 'Playlist "$name" must exist');
     fsPlaylist.removeFromPlaylist(name, mis);
     _loadCurrPage();
     updateCurrPage();
+
+    _whenModified(name);
   }
 
-  void addItemlistToPlaylist_n(List<MusicItem> items, String playlistName) {
-    _recentPlaylistsStorage.addAndSave(playlistName);
-    fsPlaylist.addToPlaylist(playlistName, items);
-    if (playlistName == _currPlaylist?.name) {
+  /// Modifies fs playlist
+  void addItemlistToPlaylist_n(List<MusicItem> items, String name) {
+    _recentPlaylistsStorage.addAndSave(name);
+    fsPlaylist.addToPlaylist(name, items);
+    if (name == _currPlaylist?.name) {
       _currPlaylist?.addItemList(items);
       updateCurrPage();
     }
     _loadCurrPage();
     updateCurrPage();
+
+    _whenModified(name);
   }
 
   void deleteItemFromPlaylist(int index) {
@@ -1296,6 +1394,7 @@ class PlaylistHandler {
     savePlaylist(_currPlaylist!);
   }
 
+  /// Modifies fs playlist
   void savePlaylist(Playlist playlist, {String? prevTitle}) {
     // Delete old name
     if (prevTitle != null) {
@@ -1306,6 +1405,45 @@ class PlaylistHandler {
     }
 
     fsPlaylist.savePlaylist(playlist.name, playlist.items.cast<MusicItem>());
+    _whenModified(playlist.name);
+  }
+
+  /// Modifies fs playlist
+  void savePlaylistFromTracklist(String name, List<MusicItem> tracklist) {
+    fsPlaylist.savePlaylist(name, tracklist);
+    _whenModified(name);
+  }
+
+  void _whenModified(String name) {
+    gLogger.debug('_whenModified($name)');
+    try {
+      if (ignoreIndex == null) {
+        if (Platform.isAndroid) {
+          gLogger.error('No ignore playlists index file');
+        } else {
+          gLogger.log('No ignore playlists index file');
+        }
+        return;
+      }
+
+      String filename = '$name.m3u';
+      List<String> ignoreArr =
+          (ignoreIndex!.getProperty('ignore') ?? []).cast<String>();
+
+      if (ignoreArr.contains(filename)) {
+        gLogger.log('_whenModified: already got $filename');
+        return;
+      }
+
+      // Add unique
+      var s = ignoreArr.toSet();
+      s.add(filename);
+      var newArr = s.toList()..sort();
+
+      ignoreIndex!.saveProperty('ignore', newArr);
+    } catch (e, s) {
+      gLogger.exception('_whenModified', e, s);
+    }
   }
 }
 

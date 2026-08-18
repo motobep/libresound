@@ -40,10 +40,6 @@ List<String> fetchPlaylistBasenames(String dirname) {
   return _getFileNamesWithoutExtension(files);
 }
 
-String getFileName(File file) {
-  return p.basename(file.path);
-}
-
 String getExtension(String filepath) {
   var f = fileSystem.file(filepath);
   return p.extension(f.path);
@@ -77,11 +73,6 @@ bool writeToFileAsBytes(File file, List<int> contents) {
   return true;
 }
 
-bool writeToPathAsBytes(String filepath, List<int> contents) {
-  var file = fileSystem.file(filepath);
-  return writeToFileAsBytes(file, contents);
-}
-
 bool existsFile(String filepath) {
   return fileSystem.file(filepath).existsSync();
 }
@@ -105,7 +96,12 @@ bool appendToFile(String filepath, String contents) {
 bool deleteFile(String path) {
   var f = fileSystem.file(path);
   if (f.existsSync()) {
-    f.deleteSync();
+    try {
+      f.deleteSync();
+    } catch (e, s) {
+      gLogger.exception('deleteFile', e, s);
+      return false;
+    }
     return true;
   }
   return false;

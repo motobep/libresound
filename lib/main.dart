@@ -8,7 +8,7 @@ import 'package:music_player/logic/audioNotificationHandler.dart';
 
 import 'package:music_player/logic/Config.dart';
 import 'package:music_player/logic/fs/files.dart' as fs;
-import 'package:music_player/logic/utils.dart' as utils;
+import 'package:music_player/logic/utils_flutter.dart' as utils_flutter;
 
 import 'view/App.dart';
 
@@ -23,7 +23,8 @@ void main(List<String> args) async {
   if (CONFIG.isUseWsServer) {
     final testDirServer =
         '${Directory.current.path}/test_targets/music_playlists/server';
-    useWsServer(testDirServer);
+    final testDirPlaylistsServer = testDirServer;
+    useWsServer(testDirServer, testDirPlaylistsServer);
   }
 
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,6 +33,13 @@ void main(List<String> args) async {
   MyAudioHandler? audioHandler = await initAudioService();
 
   logFilepath = config.logFilepath;
+  Logger.setLogLevels(
+    isLogToFile: config.getProperty('logging.isLogToFile'),
+    isLogDebug: config.getProperty('logging.isLogDebug'),
+    isLogTrace: config.getProperty('logging.isLogTrace'),
+    isLogView: config.getProperty('logging.isLogView'),
+    isLogBuild: config.getProperty('logging.isLogBuild'),
+  );
   if (CONFIG.isDev()) {
     gLogger.log('Enabling logfile assertion');
     gLogger.isAssertLogFile = true;
@@ -43,8 +51,8 @@ void main(List<String> args) async {
     HttpOverrides.global = _MyHttpOverrides();
   }
   try {
-    await utils.addLicense();
-    // await utils.genNoticeFile();
+    await utils_flutter.addLicense();
+    // await utils_flutter.genNoticeFile();
     runApp(App(audioHandler));
   } catch (e) {
     gLogger.error('main catch: $e');

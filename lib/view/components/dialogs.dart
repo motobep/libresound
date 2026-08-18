@@ -8,8 +8,10 @@ import 'package:music_player/states/AppearanceState.dart';
 import 'package:music_player/states/FocusState.dart';
 import 'package:music_player/states/PlaybackState.dart';
 import 'package:music_player/view/App.dart';
+import 'package:music_player/view/addGuardsFuncs.dart' show SelectSourceDir;
 import 'package:music_player/view/components/KeyBindigsTable.dart'
     show getActionToLangMap;
+import 'package:music_player/view/components/buttons.dart';
 import 'package:music_player/view/components/parts.dart' show Cover, Thumbnail;
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
@@ -172,6 +174,77 @@ class _TextDialogState extends State<TextDialog> {
   }
 }
 
+class RenameFileDialog extends StatelessWidget {
+  const RenameFileDialog({
+    super.key,
+    required this.fileOriginal,
+    required this.fileRenamed,
+  });
+
+  final String fileOriginal;
+  final String fileRenamed;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(lang.The_file_already_exists.replaceFirst('{}', '')),
+      content: Container(
+        constraints: const BoxConstraints(maxWidth: 450.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text('${lang.Overwrite_it}?'),
+                const SizedBox(width: 14),
+                OutlinedStandardButton(
+                  lang.Ok,
+                  onTap: () async {
+                    PageRouter.back(context, 'overwrite');
+                  },
+                  fontSize: 14.0,
+                  padding: const EdgeInsets.only(),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Flexible(
+                  child: Text(
+                      '${lang.Create_a_new_file_named}\n"${fileRenamed}"?',
+                      softWrap: true),
+                ),
+                const SizedBox(width: 14),
+                OutlinedStandardButton(
+                  lang.Ok,
+                  onTap: () async {
+                    PageRouter.back(context, 'rename');
+                  },
+                  fontSize: 14.0,
+                  padding: const EdgeInsets.only(),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                    onPressed: () async {
+                      PageRouter.back(context, 'cancel');
+                    },
+                    child: Text(lang.Cancel)),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class ConfirmDialog extends StatelessWidget {
   const ConfirmDialog({
     super.key,
@@ -209,6 +282,29 @@ class ConfirmDialog extends StatelessWidget {
                   child: Text(cancelText)),
             ],
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class SelectSourceDirDialog extends StatelessWidget {
+  const SelectSourceDirDialog({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 12.0),
+      contentPadding: const EdgeInsets.only(),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SelectSourceDir(onSelect: () {
+            PageRouter.back(context);
+          }),
         ],
       ),
     );

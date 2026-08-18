@@ -141,6 +141,7 @@ class PlaybackQueue {
   }
 
   void removeAt(int idx) {
+    assert(_checkIndexInBounds(idx), 'Index is out of bounds');
     if (idx < _currentIdx) {
       // Top elements
       setCurrIdx(_currentIdx - 1);

@@ -6,7 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:music_player/logic/Config.dart' show Config;
 import 'package:music_player/view/PageRouter.dart';
+import 'package:music_player/view/addGuardsFuncs.dart';
 import 'package:music_player/view/components/VolumeControls.dart';
+import 'package:music_player/view/components/dialogs.dart'
+    show SelectSourceDirDialog;
 import 'package:music_player/view/components/inputs.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart'
@@ -81,6 +84,15 @@ class SettingsBody extends StatelessWidget {
 
     Lang lang = context.select<AppearanceState, Lang>((s) => s.lang);
 
+    final chooseFolderBtn = !Platform.isAndroid
+        ? StandardButton(lang.Choose, onTap: () => chooseMusicDir(context))
+        : StandardButton(lang.Choose, onTap: () async {
+            await showDialog<String>(
+              context: context,
+              builder: (context) => const SelectSourceDirDialog(),
+            );
+          });
+
     List<Widget> widgets = switch (settings.currPage) {
       'Main' => [
           const SizedBox(height: 6.0),
@@ -91,7 +103,7 @@ class SettingsBody extends StatelessWidget {
             child: SelectableText(musicFolder),
           ),
           const SizedBox(height: 10.0),
-          StandardButton(lang.Choose, onTap: () => chooseMusicDir(context)),
+          chooseFolderBtn,
           const SizedBox(height: 24.0),
           Heading(lang.Language),
           const SizedBox(height: 8.0),

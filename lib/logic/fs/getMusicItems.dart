@@ -13,7 +13,7 @@ import 'package:music_player/logic/ID3/ID3TagsV1.dart';
 import 'package:music_player/logic/ID3/ID3TagsV2.dart';
 import 'package:music_player/logic/MusicItem.dart';
 import 'package:music_player/logic/KeyValue.dart';
-import 'package:music_player/logic/fs/files.dart';
+import 'package:music_player/logic/fs/files.dart' as fs;
 
 Future<List<MusicItem>> getMusicItemsAsync(Iterable<File> fileList) async {
   List<MusicItem> list = [];
@@ -25,7 +25,7 @@ Future<List<MusicItem>> getMusicItemsAsync(Iterable<File> fileList) async {
 
 void _addMusicItemToList(File file, List<MusicItem> list) {
   try {
-    String ext = getExtension(file.path);
+    String ext = fs.getExtension(file.path);
     Tags tags;
     if (ext == '.mp3') {
       Tags v2Tags = _getId3V2Tags(file);

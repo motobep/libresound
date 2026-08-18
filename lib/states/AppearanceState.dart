@@ -18,7 +18,7 @@ import 'package:music_player/logic/Debouncer.dart';
 import 'package:music_player/logic/EventRegistrar.dart';
 import 'package:music_player/logic/enums.dart';
 import 'package:music_player/logic/playback/Playback.dart';
-import 'package:music_player/logic/utils.dart' as utils;
+import 'package:music_player/logic/utils_flutter.dart' as utils_flutter;
 import 'package:music_player/logic/lang.dart' as language;
 import 'package:music_player/states/AppState.dart';
 
@@ -59,7 +59,8 @@ class AppearanceState extends ChangeNotifier {
     playback.queue.onCurrIdxChange = onMusicItemChange;
     appState.onSheetControlsToggle = onSheetControlsToggle;
 
-    setColors();
+    var json_colors = config.getProperty('colors');
+    if (json_colors != null) setColors(json_colors);
     _setLang();
     var ambientModeJson = config.getProperty('ambientMode');
     if (ambientModeJson != null) {
@@ -85,10 +86,8 @@ class AppearanceState extends ChangeNotifier {
     } */
   }
 
-  void setColors() {
-    var json_colors = config.getProperty('colors');
-    if (json_colors == null) return;
-
+  void setColors(dynamic json_colors) {
+    assert(json_colors != null, 'json_colors is null');
     try {
       colors = _colorsFromJson(json_colors);
     } catch (e) {
@@ -244,7 +243,7 @@ class AppearanceState extends ChangeNotifier {
 
   /// Notifies
   Future<String?> changeFont(String fontPath) async {
-    var err = await utils.loadFont(fontPath, fontPath);
+    var err = await utils_flutter.loadFont(fontPath, fontPath);
     if (err == null) {
       this.fontPath = fontPath;
       notifyListeners();
@@ -300,15 +299,22 @@ class AppearanceState extends ChangeNotifier {
   void onSheetControlsToggle(OpenDegree degree) {
     logger.debug('onSheetControlsToggle');
     if (ambientMode == AmbientMode.playback) {
+      logger.log('degree: $degree');
       if (degree == OpenDegree.opened) {
         logger.log('opened');
         final mi = playback.getCurrentMusicItem();
         _setAmbientTheme_n(mi.tags.picture);
       } else if (degree == OpenDegree.closed) {
         logger.log('closed');
-        if (_shouldResetColors()) {
-          setColors();
-          update();
+
+        var json_colors = config.getProperty('colors');
+        if (json_colors == null) {
+          changeTheme(CONFIG.defaultTheme);
+        } else {
+          if (_shouldResetColors(json_colors)) {
+            setColors(json_colors);
+            update();
+          }
         }
       }
     }
@@ -324,17 +330,17 @@ class AppearanceState extends ChangeNotifier {
     } else if (mode == AmbientMode.off ||
         mode == AmbientMode.playback &&
             appState.controlsSheetOpenDegree != OpenDegree.opened) {
-      if (_shouldResetColors()) {
-        setColors();
+      var json_colors = config.getProperty('colors');
+      if (json_colors != null && _shouldResetColors(json_colors)) {
+        setColors(json_colors);
       }
       update();
     }
     config.saveProperty('ambientMode', ambientMode.toJson());
   }
 
-  bool _shouldResetColors() {
-    var json_colors = config.getProperty('colors');
-    if (json_colors == null) return false;
+  bool _shouldResetColors(dynamic json_colors) {
+    assert(json_colors != null, 'json_colors is null');
     var configColors = _colorsFromJson(json_colors);
     return !mapEquals(colors, configColors);
   }

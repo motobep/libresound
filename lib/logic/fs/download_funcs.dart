@@ -5,7 +5,8 @@ import 'package:m4a_tags_handler/Tags.dart';
 import 'package:music_player/logic/ID3/addTagsToMp3Bytes.dart';
 import 'package:music_player/logic/MusicItem.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:music_player/logic/fs/files.dart';
+import 'package:music_player/logic/fs/files.dart' as fs;
+import 'package:music_player/config.dart' show fileSystem;
 import 'package:m4a_tags_handler/M4a.dart';
 import 'package:music_player/logic/utils.dart' as utils;
 
@@ -36,7 +37,9 @@ Future<File> cachePictureAsync(String id, PictureTag picture) async {
 Future<bool> writeBytesWithTagsToFile(
     List<int> bytes, String filepath, MusicItem item) async {
   List<int> newBytes = await _addTags(bytes, item);
-  return writeToPathAsBytes(filepath, newBytes);
+
+  var file = fileSystem.file(filepath);
+  return fs.writeToFileAsBytes(file, newBytes);
 }
 
 Future<List<int>> _addTags(List<int> bytes, MusicItem item) async {

@@ -209,18 +209,29 @@ class StandardButton extends StatelessWidget {
 }
 
 class OutlinedStandardButton extends StatelessWidget {
-  const OutlinedStandardButton(this.text,
-      {super.key,
-      required this.onTap,
-      this.fgColor,
-      this.borderColor,
-      this.borderWidth = 1});
+  const OutlinedStandardButton(
+    this.text, {
+    super.key,
+    required this.onTap,
+    this.fgColor,
+    this.borderColor,
+    this.borderWidth = 1,
+    double? fontSize,
+    EdgeInsets? padding,
+  })  : fontSize = fontSize ?? 12.0,
+        padding = padding ??
+            const EdgeInsets.symmetric(
+              horizontal: 14.0,
+              vertical: 15.0,
+            );
 
   final String text;
   final void Function()? onTap;
   final Color? fgColor;
   final Color? borderColor;
   final double borderWidth;
+  final double fontSize;
+  final EdgeInsets padding;
 
   @override
   Widget build(BuildContext context) {
@@ -240,14 +251,9 @@ class OutlinedStandardButton extends StatelessWidget {
             side: BorderSide(width: borderWidth, color: _borderColor),
             borderRadius: BorderRadius.circular(18.0),
           )),
-          padding:
-              const WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.symmetric(
-            horizontal: 14.0,
-            vertical: 15.0,
-          ))),
+          padding: WidgetStatePropertyAll<EdgeInsets>(padding)),
       child: Text(text,
-          style:
-              const TextStyle(fontSize: 12.0, fontWeight: FontWeight.normal)),
+          style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.normal)),
     );
   }
 }

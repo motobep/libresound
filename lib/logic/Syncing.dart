@@ -49,15 +49,17 @@ class Syncing {
   }
 }
 
-Future<void> useWsServer(String testDirServer) async {
+Future<void> useWsServer(String testDirServer, testPlaylistsDirServer) async {
   WsHandler wsServer =
       WsHandler.test(CONFIG.devIP, () => ws_helpers.pivotD(testDirServer),
+          getPlaylistsDir: () => testPlaylistsDirServer,
           notifyUiCallback: (UiNotification n) {
-    // logger.log('TEST: Client Notification: $n');
-  }, interruptCallback: (String s) async {
-    gLogger.log('--------\nServer interrupt - $s');
-    return SyncPriority.none;
-  });
+            // logger.log('TEST: Client Notification: $n');
+          },
+          interruptCallback: (String s) async {
+            gLogger.log('--------\nServer interrupt - $s');
+            return SyncPriority.none;
+          });
   UdpHandler udpServer = UdpHandler(
     ipSelf: CONFIG.devIP,
     multicastIp: CONFIG.multicastIp,

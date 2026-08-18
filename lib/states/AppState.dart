@@ -14,15 +14,14 @@ import 'package:music_player/logic/PriorityStorage.dart';
 import 'package:music_player/logic/enums.dart';
 import 'package:music_player/logic/Source.dart';
 import 'package:music_player/logic/fs/FsSource.dart';
-import 'package:music_player/logic/fs/files.dart' show watchSubDirs;
+import 'package:music_player/logic/fs/files.dart' as fs;
 import 'package:music_player/logic/PluginManager.dart';
 import 'package:music_player/logic/getDeviceInfo.dart';
 import 'package:music_player/logic/fs/getMusicItems.dart';
 import 'package:music_player/logic/lang.dart';
 import 'package:music_player/logic/playback/Playback.dart';
 import 'package:music_player/logic/plugins.dart' as plugins;
-import 'package:music_player/logic/utils.dart'
-    show requestAudioPermission, requestManageExternalStorage;
+import 'package:music_player/logic/utils_flutter.dart' as utils_flutter;
 import 'package:music_player/view/components/BottomControls.dart';
 import 'package:music_player/view/pages/DraggableQueue.dart';
 import 'package:music_player/view/pages/PluginsPage.dart';
@@ -43,6 +42,7 @@ class AppState extends ChangeNotifier {
       reloadFsSource: reloadFsSource,
       update: update,
       getMusicSourceDir: () => config.musicSourceDir,
+      getPlaylistsDir: () => config.playlistsDir,
       isMusicSourceValid: config.isMusicSourceDirValid,
     );
     sources[fsSource.sourceId] = fsSource;
@@ -58,6 +58,7 @@ class AppState extends ChangeNotifier {
         reloadFsSource: reloadFsSource,
         update: update,
         getMusicSourceDir: () => config.cliDir,
+        getPlaylistsDir: () => config.playlistsDir,
         isMusicSourceValid: config.isCliDirValid,
       );
       sources[tempFsSource!.sourceId] = tempFsSource!;
@@ -119,8 +120,7 @@ class AppState extends ChangeNotifier {
         !config.isMusicSourceDirValid();
   }
 
-  bool isAudioAccessGranted = true;
-  bool isShowGrantStorageAccess = false;
+  bool isAudioAccessGranted = false;
   bool get isPluginsDisclaimerRead =>
       config.getProperty('isPluginsDisclaimerRead') ?? false;
   bool get isPluginsMiniDisclaimerRead =>
@@ -234,21 +234,22 @@ class AppState extends ChangeNotifier {
     hasLyrics = pluginManager.getLyricsPluginId() != '';
   }
 
-  Future<bool> tryGrantManageExternalStorage() async {
-    bool isManageExternalStorageGranted = true;
-    isManageExternalStorageGranted = await requestManageExternalStorage();
-    // log('Is external storage access granted: $isManageExternalStorageGranted');
-    logger.log(
-        'Is external storage access granted: $isManageExternalStorageGranted');
-
-    int sdk = await getAndroidSdkVersion();
-    isShowGrantStorageAccess =
-        Platform.isAndroid && sdk >= 33 && !isManageExternalStorageGranted;
-    return isManageExternalStorageGranted;
-  }
+  // Future<bool> tryGrantManageExternalStorage() async {
+  //   bool isManageExternalStorageGranted = true;
+  //   isManageExternalStorageGranted =
+  //       await utils_flutter.requestManageExternalStorage();
+  //   // log('Is external storage access granted: $isManageExternalStorageGranted');
+  //   logger.log(
+  //       'Is external storage access granted: $isManageExternalStorageGranted');
+  //
+  //   int sdk = await getAndroidSdkVersion();
+  //   isShowGrantStorageAccess =
+  //       Platform.isAndroid && sdk >= 33 && !isManageExternalStorageGranted;
+  //   return isManageExternalStorageGranted;
+  // }
 
   Future<bool> tryGrantAudioAccess() async {
-    isAudioAccessGranted = await requestAudioPermission();
+    isAudioAccessGranted = await utils_flutter.requestAudioPermission();
     // log('Is audio access granted: $isAudioAccessGranted');
     logger.log('Is audio access granted: $isAudioAccessGranted');
     return isAudioAccessGranted;
@@ -277,7 +278,7 @@ class AppState extends ChangeNotifier {
   }
 
   Future<bool> loadFromDirectoryAsync(String dir) async {
-    bool ok = config.setMusicSourceDir(dir);
+    bool ok = config.setDirsFromSourceDir(dir);
     if (!ok) return false;
 
     isSourceLoaded = false;
@@ -297,7 +298,6 @@ class AppState extends ChangeNotifier {
 
   void _initAsync() async {
     await tryGrantAudioAccess();
-    await tryGrantManageExternalStorage();
 
     // config.log(config.toString());
 
@@ -314,7 +314,7 @@ class AppState extends ChangeNotifier {
     }
 
     if (config.getProperty('isWatchPluginDirs') ?? false) {
-      watchSubDirs(pluginManager.pluginsDir, callback: () {
+      fs.watchSubDirs(pluginManager.pluginsDir, callback: () {
         reloadPlugins();
       }, delayMs: 2000, ext: '.js');
     }

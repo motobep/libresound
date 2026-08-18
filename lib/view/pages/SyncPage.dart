@@ -530,16 +530,16 @@ class ErrorsDuringSyncing extends StatelessWidget {
 }
 
 Widget _addGuardsToSyncBody(Widget body, BuildContext context) {
-  bool isShowGrantStorageAccess =
-      context.select<AppState, bool>((s) => s.isShowGrantStorageAccess);
+  // bool isShowGrantStorageAccess =
+  //     context.select<AppState, bool>((s) => s.isShowGrantStorageAccess);
   bool isShowChooseMusicDir =
       context.select<AppState, bool>((s) => s.isShowChooseMusicDir);
   NetworkError networkError =
       context.select<NetworkState, NetworkError>((n) => n.networkError);
 
-  if (isShowGrantStorageAccess) {
-    return const GrantStorageAccess();
-  } else if (isShowChooseMusicDir) {
+  // TODO: add
+  // if (!isAudioAccessGranted) {
+  if (isShowChooseMusicDir) {
     return const SelectSourceDir();
   } else if (networkError != NetworkError.none) {
     return _ErrorBody(networkError: networkError);

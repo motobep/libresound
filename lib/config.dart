@@ -28,7 +28,8 @@ const String buildVerbose =
 
 const String cliMusicDir = String.fromEnvironment('music_dir');
 
-const String devIP = '192.168.0.163';
+const String devIP =
+    String.fromEnvironment('datetime', defaultValue: '127.0.0.1');
 const String devBroadcastIP = '192.168.0.255';
 const int udpPort = 8085;
 const int wsServerPort = 8090;
@@ -224,3 +225,8 @@ const double smThumbnail = 50;
 
 const isDisableDownloadPlugins =
     String.fromEnvironment('is_disable_download_plugins') == '1' ? true : false;
+
+// const bool isUseNestedPlaylistsDir = true;
+const bool isUseNestedPlaylistsDir = mode == VersionMode.dev ? true : false;
+
+const String syncVersion = '1.0.0';

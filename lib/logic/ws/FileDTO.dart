@@ -11,18 +11,30 @@ const int SIZE_OF_FILENAME_LENGTH_BYTES =
 class FileDTO {
   late String filename;
 
-  /// Timestamp in milliseconds
-  late int modified;
   late Uint8List bContents;
+
+  /// Gets the file extension of [path]: the portion of [basename] from the last
+  /// `.` to the end (including the `.` itself).
+  ///
+  ///     p.extension('path/to/foo.dart');    // -> '.dart'
+  ///     p.extension('path/to/foo');         // -> ''
+  ///     p.extension('path.to/foo');         // -> ''
+  ///     p.extension('path/to/foo.dart.js'); // -> '.js'
+  ///
+  /// If the file name starts with a `.`, then that is not considered the
+  /// extension:
+  ///
+  ///     p.extension('~/.bashrc');    // -> ''
+  ///     p.extension('~/.notes.txt'); // -> '.txt'
   String getExtension() {
     return p.extension(fileSystem.file(filename).path);
   }
 
-  FileDTO(this.filename, this.modified, this.bContents) {
+  FileDTO(this.filename, this.bContents) {
     assert(filename.isNotEmpty, 'filename.length <= 0');
   }
 
-  FileDTO.header(this.filename, this.modified) {
+  FileDTO.header(this.filename) {
     assert(filename.isNotEmpty, 'filename.length <= 0');
     bContents = Uint8List(0);
   }
@@ -37,51 +49,35 @@ class FileDTO {
     Uint8List bFilename = bytes.sublist(sflb, sflb + filenameLen);
     filename = utf8.decode(bFilename);
 
-    // Modified
-    int modifiedStart = sflb + filenameLen;
-    Uint8List bModified = bytes.sublist(modifiedStart, modifiedStart + 8);
-    modified = bModified.buffer.asInt64List()[0];
-
     // Contents
-    int contentsStart = modifiedStart + 8;
+    int contentsStart = sflb + filenameLen;
     bContents = bytes.sublist(contentsStart, bytes.length);
   }
 
   Uint8List toBytes() {
     Uint8List bFilename = utf8.encode(filename);
-    Uint8List bFilenameLen = Uint8List.fromList([bFilename.length]);
-    Uint8List bModified = Uint8List(8);
-    bModified.buffer.asInt64List()[0] = modified;
+    Uint8List bFilenameSize = Uint8List.fromList([bFilename.length]);
 
-    final size = bFilenameLen.length +
-        bFilename.length +
-        bModified.length +
-        bContents.length;
-    final modifiedStart = bFilenameLen.length + bFilename.length;
-    final modifiedEnd = modifiedStart + bModified.length;
+    final size = bFilenameSize.length + bFilename.length + bContents.length;
+    final filenameBoxEnd = bFilenameSize.length + bFilename.length;
 
     final bytes = Uint8List(size);
     // Filename length
-    bytes.setRange(0, bFilenameLen.length, bFilenameLen);
+    bytes.setRange(0, bFilenameSize.length, bFilenameSize);
     // Filename
-    bytes.setRange(bFilenameLen.length,
-        modifiedStart, bFilename);
-    // Modified
-    bytes.setRange(modifiedStart,
-        modifiedEnd, bModified);
+    bytes.setRange(bFilenameSize.length, filenameBoxEnd, bFilename);
     // Contents
-    bytes.setRange(modifiedEnd,
-        modifiedEnd + bContents.length, bContents);
+    bytes.setRange(
+        filenameBoxEnd, filenameBoxEnd + bContents.length, bContents);
     return bytes;
   }
 
   static FileDTO fromFile(File file) {
     String filename = p.basename(file.path);
-    int modified = file.lastModifiedSync().millisecondsSinceEpoch;
 
     try {
       Uint8List bContents = file.readAsBytesSync();
-      return FileDTO(filename, modified, bContents);
+      return FileDTO(filename, bContents);
     } catch (e) {
       gLogger.error('Error in FileDTO.fromFile(): $e');
       rethrow;
@@ -89,32 +85,7 @@ class FileDTO {
   }
 
   @override
-  bool operator ==(Object other) {
-    return other is FileDTO &&
-        filename == other.filename &&
-        modified == other.modified;
-  }
-
-  @override
-  int get hashCode => Object.hash(filename, modified);
-
-  @override
   String toString() {
-    return 'FileDTO: (filename: $filename, modified: $modified)';
-  }
-
-  static Set<FileDTO> filenameDifference(Set<FileDTO> aSet, Set<FileDTO> bSet) {
-    Set<FileDTO> resultSet = Set.from(aSet);
-
-    for (var aDto in aSet) {
-      for (var bDto in bSet) {
-        if (aDto.filename == bDto.filename) {
-          resultSet.remove(aDto);
-          break;
-        }
-      }
-    }
-
-    return resultSet;
+    return 'FileDTO: (filename: $filename)';
   }
 }

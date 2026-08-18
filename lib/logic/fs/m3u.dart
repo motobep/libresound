@@ -1,6 +1,7 @@
+import 'dart:convert' show LineSplitter;
 import 'dart:io';
 
-import 'package:path/path.dart' as path;
+import 'package:path/path.dart' as pathPkg;
 import 'package:music_player/config.dart';
 import 'package:music_player/consts.dart' as CONSTS;
 import 'package:music_player/logger.dart';
@@ -8,10 +9,14 @@ import 'package:music_player/logic/fs/files.dart' as fs;
 import 'package:music_player/logic/utils.dart' as utils;
 
 /// Throws
-List<String> getPlaylistFilepaths(String name, String sourceDir) {
+List<String> getPlaylistFilepathsCanonical(String name, String sourceDir) {
   String playlistPath = fmtPlaylistPath(name, sourceDir);
   List<String> filenames = _getPlaylistFilenames(playlistPath);
-  return utils.prefixOrNotFilenames(filenames, sourceDir);
+  // gLogger.log('[name=$name]');
+  // gLogger.debug('filename: $filenames');
+  final paths = utils.prefixOrNotFilenames(filenames, sourceDir);
+  // gLogger.debug('paths: $paths');
+  return paths.map((el) => pathPkg.canonicalize(el)).toList();
 }
 
 /// Throws
@@ -29,7 +34,7 @@ List<String> _getPlaylistFilenames(String playlistPath) {
 
 List<String> _getFilesFromM3U(List<String> lines) {
   List<String> filenames = [];
-  if (lines[0] != CONSTS.m3uHeader) {
+  if (lines.isEmpty || lines[0] != CONSTS.m3uHeader) {
     return [];
   }
   for (var line in lines) {
@@ -65,6 +70,62 @@ bool removeFromM3uFile(String playlistPath, String itemPath,
   }
 }
 
+(String, Exception?) prefixM3uPaths(String contents, String prefix) {
+  try {
+    List<String> lines = LineSplitter.split(contents).toList();
+    String newContents = '';
+
+    if (lines[0] != CONSTS.m3uHeader) {
+      return ('', Exception('Bad m3uHeader'));
+    }
+    for (var line in lines) {
+      String newLine = line.trim();
+      if (newLine.isNotEmpty && newLine[0] != '#') {
+        if (pathPkg.isRelative(newLine)) {
+          newLine = pathPkg.join(prefix, newLine);
+          // gLogger.log('1: $newLine');
+          newLine = pathPkg.normalize(newLine);
+          // gLogger.log('2: $newLine');
+        }
+      }
+      newContents += '$newLine\n';
+    }
+
+    return (newContents, null);
+  } catch (e) {
+    gLogger.error('prefixM3uPaths(): $e');
+    return ('', Exception('Unexpected Exception: $e'));
+  }
+}
+
+(String, Exception?) unPrefixM3uPaths(String contents, String prefix) {
+  assert(prefix.endsWith('/'), 'prefix must end with /');
+  try {
+    List<String> lines = LineSplitter.split(contents).toList();
+    String newContents = '';
+
+    if (lines[0] != CONSTS.m3uHeader) {
+      return ('', Exception('Bad m3uHeader'));
+    }
+    for (var line in lines) {
+      String newLine = line.trim();
+      if (newLine.isNotEmpty && newLine[0] != '#') {
+        if (pathPkg.isRelative(newLine)) {
+          // gLogger.log('0: $newLine');
+          newLine = newLine.replaceFirst(prefix, '');
+          // gLogger.log('1: $newLine');
+        }
+      }
+      newContents += '$newLine\n';
+    }
+
+    return (newContents, null);
+  } catch (e) {
+    gLogger.error('unPrefixM3uPaths(): $e');
+    return ('', Exception('Unexpected Exception: $e'));
+  }
+}
+
 String formatM3uRecord(
     String itemFilepath, String? seconds, String? artist, String? title) {
   var arr = [seconds, artist, title];
@@ -76,6 +137,6 @@ String formatM3uRecord(
   return '\n$itemFilepath\n';
 }
 
-String fmtPlaylistPath(String playlistName, String sourceDir) {
-  return path.join(sourceDir, '$playlistName.m3u');
+String fmtPlaylistPath(String playlistName, String playlistsDirpath) {
+  return pathPkg.join(playlistsDirpath, '$playlistName.m3u');
 }

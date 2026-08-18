@@ -35,6 +35,9 @@ abstract class Lang {
   abstract String Download;
   abstract String Downloading;
   abstract String Music_folder_not_specified;
+  abstract String The_file_already_exists;
+  abstract String Overwrite_it;
+  abstract String Create_a_new_file_named;
 
   abstract String Delete_this_song;
   abstract String Delete_these_songs;
@@ -301,6 +304,9 @@ class EnLang implements Lang {
   String Download = 'Download';
   String Downloading = 'Downloading';
   String Music_folder_not_specified = 'Music folder not specified';
+  String The_file_already_exists = 'The file {} already exists';
+  String Overwrite_it = 'Overwrite it';
+  String Create_a_new_file_named = 'Create a new file named';
 
   String Delete__q = 'Delete?';
   String Delete_this_song = 'Delete this song?';
@@ -591,6 +597,9 @@ class RuLang implements Lang {
   String Download = 'Скачать';
   String Downloading = 'Загрузка';
   String Music_folder_not_specified = 'Папка с музыкой не указана';
+  String The_file_already_exists = 'Файл {} уже существует';
+  String Overwrite_it = 'Перезаписать';
+  String Create_a_new_file_named = 'Создать новый файл с именем';
 
   String Delete_this_song = 'Удалить эту песню?';
   String Delete_these_songs = 'Удалить эти песни?';

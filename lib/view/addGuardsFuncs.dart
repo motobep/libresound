@@ -2,7 +2,7 @@ import 'dart:io' show Directory, File, Platform;
 
 import 'package:flutter/material.dart';
 import 'package:music_player/logger.dart';
-import 'package:music_player/logic/fs/files.dart' as files;
+import 'package:music_player/logic/fs/files.dart' as fs;
 import 'package:music_player/logic/lang.dart';
 import 'package:music_player/config.dart' as CONFIG;
 import 'package:music_player/states/AppearanceState.dart';
@@ -15,8 +15,8 @@ import 'package:music_player/view/components/buttons.dart';
 
 Widget addGuardsToPageBody(Widget body, BuildContext context) {
   AppState appState = Provider.of<AppState>(context, listen: false);
-  bool isShowGrantStorageAccess =
-      context.select<AppState, bool>((s) => s.isShowGrantStorageAccess);
+  // bool isShowGrantStorageAccess =
+  //     context.select<AppState, bool>((s) => s.isShowGrantStorageAccess);
   bool isShowChooseMusicDir =
       context.select<AppState, bool>((s) => s.isShowChooseMusicDir);
   bool isAudioAccessGranted =
@@ -28,11 +28,7 @@ Widget addGuardsToPageBody(Widget body, BuildContext context) {
   var errorMsg =
       context.select<AppState, String>((s) => s.currentSource.errorMsg);
 
-  if (isShowGrantStorageAccess) {
-    return const GrantStorageAccess();
-  } else if (isShowChooseMusicDir) {
-    return const SelectSourceDir();
-  } else if (!isAudioAccessGranted) {
+  if (!isAudioAccessGranted) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -43,10 +39,13 @@ Widget addGuardsToPageBody(Widget body, BuildContext context) {
           ),
           StandardButton(lang.Grant, onTap: () {
             appState.tryGrantAudioAccess();
+            appState.update();
           }),
         ],
       ),
     );
+  } else if (isShowChooseMusicDir) {
+    return const SelectSourceDir();
   } else if (!isSourceLoaded) {
     return const Center(
       child: SizedBox(
@@ -74,67 +73,45 @@ Widget addGuardsToPageBody(Widget body, BuildContext context) {
   return body;
 }
 
-class GrantStorageAccess extends StatelessWidget {
-  const GrantStorageAccess({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    AppState appState = Provider.of<AppState>(context, listen: false);
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(lang.Grant_access_to_storage),
-          const SizedBox(
-            height: 10,
-          ),
-          StandardButton(lang.Grant, onTap: () {
-            gLogger.view('tryGrantManageExternalStorage tap');
-            appState.tryGrantManageExternalStorage();
-            appState.update();
-          }),
-        ],
-      ),
-    );
-  }
-}
-
 class SelectSourceDir extends StatelessWidget {
   const SelectSourceDir({
     super.key,
+    this.onSelect,
   });
+
+  final void Function()? onSelect;
 
   @override
   Widget build(BuildContext context) {
     logger.build('SelectSourceDir');
+    logger.debug('SelectSourceDir');
     final androidMusicDir = Directory(CONFIG.androidDefaultMusicDir);
     final androidDownloadsDir = Directory(CONFIG.androidDefaultDownloadsDir);
     final appearanceState =
         Provider.of<AppearanceState>(context, listen: false);
 
-    List<Widget> androidWs = [];
+    List<Widget> androidWidgets = [];
     if (Platform.isAndroid &&
         (androidMusicDir.existsSync() || androidDownloadsDir.existsSync())) {
       List<File>? musicDirFiles;
       List<File>? downloadsDirFiles;
 
       try {
-        musicDirFiles = files.fetchMusicFiles(CONFIG.androidDefaultMusicDir);
+        musicDirFiles = fs.fetchMusicFiles(CONFIG.androidDefaultMusicDir);
+        logger.debug('musicDirFiles: ${musicDirFiles.length}');
       } catch (e, s) {
         gLogger.exception('musicDirFiles', e, s);
       }
       try {
         downloadsDirFiles =
-            files.fetchMusicFiles(CONFIG.androidDefaultDownloadsDir);
+            fs.fetchMusicFiles(CONFIG.androidDefaultDownloadsDir);
       } catch (e, s) {
         gLogger.exception('downloadsDirFiles', e, s);
       }
       if (musicDirFiles == null && downloadsDirFiles == null) {
-        androidWs = [];
+        androidWidgets = [];
       } else {
-        androidWs = [
+        androidWidgets = [
           Container(
             width: 330,
             padding: const EdgeInsets.symmetric(vertical: 28),
@@ -169,15 +146,16 @@ class SelectSourceDir extends StatelessWidget {
                             // textAlign: TextAlign.center,
                           ),
                           // TODO: implement properly
-                          // Text(
-                          //   '${musicDirFiles.length} ${lang.tracks__genetive}',
-                          //   style: TextStyle(
-                          //       color: ColorScheme.of(context).secondary),
-                          // ),
+                          Text(
+                            '${musicDirFiles.length} ${lang.tracks__genetive}',
+                            style: TextStyle(
+                                color: ColorScheme.of(context).secondary),
+                          ),
                           const SizedBox(
                             height: 12,
                           ),
                           StandardButton(lang.Choose, onTap: () async {
+                            onSelect?.call();
                             await loadMusicDir(
                                 context, CONFIG.androidDefaultMusicDir);
                           }),
@@ -198,15 +176,16 @@ class SelectSourceDir extends StatelessWidget {
                             textAlign: TextAlign.center,
                           ),
                           // TODO: implement properly
-                          // Text(
-                          //   '${downloadsDirFiles.length} ${lang.tracks__genetive}',
-                          //   style: TextStyle(
-                          //       color: ColorScheme.of(context).secondary),
-                          // ),
+                          Text(
+                            '${downloadsDirFiles.length} ${lang.tracks__genetive}',
+                            style: TextStyle(
+                                color: ColorScheme.of(context).secondary),
+                          ),
                           const SizedBox(
                             height: 12,
                           ),
                           StandardButton(lang.Choose, onTap: () async {
+                            onSelect?.call();
                             await loadMusicDir(
                                 context, CONFIG.androidDefaultDownloadsDir);
                           }),
@@ -217,43 +196,50 @@ class SelectSourceDir extends StatelessWidget {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 30.0),
-            child: Text(lang.Or),
-          ),
+          // Padding(
+          //   padding: const EdgeInsets.symmetric(vertical: 30.0),
+          //   child: Text(lang.Or),
+          // ),
         ];
       }
     }
+
+    Widget pcWidget = _PickButton(
+      onTap: () {
+        onSelect?.call();
+        chooseMusicDir(context);
+      },
+      child: Column(
+        children: [
+          const Icon(PhosphorIconsThin.folderOpen, size: 30),
+          const SizedBox(
+            height: 5,
+          ),
+          SizedBox(
+            width: 250,
+            child: Text(
+              lang.Select_the_music_folder,
+              style: const TextStyle(fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(
+            height: 12,
+          ),
+          StandardButton(lang.Choose, onTap: () {
+            onSelect?.call();
+            chooseMusicDir(context);
+          }),
+        ],
+      ),
+    );
 
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          ...androidWs,
-          _PickButton(
-            onTap: () => chooseMusicDir(context),
-            child: Column(
-              children: [
-                const Icon(PhosphorIconsThin.folderOpen, size: 30),
-                const SizedBox(
-                  height: 5,
-                ),
-                SizedBox(
-                  width: 250,
-                  child: Text(
-                    lang.Select_the_music_folder,
-                    style: const TextStyle(fontSize: 16),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                const SizedBox(
-                  height: 12,
-                ),
-                StandardButton(lang.Choose,
-                    onTap: () => chooseMusicDir(context)),
-              ],
-            ),
-          )
+          if (Platform.isAndroid) ...androidWidgets,
+          if (!Platform.isAndroid) pcWidget,
         ],
       ),
     );

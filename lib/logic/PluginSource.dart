@@ -42,6 +42,7 @@ import 'package:music_player/logic/playback/PlaybackQueue.dart';
 import 'package:music_player/logic/tapHandlers.dart';
 import 'package:music_player/logic/dialogFuncs.dart';
 import 'package:music_player/logic/utils.dart' as utils;
+import 'package:music_player/logic/utils_flutter.dart' as utils_flutter;
 import 'package:music_player/logic/enums.dart';
 import 'package:music_player/states/DownloadsState.dart';
 import 'package:music_player/view/snackBarFuncs.dart';
@@ -998,7 +999,8 @@ class PluginSource implements Source {
               return __dartjs_sendMessage('MP.getProxyConfig', JSON.stringify({}));
           '''))?.cast<String, String>();
       network.setProxy(_httpClient, proxy: proxyConfig);
-      final picture = await utils.downloadPictureAsync(url, _httpClient);
+      final picture =
+          await utils_flutter.downloadPictureAsync(url, _httpClient);
 
       if (picture != null) {
         logger.log('New pic cache: ${url}');

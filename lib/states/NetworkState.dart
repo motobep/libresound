@@ -88,6 +88,7 @@ class NetworkState extends ChangeNotifier {
 
     // Init WS
     WsHandler wsServer = WsHandler(currIp!, () => config.musicSourceDir!.path,
+        getPlaylistsDir: () => config.playlistsDir!.path,
         notifyUiCallback: _notifyUiCallback,
         interruptCallback: _interruptCallback,
         connectHandler: _wsConnectHandler,
