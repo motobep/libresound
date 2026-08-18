@@ -284,6 +284,7 @@ var __MP_MusicPlayer = (function (exports) {
     }
     class Logger {
         constructor(prefix, is_mp_logger = false) {
+            this.isDisabled = false;
             this._colorMap = {
                 'black': '\x1B[30m',
                 'red': '\x1B[31m',
@@ -315,6 +316,8 @@ var __MP_MusicPlayer = (function (exports) {
             this.logGeneral(args, 'red');
         }
         logGeneral(args, color) {
+            if (this.isDisabled)
+                return;
             if (this.is_mp_logger) {
                 let argsStr = args.map((el) => typeof el === 'string' ? el : JSON.stringify(el))
                     .join(' ');
@@ -551,6 +554,7 @@ var __MP_MusicPlayer = (function (exports) {
         });
     }
     let byteStreamController;
+    const logger = new Logger('MusicPlayer/runtime.ts: ', true);
     /**
      * A class that not only implments (imitates) parts of browser/nodejs API
      */
@@ -560,11 +564,11 @@ var __MP_MusicPlayer = (function (exports) {
             // bytesFetcher = new BytesFetcher()
             this.sessionStorage = new SessionStorage();
             this.byteStreamController = byteStreamController;
-            this.logger = new Logger('MusicPlayer/runtime.ts: ');
+            this.logger = logger;
             this._mapper = new Mapper();
         }
         async fetch(url, options = {}) {
-            this.logger.log('fetch url:', url);
+            logger.log('fetch url:', url);
             let isRequest = url instanceof Request;
             if (isRequest) ;
             else {
@@ -572,8 +576,8 @@ var __MP_MusicPlayer = (function (exports) {
             }
             if (options.credentials === 'always' || options.credentials === 'same-origin') {
                 this._addRequestCookies(options);
-                this.logger.blue('headers.length', options.headers?.length);
-                this.logger.blue('cookie.length', options.headers?.cookie?.length);
+                logger.blue('headers.length', options.headers?.length);
+                logger.blue('cookie.length', options.headers?.cookie?.length);
             }
             let resp = await MP('fetch', { 'url': url, 'options': options });
             if (options.credentials === 'always' || options.credentials === 'same-origin') {
@@ -617,35 +621,35 @@ var __MP_MusicPlayer = (function (exports) {
         //     byteStreamController.close()
         // }
         onDataReceived(recieved, contentLength) {
-            console.log((recieved / contentLength * 100).toFixed(2) + ' %');
+            logger.log((recieved / contentLength * 100).toFixed(2) + ' %');
         }
         setProxy(env) {
-            console.log('setProxyConfig', env);
+            logger.log('setProxyConfig', env);
             MP('setProxyConfig', env);
         }
         isTls1_3_get() {
             return MP('isTls1_3_get');
         }
         isTls1_3_set(isTls1_3) {
-            console.log('isTls1_3', isTls1_3);
+            logger.log('isTls1_3', isTls1_3);
             MP('isTls1_3_set', isTls1_3);
         }
         async addMappingsToErrorAsync(e, code) {
-            // this.logger.blue('addMappingsToErrorAsync', e);
-            this.logger.blue('addMappingsToErrorAsync');
+            // logger.blue('addMappingsToErrorAsync', e);
+            logger.blue('addMappingsToErrorAsync');
             if (typeof e === 'string') {
-                this.logger.error('String error:', e);
+                logger.error('String error:', e);
                 return e;
             }
             try {
-                // this.logger.blue('mapStacktraceAsync', e, e.message, e.stack);
-                this.logger.blue('mapStacktraceAsync before');
+                // logger.blue('mapStacktraceAsync', e, e.message, e.stack);
+                logger.blue('mapStacktraceAsync before');
                 let stack = await this._mapper.mapStacktraceAsync(e.stack);
-                this.logger.blue('after mapStacktraceAsync');
+                logger.blue('after mapStacktraceAsync');
                 let msg = 'Error in plugin lib code (runCodeInAsyncFunc): ' + e.message;
                 let s = 'Stacktrace:\n' + stack + 'Code:\n' + `${code}`;
                 /*
-                this.logger.error('Error in plugin lib code (runCodeInAsyncFunc):', e.message +
+                logger.error('Error in plugin lib code (runCodeInAsyncFunc):', e.message +
                   '\nStacktrace:\n' + stack,
                   'Code:\n' + `${code}`);
                 */
@@ -653,8 +657,8 @@ var __MP_MusicPlayer = (function (exports) {
                 e.stack = s;
             }
             catch (mappingErr) {
-                this.logger.warn('Mapping Error (runCodeInAsyncFunc)', mappingErr.message);
-                this.logger.error('Error in plugin code:', e.message +
+                logger.warn('Mapping Error (runCodeInAsyncFunc)', mappingErr.message);
+                logger.error('Error in plugin code:', e.message +
                     '\nStacktrace:\n' + e.stack);
                 return e;
             }
@@ -662,7 +666,7 @@ var __MP_MusicPlayer = (function (exports) {
         }
     }
     async function MP_unit8ListToString(list) {
-        // console.log('unit8ListToString')
+        // logger.log('unit8ListToString')
         return await MP('uint8ListToString', list);
     }
     class BytesFetcher {
@@ -686,18 +690,18 @@ var __MP_MusicPlayer = (function (exports) {
             let bf = BytesFetcher.new();
             let ret = [];
             try {
-                console.log(`calling fn`);
+                logger.log(`calling fn`);
                 ret = await fn(bf);
                 if (!ret || ret.length === 0) {
-                    console.log(`bad ret:`, ret);
+                    logger.log(`bad ret:`, ret);
                 }
             }
             catch (e) {
-                console.log('Error in BytesFetcher.run(): ' + e);
+                logger.log('Error in BytesFetcher.run(): ' + e);
                 throw e;
             }
             finally {
-                console.log('calling abort and delete');
+                logger.log('calling abort and delete');
                 bf.abort();
                 bf.delete();
             }
@@ -705,7 +709,7 @@ var __MP_MusicPlayer = (function (exports) {
         }
     }
     function MP(a, b = null) {
-        // console.log(`${a}(${b})`)
+        // logger.log(`${a}(${b})`)
         return __dartjs_sendMessage(`MP.${a}`, JSON.stringify(b));
     }
     function _makeResp(resp, signal = undefined) {
@@ -715,26 +719,35 @@ var __MP_MusicPlayer = (function (exports) {
         const body = new __Streams.ReadableStream({
             type: 'bytes', // NOTICE: removes first auto pull
             start(c) { byteStreamController = c; },
-            cancel(reason) { console.log('stream canceled', reason); },
+            cancel(reason) { logger.log('stream canceled', reason); },
             async pull(controller) {
-                // console.log(`Calling pull`)
-                console.log(`getChunk`);
+                // logger.log(`Calling pull`)
+                logger.log(`getChunk`);
                 const chunk = await getChunk();
                 if (!chunk) {
-                    console.log(`falsy chunk=${chunk}`);
+                    logger.log(`falsy chunk=${chunk}`);
                 }
                 if (chunk == null) {
-                    console.log(`Runtime, chunk=${chunk}`);
+                    logger.log(`Runtime, chunk=${chunk}`);
                     controller.close();
                 }
                 else {
-                    console.log(`Runtime, chunk (${chunk.byteLength}): ${chunk}`);
-                    controller.enqueue(chunk);
+                    logger.log(`Runtime, chunk (${chunk.byteLength}): ${chunk}`);
+                    let buffer;
+                    if (!ArrayBuffer.isView(chunk)) {
+                        logger.log(`chunk is not view. Creating Uint8Array`);
+                        buffer = new Uint8Array(chunk);
+                    }
+                    else {
+                        buffer = chunk;
+                    }
+                    logger.log(`Runtime, buffer (${buffer.byteLength})`);
+                    controller.enqueue(buffer);
                 }
             },
         });
         var abort = resp['abort'];
-        // console.log(`signal=${signal}`)
+        // logger.log(`signal=${signal}`)
         if (signal) {
             signal._onabort = abort;
         }
@@ -763,14 +776,14 @@ var __MP_MusicPlayer = (function (exports) {
                 has: (n) => n.toLowerCase() in headers
             },
         };
-        // this.logger.log('response', response)
+        // logger.log('response', response)
         return response;
     }
 
     class PoolsManager {
         constructor() {
             this.pools = {};
-            this.logger = new Logger('🔌 PoolsManager:');
+            this.logger = new Logger('🔌 PoolsManager:', true);
         }
         makePool(name) {
             this.logger.green('+++ makePool pool', name);
@@ -1005,7 +1018,7 @@ var __MP_MusicPlayer = (function (exports) {
         constructor() {
             this.listeners = {};
             this.cookieManager = new CookieManager();
-            this.logger = new Logger('🔌 WebView:');
+            this.logger = new Logger('🔌 WebView:', true);
         }
         async isSupportedAsync() {
             return await WV('isSupportedAsync');
@@ -1054,9 +1067,9 @@ var __MP_MusicPlayer = (function (exports) {
             this.propertyStorage = new PropertyStorage();
             this.helpers = new Helpers();
             this.webView = new WebView();
-            this.logger = new Logger('🔌MusicPlayer: ');
+            this.logger = new Logger('🔌MusicPlayer: ', true);
             this.settings = {
-                logger: new Logger('🔌settings '),
+                logger: new Logger('🔌settings ', true),
                 async setControlsAsync(controls) {
                     z.array(sControl).parse(controls);
                     _checkControls(controls);
@@ -1397,6 +1410,14 @@ var __MP_MusicPlayer = (function (exports) {
             sPlayState.parse(state);
             await PS('playback.stopWithAsync', state);
         }
+        /** @Unstable */
+        async resumeAsync() {
+            await PS('playback.resumeAsync');
+        }
+        /** @Unstable */
+        async pauseAsync() {
+            await PS('playback.pauseAsync');
+        }
         async setUrlSourceAsync(mi) {
             sMusicItem.parse(mi);
             return await PS('playback.setUrlSourceAsync', mi);
@@ -1550,10 +1571,10 @@ var __MP_MusicPlayer = (function (exports) {
             pool.addWithId('abort', abort);
             let val = [];
             try {
-                console.log(`calling PS register`);
+                musicPlayer.logger.log(`calling PS register`);
                 val = await PS('DownloadsState.download', { downloadType, id: mi.id, text: mi.title, poolName });
                 if (!val || val.length === 0) {
-                    console.log(`bad val:`, val);
+                    musicPlayer.logger.log(`bad val:`, val);
                 }
             }
             catch (e) {
@@ -1709,12 +1730,14 @@ var __MP_MusicPlayer = (function (exports) {
             await musicPlayer.source.isShowPreloader_setAsync(value);
             await musicPlayer.updateAppStateAsync();
         }
+        /** @Unstable */
         loading(originalMethod, _context) {
             async function replacementMethod(...args) {
-                await musicPlayer.playback.stopWithAsync(PlayState.loading);
                 let res;
                 try {
+                    await musicPlayer.playback.stopWithAsync(PlayState.loading);
                     res = await originalMethod.call(this, ...args);
+                    await musicPlayer.playback.resumeAsync();
                 }
                 catch (e) {
                     await musicPlayer.playback.stopWithAsync(PlayState.notReady);

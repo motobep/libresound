@@ -227,6 +227,6 @@ const isDisableDownloadPlugins =
     String.fromEnvironment('is_disable_download_plugins') == '1' ? true : false;
 
 // const bool isUseNestedPlaylistsDir = true;
-const bool isUseNestedPlaylistsDir = mode == VersionMode.dev ? true : false;
+const bool isUseNestedPlaylistsDir = mode == VersionMode.dev ? false : false;
 
 const String syncVersion = '1.0.0';
