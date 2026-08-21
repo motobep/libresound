@@ -782,10 +782,11 @@ class WsHandler {
 
         // gLogger.log('before:\n$contents\n\nafter:\n$newContents');
 
+        int size = newBytes.length;
         List<int> hash = hashBytes(newBytes).bytes;
         var info = FileInfo(
           filename,
-          newContents.length,
+          size,
           hash,
         );
         list.add(info);

@@ -9,7 +9,7 @@ is_disable_download_plugins := env('is_disable_download_plugins', '0')
 
 [group('dev')]
 run version='debug' platform=os():
-    IS_LINUX_LOG=1 flutter run \
+    IS_GST_PLAYER_LOG=1 flutter run \
         --{{version}} \
         --dart-define=build_mode=dev \
         --dart-define=datetime={{build_time}} \
