@@ -51,7 +51,7 @@ class EqualizerWidget extends StatelessWidget {
           await equalizer.setEnabled(isEnabled);
 
           for (var i = 0; i < numBands; i++) {
-            if (Platform.isLinux) {
+            if (Platform.isLinux || Platform.isWindows) {
               await equalizer.setBand(i, {
                 'bandwidth': frequencies[i] / 1.5,
                 'frequency': frequencies[i]

@@ -202,7 +202,7 @@ class SettingsBody extends StatelessWidget {
             }),
           ],
           const SizedBox(height: 10.0 + 8),
-          if (Platform.isLinux || Platform.isAndroid) ...[
+          if (Platform.isLinux || Platform.isWindows || Platform.isAndroid) ...[
             const SizedBox(height: 14.0),
             ToPageButton(lang.Equalizer, onTap: () {
               settings.currPage = settings.pages[1];
