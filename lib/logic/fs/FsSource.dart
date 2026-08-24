@@ -48,12 +48,15 @@ class FsSource implements Source {
     required this.getMusicSourceDir,
     required this.getPlaylistsDir,
     required this.isMusicSourceValid,
-  }) : logger = Logger(prefix: '📗 $sourceId: ');
+    List<File> Function(String dirpath)? fetchMusicFiles,
+  })  : _fetchMusicFiles = fetchMusicFiles ?? fs.fetchMusicFiles,
+        logger = Logger(prefix: '📗 $sourceId: ');
 
   Playback playback;
   Future<void> Function() toThisSourceAsync;
   void Function() update;
   Future<void> Function() reloadFsSource;
+  final List<File> Function(String dirpath) _fetchMusicFiles;
   void updateCurrPage() {
     currPage.updateIdx++;
     update();
@@ -90,11 +93,11 @@ class FsSource implements Source {
     if (errorMsg != '') errorMsg = '';
 
     playlistHandler = PlaylistHandler(config, this);
-    var newFiles = fs.fetchMusicFiles(_sourceDirPath);
+    var newFiles = _fetchMusicFiles(_sourceDirPath);
     final isIdentical = _compareFilesArrays(newFiles, files);
     if (!isIdentical) {
       files = newFiles;
-      await _loadMusicItemsAsync(_sourceDirPath);
+      await _loadMusicItemsAsync(_sourceDirPath, files);
     }
     // Probably can do better than this flag variable usage
     if (!_isLoadingMusicItems) {
@@ -110,37 +113,22 @@ class FsSource implements Source {
     if (errorMsg != '') errorMsg = '';
 
     playlistHandler = PlaylistHandler(config, this);
-    files = fs.fetchMusicFiles(_sourceDirPath);
-    await _loadMusicItemsAsync(_sourceDirPath);
+    files = _fetchMusicFiles(_sourceDirPath);
+    await _loadMusicItemsAsync(_sourceDirPath, files);
     _checkIsMusicItemsEmpty();
 
     currPage.updateIdx++;
     _setShowPreloader_n(true);
     loadCurrPage();
     _setShowPreloader_n(false);
-    // update();
   }
 
   Future<void> reinitAsync() async {
-    logger.blue('reinitAsync');
-    if (!isMusicSourceValid()) return;
-    if (errorMsg != '') errorMsg = '';
-
-    playlistHandler = PlaylistHandler(config, this);
-    files = fs.fetchMusicFiles(_sourceDirPath);
-    await _loadMusicItemsAsync(_sourceDirPath);
-    _checkIsMusicItemsEmpty();
-
     currTabIdx = 0;
     _currPageStackName = _fsTabs[currTabIdx];
     _pageStacks.addAll(_getEmptyPageStacks());
 
-    currPage.updateIdx++;
-    _setShowPreloader_n(true);
-    loadCurrPage();
-    _setShowPreloader_n(false);
-    // update();
-    logger.blue('End reinitAsync');
+    await reloadAsync();
   }
 
   void _setShowPreloader_n(bool val) {
@@ -189,8 +177,9 @@ class FsSource implements Source {
 
   bool _isLoadingMusicItems = false;
 
-  Future<void> _loadMusicItemsAsync(String sourceDir) async {
-    logger.blue('_loadMusicItemsAsync() - $_isLoadingMusicItems');
+  Future<void> _loadMusicItemsAsync(String sourceDir, List<File> files) async {
+    logger.blue(
+        '_loadMusicItemsAsync() - _isLoadingMusicItems $_isLoadingMusicItems');
     if (_isLoadingMusicItems) {
       logger.warn('Already loading music items. sourceDir: $sourceDir');
       return;
@@ -377,7 +366,12 @@ class FsSource implements Source {
         ],
       };
 
-  final _fsTabs = [
+  useOnlyTracksTab() {
+    _fsTabs = [FsTabsNames.all];
+    _fsSearchTabs = [FsTabsNames.all];
+  }
+
+  List<String> _fsTabs = [
     FsTabsNames.all,
     FsTabsNames.playlists,
     FsTabsNames.artists,
@@ -386,19 +380,28 @@ class FsSource implements Source {
 
   @override
   List<(String, IconName?)> getTabs() {
-    final _fsTabsForUser = [
-      (lang.Tracks, IconName.house),
-      (lang.Playlists, IconName.playlist),
-      (lang.Artists, IconName.artist),
-      (lang.Albums, IconName.vinyl_record),
-    ];
-    return _fsTabsForUser;
+    return _fsTabs.map((t) => _fsTabsTranslation(t)).toList();
+  }
+
+  (String, IconName) _fsTabsTranslation(String tabName) {
+    assert(FsTabsNames.list.contains(tabName), 'Wrong tabName: "$tabName"');
+    return {
+      FsTabsNames.all: (lang.Tracks, IconName.house),
+      FsTabsNames.playlists: (lang.Playlists, IconName.playlist),
+      FsTabsNames.artists: (lang.Artists, IconName.artist),
+      FsTabsNames.albums: (lang.Albums, IconName.vinyl_record),
+    }[tabName]!;
   }
 
   @override
   int currSearchTabIdx = 0;
 
-  final _fsSearchTabs = FsTabsNames.list;
+  List<String> _fsSearchTabs = FsTabsNames.list;
+
+  @override
+  List<String> getSearchTabs() {
+    return _fsSearchTabs.map((t) => _fsSearchTabsTranslation(t)).toList();
+  }
 
   String _fsSearchTabsTranslation(String tabName) {
     assert(FsTabsNames.list.contains(tabName), 'Wrong tabName: "$tabName"');
@@ -408,11 +411,6 @@ class FsSource implements Source {
       FsTabsNames.artists: lang.Artists,
       FsTabsNames.albums: lang.Albums,
     }[tabName]!;
-  }
-
-  @override
-  List<String> getSearchTabs() {
-    return _fsSearchTabs.map((t) => _fsSearchTabsTranslation(t)).toList();
   }
 
   /// No side effects

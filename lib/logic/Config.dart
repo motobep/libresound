@@ -27,14 +27,17 @@ class Config {
 
   String _appDirpath = '';
   Directory? _musicSourceDir;
-  Directory? _cliDir;
   Directory? _playlistsDir;
+  Directory? _cliDir;
+  Directory? _cliPlaylistsDir;
 
   Directory? get musicSourceDir => _musicSourceDir;
 
+  Directory? get playlistsDir => _playlistsDir;
+
   Directory? get cliDir => _cliDir;
 
-  Directory? get playlistsDir => _playlistsDir;
+  Directory? get cliPlaylistsDir => _cliPlaylistsDir;
 
   String get appDir {
     return _appDirpath;
@@ -58,7 +61,7 @@ class Config {
 
   bool setDirsFromSourceDir(String dir) {
     bool ok = _setMusicSourceDir(dir);
-    _setPlaylistsDirFromSource(dir);
+    _playlistsDir = _getPlaylistsDirFromSource(dir);
     return ok;
   }
 
@@ -67,7 +70,8 @@ class Config {
     return saveProperty('musicSourceDir', _musicSourceDir!.path);
   }
 
-  void _setPlaylistsDirFromSource(String dir) {
+  Directory _getPlaylistsDirFromSource(String dir) {
+    Directory playlists_dir;
     if (Platform.isAndroid || CONFIG.isUseNestedPlaylistsDir) {
       // _playlistsDir = Directory('$dir/LibreSound/playlists');
       if (![CONFIG.androidDefaultMusicDir, CONFIG.androidDefaultDownloadsDir]
@@ -75,14 +79,15 @@ class Config {
         logger.error('Unsupported dir: $dir');
       }
       final filename = pathPkg.basename(dir);
-      _playlistsDir = Directory('$appDir/playlists/$filename');
+      playlists_dir = Directory('$appDir/playlists/$filename');
     } else {
-      _playlistsDir = Directory(dir);
+      playlists_dir = Directory(dir);
     }
     logger.blue('_playlistsDir: $_playlistsDir');
-    if (!_playlistsDir!.existsSync()) {
-      _playlistsDir!.createSync(recursive: true);
+    if (!playlists_dir.existsSync()) {
+      playlists_dir.createSync(recursive: true);
     }
+    return playlists_dir;
   }
 
   String get configFilepath {
@@ -173,9 +178,9 @@ class Config {
       if (type == FileSystemEntityType.directory) {
         final dir = Directory(path);
         cliDirPath = dir.absolute.path;
-        // } else if (type == FileSystemEntityType.file) {
-        //   final file = File(path);
-        //   cliDirPath = file.absolute.parent.path;
+      } else if (type == FileSystemEntityType.file) {
+        final file = File(path);
+        cliDirPath = file.absolute.parent.path;
       } else {
         logger.warn('cliArgs: Directory/File "$path" doesn\'t exist');
       }
@@ -193,6 +198,7 @@ class Config {
     if (cliDirPath != '') {
       logger.log('cli SOURCE_DIR=$cliDirPath');
       _cliDir = Directory(cliDirPath);
+      _cliPlaylistsDir = _getPlaylistsDirFromSource(_cliDir!.path);
     }
 
     // Config Dir

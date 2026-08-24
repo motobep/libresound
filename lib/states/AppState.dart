@@ -16,7 +16,6 @@ import 'package:music_player/logic/Source.dart';
 import 'package:music_player/logic/fs/FsSource.dart';
 import 'package:music_player/logic/fs/files.dart' as fs;
 import 'package:music_player/logic/PluginManager.dart';
-import 'package:music_player/logic/getDeviceInfo.dart';
 import 'package:music_player/logic/fs/getMusicItems.dart';
 import 'package:music_player/logic/lang.dart';
 import 'package:music_player/logic/playback/Playback.dart';
@@ -26,6 +25,7 @@ import 'package:music_player/view/components/BottomControls.dart';
 import 'package:music_player/view/pages/DraggableQueue.dart';
 import 'package:music_player/view/pages/PluginsPage.dart';
 import 'package:music_player/view/pages/SettingsPage.dart' show Settings;
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 class AppState extends ChangeNotifier {
   AppState(this.config, this.playback, this.pluginManager) : super() {
@@ -50,17 +50,7 @@ class AppState extends ChangeNotifier {
     currentSource = sources[fsSource.sourceId]!;
 
     if (_isAddTempFsSource()) {
-      logger.log('Creating TempFsSource');
-      tempFsSource = FsSource(
-        sourceId: CONFIG.tempFsSourceId,
-        playback: playback,
-        toThisSourceAsync: () => toSource(CONFIG.tempFsSourceId),
-        reloadFsSource: reloadFsSource,
-        update: update,
-        getMusicSourceDir: () => config.cliDir,
-        getPlaylistsDir: () => config.playlistsDir,
-        isMusicSourceValid: config.isCliDirValid,
-      );
+      tempFsSource = _buildTempFsSource();
       sources[tempFsSource!.sourceId] = tempFsSource!;
       currentSource = sources[tempFsSource!.sourceId]!;
     }
@@ -73,7 +63,39 @@ class AppState extends ChangeNotifier {
     controlsSheetController.addListener(_controlsSheetListener);
     queueSheetController.addListener(_queueSheetListener);
 
+    if (Platform.isAndroid) {
+      _listenIntents();
+    }
+
     _initAsync();
+  }
+
+  FsSource _buildTempFsSource() {
+    List<File> Function(String dirpath)? fetchMusicFiles;
+    String filepath = config.cliArgs[0];
+    logger.debug('_buildTempFsSource filepath=$filepath');
+    File file = File(filepath);
+    if (file.existsSync()) {
+      fetchMusicFiles = (String dirpath) {
+        return [file];
+      };
+    }
+    logger.log('Creating TempFsSource');
+    final temp = FsSource(
+      sourceId: CONFIG.tempFsSourceId,
+      playback: playback,
+      toThisSourceAsync: () => toSource(CONFIG.tempFsSourceId),
+      reloadFsSource: reloadFsSource,
+      update: update,
+      getMusicSourceDir: () => config.cliDir,
+      getPlaylistsDir: () => config.cliPlaylistsDir,
+      isMusicSourceValid: config.isCliDirValid,
+      fetchMusicFiles: fetchMusicFiles,
+    );
+    if (filepath != config.cliDir!.path) {
+      temp.useOnlyTracksTab();
+    }
+    return temp;
   }
 
   bool _isAddTempFsSource() {
@@ -321,11 +343,11 @@ class AppState extends ChangeNotifier {
 
     notifyListeners();
 
-    await _afterInit();
+    await _playCliMiIf();
   }
 
-  Future<void> _afterInit() async {
-    logger.trace('_afterInit()');
+  Future<void> _playCliMiIf() async {
+    logger.trace('_playCliMiIf()');
     if (config.cliArgs.isNotEmpty) {
       logger.log('cliArgs isNotEmpty');
       String filepath = config.cliArgs[0];
@@ -346,10 +368,38 @@ class AppState extends ChangeNotifier {
     final list = await getMusicItemsAsync([fileAbsolute]);
     var mi = list[0];
 
-    playback.addItemToQueue(mi);
-    int lastIdx = playback.queue.length - 1;
-    await playback.playByIdx_n(lastIdx);
+    playback.addAllNext_n(list);
+    await playback.playNext();
     logger.log('played $mi');
+  }
+
+  void _listenIntents() {
+    logger.log('listenIntents');
+
+    ReceiveSharingIntent.instance.getMediaStream().listen((value) async {
+      logger.log('listenIntents when in memory');
+
+      var sharedFiles = value;
+      // log
+      final maps = sharedFiles.map((f) => f.toMap());
+      logger.log('intent files: $maps');
+
+      if (sharedFiles.isNotEmpty) {
+        List<String> args = [sharedFiles[0].path];
+        config.cliArgs = args;
+        await config.init();
+
+        tempFsSource = _buildTempFsSource();
+        sources[tempFsSource!.sourceId] = tempFsSource!;
+        if (currentSource.sourceId == tempFsSource!.sourceId) {
+          await changeSource(tempFsSource!.sourceId);
+        }
+
+        await _playCliMiIf();
+      }
+    }, onError: (err) {
+      logger.error('_listenIntents error: $err');
+    });
   }
 
   Future<void> reloadFsSource() async {

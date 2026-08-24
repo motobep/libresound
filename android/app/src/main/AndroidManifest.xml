@@ -20,14 +20,15 @@
     <!-- android:name=".MainActivity" -->
     <!-- android:name="com.ryanheise.audioservice.AudioServiceActivity" -->
 
+    <!-- android:launchMode="singleTop" -->
     <application
         android:label="LibreSound"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity
-            android:name="com.ryanheise.audioservice.AudioServiceActivity"
+            android:name=".MainActivity"
             android:exported="true"
-            android:launchMode="singleTop"
+            android:launchMode="singleTask"
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
@@ -43,6 +44,24 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+
+            <!-- m4a -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data
+                    android:mimeType="audio/mp4"
+                    android:scheme="content" />
+            </intent-filter>
+
+            <!-- mp3 -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data
+                    android:mimeType="audio/mpeg"
+                    android:scheme="content" />
             </intent-filter>
         </activity>
 

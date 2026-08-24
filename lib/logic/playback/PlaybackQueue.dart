@@ -87,15 +87,23 @@ class PlaybackQueue {
   }
 
   void addAllNext(List<MusicItem> queueList) {
-    assert(-1 <= _currentIdx && _currentIdx < queue.length,
-        'queue._currentIdx is out of bounds');
+    // assert(-1 <= _currentIdx && _currentIdx < queue.length,
+    //     'queue._currentIdx is out of bounds');
+    if (!(-1 <= _currentIdx && _currentIdx < queue.length)) {
+      gLogger.warn(
+          'addAllNext: queue._currentIdx="$_currentIdx" is out of bounds');
+    }
     queue.insertAll(_currentIdx + 1, queueList);
     updateIdx++;
   }
 
   void insertAll(int index, List<MusicItem> queueList) {
-    assert(-1 <= index && index < queue.length,
-        'queue._currentIdx is out of bounds');
+    // assert(-1 <= index && index < queue.length,
+    //     'queue._currentIdx is out of bounds');
+    if (!(-1 <= _currentIdx && _currentIdx < queue.length)) {
+      gLogger
+          .warn('insertAll: queue._currentIdx="$_currentIdx is out of bounds');
+    }
     queue.insertAll(index, queueList);
     updateIdx++;
   }
@@ -154,6 +162,10 @@ class PlaybackQueue {
     // Bottom elements
     // Nothing changes
     queue.removeAt(idx);
+
+    if (queue.isEmpty) {
+      _invalidateCurrIdx();
+    }
   }
 
   void deleteQueue() {

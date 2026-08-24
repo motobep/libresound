@@ -57,6 +57,10 @@ dependencies:
       ref: master
   collection: ^1.19.1
   crypto: ^3.0.6
+  receive_sharing_intent: # Apache License 2.0
+    git:
+      url: https://github.com/KasemJaffer/receive_sharing_intent.git
+      ref: 2cea396843cd3ab1b5ec4334be4233864637874e
 
   m4a_tags_handler:
     path: ./libraries/m4a_tags_handler

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:music_player/config.dart' as CONFIG;
 import 'package:music_player/logger.dart';
 import 'package:music_player/logic/Syncing.dart' show useWsServer;
@@ -28,6 +29,22 @@ void main(List<String> args) async {
   }
 
   WidgetsFlutterBinding.ensureInitialized();
+  if (Platform.isAndroid) {
+    var sharedFiles = await ReceiveSharingIntent.instance.getInitialMedia();
+    gLogger.log('listenIntents on open app');
+
+    // log
+    final maps = sharedFiles.map((f) => f.toMap());
+    gLogger.log('intent files: $maps');
+
+    if (sharedFiles.isNotEmpty && args.isEmpty) {
+      args = [sharedFiles[0].path];
+    }
+
+    // Tell the library that we are done processing the intent.
+    ReceiveSharingIntent.instance.reset();
+  }
+
   config.cliArgs = args;
   await config.init();
   MyAudioHandler? audioHandler = await initAudioService();
