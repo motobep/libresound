@@ -241,10 +241,20 @@ class _SyncButtonsBody extends StatelessWidget {
     const double actionsGap = 24;
     const double textGap = 5;
 
+    String partnerName = deviceName;
+    if (CONFIG.isDemo) {
+      final appState = Provider.of<AppState>(context, listen: false);
+      if (appState.isWide) {
+        partnerName = 'Android';
+      } else {
+        partnerName = 'Desktop';
+      }
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('${lang.Partner}: $deviceName'),
+        Text('${lang.Partner}: $partnerName'),
         const SizedBox(height: 10),
         _UnpairButton(networkState: networkState),
         const SizedBox(height: actionsGap + 8),

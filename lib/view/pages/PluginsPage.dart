@@ -16,12 +16,15 @@ import 'package:flutter/material.dart';
 import 'package:music_player/view/snackBarFuncs.dart' show showSnackBar;
 import 'package:provider/provider.dart';
 
+const int myPluginsIdx = 0;
+const int browsePluginsIdx = 1;
+
 class PluginsPages {
   final List<List<String>> stacks = [
-    [browsePluginsPage],
     [myPluginsPage],
+    [browsePluginsPage],
   ];
-  int stackIdx = CONFIG.isDisableDownloadPlugins ? 1 : 0;
+  int stackIdx = myPluginsIdx;
 
   static const String browsePluginsPage = 'browsePlugins';
   static const String myPluginsPage = 'myPlugins';
@@ -80,7 +83,7 @@ class PluginsBody extends StatefulWidget {
 }
 
 class _PluginsBodyState extends State<PluginsBody> {
-  List<String> tabs = [lang.Download_plugins, lang.My_plugins];
+  List<String> tabs = [lang.My_plugins, lang.Download_plugins];
 
   @override
   Widget build(BuildContext context) {
@@ -105,9 +108,9 @@ class _PluginsBodyState extends State<PluginsBody> {
     final pluginUpdatesCount = context
         .select<AppState, int>((s) => s.pluginManager.pluginUpdatesCount);
     if (pluginUpdatesCount > 0) {
-      tabs[1] = '${lang.My_plugins} ($pluginUpdatesCount)';
+      tabs[myPluginsIdx] = '${lang.My_plugins} ($pluginUpdatesCount)';
     } else {
-      tabs[1] = lang.My_plugins;
+      tabs[myPluginsIdx] = lang.My_plugins;
     }
 
     widgets = [
@@ -126,8 +129,8 @@ class _PluginsBodyState extends State<PluginsBody> {
           mainAxisAlignment: mainAxisAlignment,
         ),
       if (!CONFIG.isDisableDownloadPlugins) const SizedBox(height: 15),
-      if (pluginsPages.stackIdx == 0) const BrowsePlugins(),
-      if (pluginsPages.stackIdx == 1) const MyPlugins(),
+      if (pluginsPages.stackIdx == browsePluginsIdx) const BrowsePlugins(),
+      if (pluginsPages.stackIdx == myPluginsIdx) const MyPlugins(),
     ];
 
     final appearanceState =

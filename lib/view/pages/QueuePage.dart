@@ -26,10 +26,13 @@ class QueuePage extends StatelessWidget {
         AppBar(
           leading: IconButton(
             icon: const Icon(PhosphorIconsThin.arrowLeft),
-            onPressed: () => Provider.of<AppState>(context, listen: false)
-                .closeEndDrawer(),
+            onPressed: () =>
+                Provider.of<AppState>(context, listen: false).closeEndDrawer(),
           ),
-          title: Text(lang.Queue),
+          title: Text(
+            lang.Queue,
+            style: TextStyle(color: ColorScheme.of(context).onSurface),
+          ),
         ),
         Stack(
           alignment: Alignment.center,

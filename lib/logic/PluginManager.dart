@@ -97,8 +97,14 @@ class PluginManager {
     pluginUpdatesCount = _calcPluginUpdatesCount();
   }
 
-  List<PluginInfo> getInstalledPlugins() =>
-      getInstalledPluginsFromDir(pluginsDir);
+  List<PluginInfo> getInstalledPlugins() {
+    if (CONFIG.isDemo) {
+      return getInstalledPluginsFromDir(pluginsDir)
+          .where((p) => ['lyrics', 'simple_client'].contains(p.id))
+          .toList();
+    }
+    return getInstalledPluginsFromDir(pluginsDir);
+  }
 
   List<PluginInfo> getNewInstalledPlugins() {
     var prevNames = pluginsList.map((p) => p.mainObjectName);

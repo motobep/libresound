@@ -30,6 +30,14 @@ enum ColorType {
   accent,
 }
 
+enum DemoPreset {
+  primary,
+  pink,
+  orange,
+  dynamic,
+  light,
+}
+
 class AppearanceState extends ChangeNotifier {
   Config config;
 
@@ -42,8 +50,8 @@ class AppearanceState extends ChangeNotifier {
   };
   AmbientMode ambientMode = AmbientMode.off;
   String fontPath = CONFIG.fontFamilyDefault;
-  double thumbnailRadius = 4;
-  double coverRadius = 10;
+  double thumbnailRadius = CONFIG.Default.thumbnailRadius;
+  double coverRadius = CONFIG.Default.coverRadius;
   double contentPaddingBaseHor = CONFIG.defaultContentPaddingBaseHor;
 
   final AppState appState;
@@ -58,6 +66,10 @@ class AppearanceState extends ChangeNotifier {
     // Change ambient on music item change
     playback.queue.onCurrIdxChange = onMusicItemChange;
     appState.onSheetControlsToggle = onSheetControlsToggle;
+
+    if (CONFIG.isDemo) {
+      setDemoPreset(DemoPreset.pink);
+    }
 
     var json_colors = config.getProperty('colors');
     if (json_colors != null) setColors(json_colors);
@@ -397,6 +409,48 @@ class AppearanceState extends ChangeNotifier {
   }
 
   static final Logger logger = Logger(prefix: '🌺 AppearanceState: ');
+
+  void setDemoPreset(DemoPreset preset) {
+    switch (preset) {
+      case DemoPreset.primary:
+        ambientMode = AmbientMode.off;
+        changeTheme(CONFIG.draculaLikeThemeColors);
+        changeThumbnailRadius(CONFIG.Default.thumbnailRadius);
+        changeCoverRadius(CONFIG.Default.coverRadius);
+        fontPath = 'Roboto';
+        notifyListeners();
+        break;
+      case DemoPreset.pink:
+        ambientMode = AmbientMode.off;
+        changeTheme(CONFIG.synthwaveLikeThemeColors);
+        changeThumbnailRadius(CONFIG.Default.thumbnailRadius);
+        changeCoverRadius(CONFIG.Default.coverRadius);
+        fontPath = 'Roboto';
+        notifyListeners();
+        break;
+      case DemoPreset.orange:
+        ambientMode = AmbientMode.off;
+        changeTheme(CONFIG.ayuLikeThemeColors);
+        changeThumbnailRadius(0);
+        changeCoverRadius(0);
+        changeFont('assets/fonts/demo/BitcountGridDouble-VariableFont.ttf');
+        break;
+      case DemoPreset.dynamic:
+        ambientMode = AmbientMode.all;
+        changeThumbnailRadius(CONFIG.Default.thumbnailRadius);
+        changeCoverRadius(CONFIG.Default.coverRadius);
+        changeFont('assets/fonts/demo/Knewave-Regular.ttf');
+        break;
+      case DemoPreset.light:
+        ambientMode = AmbientMode.off;
+        changeTheme(CONFIG.gruvboxLikeThemeColors);
+        changeThumbnailRadius(CONFIG.Default.thumbnailRadius * 2);
+        changeCoverRadius(CONFIG.Default.coverRadius * 2);
+        changeFont('assets/fonts/demo/Norican-Regular.ttf');
+        break;
+    }
+    return;
+  }
 }
 
 bool isDark(Color color) {

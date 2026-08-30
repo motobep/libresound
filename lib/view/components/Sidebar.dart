@@ -1,8 +1,7 @@
 import 'package:music_player/logger.dart' show gLogger;
-import 'package:music_player/logic/PluginManager.dart' show PluginManager;
 import 'package:music_player/logic/plugins.dart';
-import 'package:music_player/main.dart' show config;
 import 'package:music_player/states/focus_states/SimpleListNavigator.dart';
+import 'package:music_player/view/components/DemoThemeButtons.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -159,11 +158,16 @@ class _SidebarState extends State<Sidebar> {
               focusState: focusState),
         ];
 
+        List<Widget> widgets = [
+          ...sidebarWidgets,
+          if (CONFIG.isDemo) const DemoThemeButtons(),
+        ];
+
         return NotificationListener<ScrollEndNotification>(
           child: ListView(
             itemExtent: CONFIG.sidebarItemExtent,
             controller: _scrollController,
-            children: sidebarWidgets,
+            children: widgets,
           ),
           onNotification: (notification) {
             var pixels = notification.metrics.pixels;

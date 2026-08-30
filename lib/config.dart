@@ -230,3 +230,10 @@ const isDisableDownloadPlugins =
 const bool isUseNestedPlaylistsDir = mode == VersionMode.dev ? false : false;
 
 const String syncVersion = '1.0.0';
+
+class Default {
+  static double thumbnailRadius = 4;
+  static double coverRadius = 10;
+}
+
+const bool isDemo = String.fromEnvironment('is_demo') == '1';

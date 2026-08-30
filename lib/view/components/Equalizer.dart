@@ -1,6 +1,7 @@
 import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
+import 'package:music_player/config.dart' as CONFIG;
 import 'package:music_player/logger.dart';
 import 'package:music_player/logic/Config.dart';
 import 'package:music_player/logic/lang.dart';
@@ -29,7 +30,7 @@ class EqualizerWidget extends StatelessWidget {
     return FutureBuilder<Map<String, dynamic>>(
       future: () async {
         try {
-          final numBands = (await equalizer.getNumberOfBands())!;
+          int numBands = (await equalizer.getNumberOfBands())!;
           final limits = await equalizer.getLimits();
 
           final bands = [];
@@ -49,6 +50,11 @@ class EqualizerWidget extends StatelessWidget {
           bool? isEqEnabled = config.getProperty('isEqEnabled');
           bool isEnabled = isEqEnabled ?? false;
           await equalizer.setEnabled(isEnabled);
+
+          if (CONFIG.isDemo && true) {
+            frequencies = [60, 230, 910, 4000, 14000];
+            numBands = frequencies.length;
+          }
 
           for (var i = 0; i < numBands; i++) {
             if (Platform.isLinux || Platform.isWindows) {
@@ -126,9 +132,9 @@ class EqualizerWidget extends StatelessWidget {
 
                         if (gainLimits.length == 2) {
                           return Padding(
-                            padding: const EdgeInsets.only(right: 18.0),
+                            padding: const EdgeInsets.only(right: 12.0),
                             child: _EqSlider(
-                              name: '${freq.toStringAsFixed(0)} Hz',
+                              name: _toHzString(freq),
                               value: gain,
                               min: gainLimits[0] as double,
                               max: gainLimits[1] as double,
@@ -152,6 +158,15 @@ class EqualizerWidget extends StatelessWidget {
       },
     );
   }
+}
+
+String _toHzString(double freq) {
+  String suffix = 'Hz';
+  if (freq >= 1000) {
+    freq /= 1000;
+    suffix = 'KHz';
+  }
+  return '${freq.toStringAsFixed(0)} ${suffix}';
 }
 
 class _EqSlider extends StatefulWidget {
@@ -188,37 +203,46 @@ class _EqSliderState extends State<_EqSlider> {
         Provider.of<AppearanceState>(context, listen: false);
     var color = appearanceState.lerpBgColor(0.6);
 
-    return Column(
-      children: [
-        Text('${_value.toStringAsFixed(1)} dB',
-            style: TextStyle(color: color, fontSize: 13.0)),
-        Expanded(
-          child: RotatedBox(
-            quarterTurns: -1,
-            child: Slider(
-              min: widget.min,
-              max: widget.max,
-              value: _value,
-              onChanged: (value) {
-                setState(() {
-                  _value = value;
-                });
-              },
-              onChangeEnd: (value) {
-                widget.onChangeEnd(value);
-                setState(() {
-                  _value = value;
-                });
-              },
+    return SizedBox(
+      width: 52,
+      child: Column(
+        children: [
+          Text('${_value.toStringAsFixed(1)} dB',
+              style: TextStyle(color: color, fontSize: 13.0)),
+          const SizedBox(height: 10.0),
+          Expanded(
+            child: RotatedBox(
+              quarterTurns: -1,
+              child: SliderTheme(
+                data: SliderTheme.of(context).copyWith(
+                  trackHeight: 5,
+                ),
+                child: Slider(
+                  min: widget.min,
+                  max: widget.max,
+                  value: _value,
+                  onChanged: (value) {
+                    setState(() {
+                      _value = value;
+                    });
+                  },
+                  onChangeEnd: (value) {
+                    widget.onChangeEnd(value);
+                    setState(() {
+                      _value = value;
+                    });
+                  },
+                ),
+              ),
             ),
           ),
-        ),
-        Text(
-            '${widget.min.toStringAsFixed(0)}~${widget.max.toStringAsFixed(0)} dB',
-            style: TextStyle(color: color, fontSize: 12.0)),
-        const SizedBox(height: 8.0),
-        Text(widget.name),
-      ],
+          // Text(
+          //     '${widget.min.toStringAsFixed(0)}~${widget.max.toStringAsFixed(0)} dB',
+          //     style: TextStyle(color: color, fontSize: 12.0)),
+          const SizedBox(height: 8.0),
+          Text(widget.name),
+        ],
+      ),
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:music_player/config.dart' as CONFIG;
 import 'package:music_player/logic/PluginSource.dart';
 import 'package:music_player/logic/plugins.dart';
 import 'package:file_picker/file_picker.dart';
@@ -124,7 +125,9 @@ class _MyPluginsList extends StatelessWidget {
                   ),
               ],
             ),
-            subtitle: Text('${plugin.type} (${plugin.dirpath})'),
+            subtitle: !CONFIG.isDemo
+                ? Text('${plugin.type} (${plugin.dirpath})')
+                : Text(plugin.type),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [

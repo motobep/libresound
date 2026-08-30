@@ -1,7 +1,9 @@
 import 'dart:convert' show jsonEncode;
 
+import 'package:music_player/config.dart' as CONFIG;
 import 'package:music_player/logic/MpJsRuntime.dart';
 import 'package:music_player/logic/MusicItem.dart' show MusicItem;
+import 'package:music_player/logic/plugins/DemoLyrics.dart';
 import 'package:music_player/view/components/Lrc.dart' show LyricsObj;
 
 class LyricsPlugin {
@@ -19,6 +21,10 @@ class LyricsPlugin {
 			return await $pluginMainObjectName.getLyricsAsync($miJson);
     ''');
     if (resp == null) return null;
+    if (CONFIG.isDemo) {
+      resp['text'] = demoLyrics;
+      resp['isSynced'] = true;
+    }
     return LyricsObj(
       text: resp['text'],
       isSynced: resp['isSynced'],

@@ -17,6 +17,7 @@ import 'package:music_player/logic/Item.dart' show IndexedItem;
 import 'package:music_player/logic/JsonStorage.dart';
 import 'package:music_player/logic/PageDescr.dart';
 import 'package:music_player/logic/ActionButtonDescr.dart';
+import 'package:music_player/logic/fs/DemoFsFuncs.dart' as demoFsFuncs;
 
 import 'package:music_player/consts.dart' as CONSTS;
 import 'package:music_player/config.dart' as CONFIG;
@@ -94,10 +95,11 @@ class FsSource implements Source {
 
     playlistHandler = PlaylistHandler(config, this);
     var newFiles = _fetchMusicFiles(_sourceDirPath);
-    final isIdentical = _compareFilesArrays(newFiles, files);
-    if (!isIdentical) {
-      files = newFiles;
-      await _loadMusicItemsAsync(_sourceDirPath, files);
+    final isIdentical = _compareFilesArrays(newFiles, _files);
+    final shouldLoad = !isIdentical || CONFIG.isDemo;
+    if (shouldLoad) {
+      _files = newFiles;
+      await _loadMusicItemsAsync(_sourceDirPath, _files);
     }
     // Probably can do better than this flag variable usage
     if (!_isLoadingMusicItems) {
@@ -113,8 +115,8 @@ class FsSource implements Source {
     if (errorMsg != '') errorMsg = '';
 
     playlistHandler = PlaylistHandler(config, this);
-    files = _fetchMusicFiles(_sourceDirPath);
-    await _loadMusicItemsAsync(_sourceDirPath, files);
+    _files = _fetchMusicFiles(_sourceDirPath);
+    await _loadMusicItemsAsync(_sourceDirPath, _files);
     _checkIsMusicItemsEmpty();
 
     currPage.updateIdx++;
@@ -178,6 +180,11 @@ class FsSource implements Source {
   bool _isLoadingMusicItems = false;
 
   Future<void> _loadMusicItemsAsync(String sourceDir, List<File> files) async {
+    if (CONFIG.isDemo) {
+      _allMusicItems =
+          await demoFsFuncs.getMusicItemsDemoAsync(sourceDir, files);
+      return;
+    }
     logger.blue(
         '_loadMusicItemsAsync() - _isLoadingMusicItems $_isLoadingMusicItems');
     if (_isLoadingMusicItems) {
@@ -253,7 +260,7 @@ class FsSource implements Source {
   }
 
   late PlaylistHandler playlistHandler;
-  List<File> files = [];
+  List<File> _files = [];
 
   List<MusicItem> _allMusicItems = [];
 
@@ -525,41 +532,9 @@ class FsSource implements Source {
       logger.log('load all');
       currPage.title = lang.Tracks;
       currPage.setFirstItemlist(_allMusicItems);
-      /* currPage.sectionlist = [
-        SectionDescr(
-          header: SectionHeaderDescr(
-            title: 'All',
-          ),
-          itemlist: _allMusicItems,
-          isBigTile: false,
-          rowsCount: 5,
-          props: {'listType': ListType.tracklist},
-        ),
-        SectionDescr(
-          header: SectionHeaderDescr(
-            title: 'Playlists',
-          ),
-          itemlist: _getGroupList(FsStacks.playlists),
-          isBigTile: false,
-          rowsCount: 4,
-        ),
-        SectionDescr(
-          header: SectionHeaderDescr(
-            title: 'Artists',
-          ),
-          itemlist: _getGroupList(FsStacks.artists),
-          isBigTile: true,
-          rowsCount: 1,
-        ),
-        SectionDescr(
-          header: SectionHeaderDescr(
-            title: 'Albums',
-          ),
-          itemlist: _getGroupList(FsStacks.albums),
-          isBigTile: false,
-          rowsCount: 4,
-        ),
-      ]; */
+      if (CONFIG.isDemo) {
+        _setDemoMainPage();
+      }
       return;
     }
 
@@ -1202,6 +1177,37 @@ class FsSource implements Source {
   }
 
   Logger logger;
+
+  void _setDemoMainPage() {
+    currPage.title = 'Simple client';
+    currPage.sectionlist = [
+      SectionDescr(
+        header: SectionHeaderDescr(
+          title: demoFsFuncs.langDemo['Favorite_Songs'],
+        ),
+        itemlist: _allMusicItems,
+        isBigTile: false,
+        rowsCount: 4,
+        props: {'listType': ListType.tracklist},
+      ),
+      SectionDescr(
+        header: SectionHeaderDescr(
+          title: demoFsFuncs.langDemo['Top_Playlists'],
+        ),
+        itemlist: _getGroupList(FsStacks.artists),
+        isBigTile: true,
+        rowsCount: 1,
+      ),
+      SectionDescr(
+        header: SectionHeaderDescr(
+          title: demoFsFuncs.langDemo['Related_Albums'],
+        ),
+        itemlist: _getGroupList(FsStacks.albums),
+        isBigTile: false,
+        rowsCount: 4,
+      ),
+    ];
+  }
 }
 
 bool _compareFilesArrays(List<File> a, List<File> b) {

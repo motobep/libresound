@@ -6,6 +6,7 @@ _list:
 
 build_time := datetime('%Y_%m_%d–%H:%M')
 is_disable_download_plugins := env('is_disable_download_plugins', '0')
+is_demo := env('is_demo', '0')
 
 [group('dev')]
 run version='debug' platform=os():
@@ -14,6 +15,7 @@ run version='debug' platform=os():
         --dart-define=build_mode=dev \
         --dart-define=datetime={{build_time}} \
         --dart-define=is_disable_download_plugins={{is_disable_download_plugins}} \
+        --dart-define=is_demo={{is_demo}} \
         -d {{platform}}
 
 [group('dev')]

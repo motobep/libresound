@@ -492,7 +492,7 @@ Please add music to this folder or select a different folder in the Settings.'''
 
   // Plugins
   String Server_address = 'Server address';
-  String Download_plugins = 'Download a plugins';
+  String Download_plugins = 'Download plugins';
   String Network_error = 'Network error';
 
   String Install_from_zip_file = 'Install from zip file';

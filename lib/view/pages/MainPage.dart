@@ -98,7 +98,7 @@ class _MainPageState extends State<MainPage> {
         break;
       case Pages.source:
         mainBody = Stack(
-          // alignment: Alignment.center,
+          alignment: Alignment.center,
           children: [
             // TODO: add guards to body with tabs, etc.
             addGuardsToPageBody(const SourceContents(), context),
@@ -165,7 +165,13 @@ class _MainPageState extends State<MainPage> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      appBar,
+                      if (CONFIG.isDemo)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 24.0),
+                          child: appBar,
+                        )
+                      else
+                        appBar,
                       if (mainPage == Pages.source &&
                           navType == NavType.searchTabs)
                         TopTabs(
@@ -193,9 +199,12 @@ class _MainPageState extends State<MainPage> {
                           sheetController: controlsSheetController,
                           fadeInPercent: minControlsChildSize,
                           fadeOutPercent: 0.24,
-                          child: SizedBox(
+                          child: Container(
                             width: MediaQuery.of(context).size.width,
-                            height: CONFIG.tabsHeight,
+                            color: ColorScheme.of(context).surface,
+                            padding: const EdgeInsets.only(
+                                bottom: !CONFIG.isDemo ? 0 : 12),
+                            height: !CONFIG.isDemo ? CONFIG.tabsHeight : 12,
                             child: const Tabs(),
                           ),
                         )),
@@ -289,7 +298,13 @@ AppBar getAppBar(BuildContext context) {
     }
 
     centerChildren = [
-      Expanded(child: Text(headlineTitle, overflow: TextOverflow.fade)),
+      Expanded(
+        child: Text(
+          headlineTitle,
+          overflow: TextOverflow.fade,
+          style: TextStyle(color: ColorScheme.of(context).onSurface),
+        ),
+      ),
       const UpButton(),
     ];
   } else {

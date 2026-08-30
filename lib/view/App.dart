@@ -137,6 +137,8 @@ class MaterialAppThemed extends StatelessWidget {
     shortcuts.remove(const SingleActivator(LogicalKeyboardKey.arrowDown));
     shortcuts.remove(const SingleActivator(LogicalKeyboardKey.arrowUp));
 
+    const targetPlatform = CONFIG.isDemo ? TargetPlatform.android : null;
+
     return MaterialApp(
       title: 'LibreSound',
       shortcuts: shortcuts,
@@ -148,11 +150,14 @@ class MaterialAppThemed extends StatelessWidget {
         primarySwatch: Colors.blue,
         brightness: Brightness.light,
         visualDensity: const VisualDensity(),
+        platform: targetPlatform,
       ),
+      debugShowCheckedModeBanner: !CONFIG.isDemo,
       themeAnimationDuration: const Duration(seconds: 0),
       darkTheme: ThemeData(
         fontFamily: appearanceState.fontPath,
         fontFamilyFallback: const [CONFIG.fontFamilyDefault, 'Lato', 'Arial'],
+        platform: targetPlatform,
         scrollbarTheme: ScrollbarThemeData(
             thumbColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.dragged)) {

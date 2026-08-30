@@ -3,6 +3,7 @@ import 'dart:io' show Platform;
 import 'package:audioplayers/audioplayers.dart' show AudioEventType, Equalizer;
 import 'package:music_player/logic/Source.dart' show Source;
 
+import 'package:music_player/config.dart' as CONFIG;
 import 'package:music_player/main.dart' show config;
 import 'package:music_player/logger.dart';
 import 'package:music_player/logic/fs/cache.dart' as cache;
@@ -466,7 +467,9 @@ class Playback {
     Duration? realDuration = await _playback.setFilePath(mi.filepath!);
     logger.log('setFileSourceAsync() real duration: $realDuration');
     if (realDuration != null) {
-      mi.duration = realDuration;
+      if (!CONFIG.isDemo) {
+        mi.duration = realDuration;
+      }
 
       // TODO: Delegate to FsSource
       if (mi.durationInSeconds != endTimeSecs && mi.durationInSeconds > 0) {

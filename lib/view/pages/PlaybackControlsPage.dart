@@ -103,6 +103,8 @@ class PlaybackControlsBody extends StatelessWidget {
     bool isSelectionHidden =
         context.select<SelectionState, bool>((s) => s.isEmpty);
 
+    const double topPad = (!CONFIG.isDemo) ? 8 : 8 + 24;
+
     return Container(
       color: ColorScheme.of(context).surface,
       child: Stack(
@@ -110,7 +112,7 @@ class PlaybackControlsBody extends StatelessWidget {
           Column(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
             Padding(
               padding: const EdgeInsets.only(
-                  top: 8.0, left: mainHorPad, right: mainHorPad),
+                  top: topPad, left: mainHorPad, right: mainHorPad),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [

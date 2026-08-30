@@ -3,14 +3,15 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:music_player/states/AppState.dart';
-import 'package:music_player/states/PlaybackState.dart';
 import 'package:provider/provider.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
+import 'package:music_player/config.dart' as CONFIG;
 import 'package:music_player/logic/SectionDescr.dart';
 import 'package:music_player/states/AppearanceState.dart';
+import 'package:music_player/states/AppState.dart';
+import 'package:music_player/states/PlaybackState.dart';
 import 'package:music_player/view/components/HorizontalGridList.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import 'package:music_player/view/components/buttons.dart';
 
@@ -236,7 +237,7 @@ class _SectionHeaderState extends State<_SectionHeader> {
           Row(
             children: [
               widget.button ?? const SizedBox.shrink(),
-              isScrollable && isPC
+              isScrollable && isPC && !CONFIG.isDemo
                   ? Row(
                       children: [
                         const SizedBox(width: 28),
