@@ -152,7 +152,7 @@ class MaterialAppThemed extends StatelessWidget {
         visualDensity: const VisualDensity(),
         platform: targetPlatform,
       ),
-      debugShowCheckedModeBanner: !CONFIG.isDemo,
+      debugShowCheckedModeBanner: CONFIG.debugShowCheckedModeBanner,
       themeAnimationDuration: const Duration(seconds: 0),
       darkTheme: ThemeData(
         fontFamily: appearanceState.fontPath,

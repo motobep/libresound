@@ -184,7 +184,7 @@ const double listViewGap = itemExtent + 50.0;
 const double tileTitleFontSize = 15;
 const double tileLineHeight = 1.2;
 
-const double tabsHeight = 46;
+const double defaultTabsHeight = 46;
 const double bottomControlsHeight = 69;
 
 const double drawerEdgeDragWidth = 60.0;
@@ -236,4 +236,13 @@ class Default {
   static double coverRadius = 10;
 }
 
+// Demo
 const bool isDemo = String.fromEnvironment('is_demo') == '1';
+
+const double minQueueSheetChildSize = !isDemo ? 0.085 : 0.1;
+const double tabsHeight = !isDemo ? defaultTabsHeight : 12.0;
+const double tabsBottomPad = !isDemo ? 0 : 12;
+
+const double playbackTopPad = !isDemo ? 8 : 8 + 24;
+
+const bool debugShowCheckedModeBanner = !isDemo;

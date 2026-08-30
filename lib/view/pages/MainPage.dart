@@ -203,8 +203,8 @@ class _MainPageState extends State<MainPage> {
                             width: MediaQuery.of(context).size.width,
                             color: ColorScheme.of(context).surface,
                             padding: const EdgeInsets.only(
-                                bottom: !CONFIG.isDemo ? 0 : 12),
-                            height: !CONFIG.isDemo ? CONFIG.tabsHeight : 12,
+                                bottom: CONFIG.tabsBottomPad),
+                            height: CONFIG.tabsHeight,
                             child: const Tabs(),
                           ),
                         )),

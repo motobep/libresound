@@ -12,7 +12,7 @@ import 'package:provider/provider.dart';
 import 'package:music_player/logic/lang.dart';
 import 'package:music_player/states/AppearanceState.dart';
 
-const double minQueueSheetChildSize = !CONFIG.isDemo ? 0.085 : 0.1;
+const double minQueueSheetChildSize = CONFIG.minQueueSheetChildSize;
 const double maxQueuePercent = 1.0;
 double maxQueueChildSize = -1.0;
 
