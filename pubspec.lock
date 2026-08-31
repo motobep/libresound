@@ -86,8 +86,8 @@ packages:
     description:
       path: "packages/audioplayers"
       ref: v5_with_equalizer
-      resolved-ref: "2b25e510ead183ebeed538b2b74dbf41641e9591"
-      url: "https://github.com/motobep/audioplayers.git"
+      resolved-ref: "4c459e6ed8082cbe06f385be180e3fdc84c5373a"
+      url: "git@github.com:motobep/audioplayers.git"
     source: git
     version: "5.2.1"
   audioplayers_android:
@@ -348,8 +348,8 @@ packages:
     description:
       path: "."
       ref: dart_quickjs
-      resolved-ref: "62cc687bf9e67dc6fbdbc0678e92a790d1fe206b"
-      url: "https://github.com/motobep/flutter_js.git"
+      resolved-ref: "42248e1d119d4014260ad24c6ef55c7c5d1bd507"
+      url: "git@github.com:motobep/flutter_js.git"
     source: git
     version: "0.8.5"
   flutter_launcher_icons:

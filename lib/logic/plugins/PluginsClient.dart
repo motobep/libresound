@@ -16,6 +16,10 @@ class PluginsClient {
   }
 
   Future<dynamic> getPluginsVersions(List<String> pluginsNames) async {
+    if (pluginsNames.isEmpty) {
+      logger.log('pluginsNames is empty');
+      return [];
+    }
     final url = _pluginsVersionsUrl(endpointUrl, pluginsNames);
     logger.log('_pluginsVersionsUrl: $url');
     final obj = await _getJson(url);
