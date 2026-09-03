@@ -357,8 +357,8 @@ class Playback {
     assert(playState == PlayState.playing || playState == PlayState.loading,
         '_pause playState: $playState');
     try {
-      await getSourceByMi(getCurrentMusicItem())
-          .triggerEventAsync('BeforePauseAsync', {});
+      await getSourceByMi(getCurrentMusicItem()).triggerEventAsync(
+          'BeforePauseAsync', {}).timeout(CONFIG.beforePauseAsyncTimeout);
     } catch (e, s) {
       logger.exception('in onBeforePauseAsync()', e, s);
     }

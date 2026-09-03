@@ -15,20 +15,25 @@ class IsolateMessager {
   Function(Object?)? handleIsolateRequest;
 
   Future<Object?> call(String fnName, List args) async {
-    if (_closed) throw StateError('Closed');
-    final completer = Completer<Object?>.sync();
-    final id = _mainIdCounter++;
-    _activeRequests[id] = completer;
+    try {
+      if (_closed) throw StateError('Closed');
+      final completer = Completer<Object?>.sync();
+      final id = _mainIdCounter++;
+      _activeRequests[id] = completer;
 
-    _mainSendPort.send((id, (fnName, args)));
+      _mainSendPort.send((id, (fnName, args)));
 
-    return await completer.future;
+      return await completer.future;
+    } catch (e, s) {
+      logger.exception('call ($_mainIdCounter): fnName="$fnName"', e, s);
+      rethrow;
+    }
   }
 
   static Future<IsolateMessager> spawn(void Function(SendPort) func,
       Function(Object?) handleIsolateRequest) async {
     // Create a initial raw receive port
-    final initPort = RawReceivePort();
+    final initPort = RawReceivePort(null, 'IsolateMessager.initPort');
     final connection = Completer<(ReceivePort, SendPort)>.sync();
     initPort.handler = (initialMessage) {
       final mainSendPort = initialMessage as SendPort;
@@ -40,7 +45,25 @@ class IsolateMessager {
 
     // Spawn the isolate.
     try {
-      await Isolate.spawn(func, (initPort.sendPort));
+      final ReceivePort errorPort = ReceivePort();
+      await Isolate.spawn(
+        func,
+        (initPort.sendPort),
+        debugName: 'Isolate.spawn',
+        onError: errorPort.sendPort,
+      );
+
+      errorPort.listen((dynamic message) {
+        final String errorString = message[0];
+        final String stackTraceString = message[1];
+
+        gLogger.exception('errorPort.handleError (propagte up)', errorString,
+            stackTraceString);
+
+        final Exception exception =
+            Exception('$errorString, stackTrace: $stackTraceString');
+        throw exception;
+      });
     } on Object {
       initPort.close();
       rethrow;

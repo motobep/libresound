@@ -236,6 +236,8 @@ class Default {
   static double coverRadius = 10;
 }
 
+const beforePauseAsyncTimeout = Duration(seconds: 2);
+
 // Demo
 const bool isDemo = String.fromEnvironment('is_demo') == '1';
 

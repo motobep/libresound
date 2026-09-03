@@ -36,5 +36,5 @@ var __AbortController = (function (exports) {
 
 })({});
 
-const AbortSignal = __AbortController.AbortController
-const AbortController = __AbortController.AbortSignal
+const AbortSignal = __AbortController.AbortSignal
+const AbortController = __AbortController.AbortController
