@@ -30,7 +30,9 @@ import 'package:provider/provider.dart';
 import 'package:archive/archive_io.dart';
 
 class MyPlugins extends StatelessWidget {
-  const MyPlugins({super.key});
+  const MyPlugins({super.key, required this.toDownloadPlugins});
+
+  final void Function() toDownloadPlugins;
 
   @override
   Widget build(BuildContext context) {
@@ -83,9 +85,9 @@ class MyPlugins extends StatelessWidget {
             gLogger.view('Picking END');
           },
         ),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 8.0),
-          child: _MyPluginsList(),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: _MyPluginsList(toDownloadPlugins: toDownloadPlugins),
         ),
       ],
     );
@@ -93,7 +95,10 @@ class MyPlugins extends StatelessWidget {
 }
 
 class _MyPluginsList extends StatelessWidget {
-  const _MyPluginsList();
+  const _MyPluginsList({required this.toDownloadPlugins});
+
+  final void Function() toDownloadPlugins;
+
   @override
   Widget build(BuildContext context) {
     var appState = Provider.of<AppState>(context, listen: false);
@@ -107,6 +112,18 @@ class _MyPluginsList extends StatelessWidget {
 
     final appearanceState =
         Provider.of<AppearanceState>(context, listen: false);
+
+    if (pluginsList.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 32.0),
+        child: ToPageButton(
+          lang.Download_plugins,
+          onTap: () {
+            toDownloadPlugins();
+          },
+        ),
+      );
+    }
 
     return Column(
       children: [

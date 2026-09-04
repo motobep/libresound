@@ -119,7 +119,6 @@ class _PluginsBodyState extends State<PluginsBody> {
           elements: tabs,
           initial: pluginsPages.stackIdx,
           onSelect: (index) {
-            gLogger.view('hey: $index');
             setState(() {
               pluginsPages.stackIdx = index;
               appState.update();
@@ -129,8 +128,14 @@ class _PluginsBodyState extends State<PluginsBody> {
           mainAxisAlignment: mainAxisAlignment,
         ),
       if (!CONFIG.isDisableDownloadPlugins) const SizedBox(height: 15),
+      if (pluginsPages.stackIdx == myPluginsIdx)
+        MyPlugins(toDownloadPlugins: () {
+          setState(() {
+            pluginsPages.stackIdx = browsePluginsIdx;
+            appState.update();
+          });
+        }),
       if (pluginsPages.stackIdx == browsePluginsIdx) const BrowsePlugins(),
-      if (pluginsPages.stackIdx == myPluginsIdx) const MyPlugins(),
     ];
 
     final appearanceState =
@@ -249,7 +254,8 @@ class _PluginsBodyState extends State<PluginsBody> {
             ),
           ),
         ],
-        if (!isPluginsMiniDisclaimerRead && CONFIG.isDisableDownloadPlugins) ...[
+        if (!isPluginsMiniDisclaimerRead &&
+            CONFIG.isDisableDownloadPlugins) ...[
           Positioned(
             child: Container(
               padding: const EdgeInsets.only(
@@ -296,7 +302,8 @@ class _PluginsBodyState extends State<PluginsBody> {
                         Text('${lang.This_message_will_not_appear_again}.'),
                         const SizedBox(height: 14.0),
                         StandardButton(lang.Continue, onTap: () {
-                          config.saveProperty('isPluginsMiniDisclaimerRead', true);
+                          config.saveProperty(
+                              'isPluginsMiniDisclaimerRead', true);
                           appState.update();
                         }),
                         const SizedBox(height: 6.0),
