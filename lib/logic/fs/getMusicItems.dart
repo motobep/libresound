@@ -28,6 +28,8 @@ void _addMusicItemToList(File file, List<MusicItem> list) {
     String ext = fs.getExtension(file.path);
     Tags tags;
     if (ext == '.mp3') {
+      // TODO: pass bytes instead of file
+      // TODO: calc duration from bytes
       Tags v2Tags = _getId3V2Tags(file);
       if (v2Tags.hasNecessary()) {
         tags = v2Tags;
@@ -56,7 +58,7 @@ void _addMusicItemToList(File file, List<MusicItem> list) {
       tags,
       sourceId: CONFIG.fsSourceId,
     );
-    mi.fetchDuration();
+    // mi.fetchDurationAsync();
     list.add(mi);
   } catch (e) {
     gLogger.warn('Error in getting file ${file.path}. \nInner exception: $e');

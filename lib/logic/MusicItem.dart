@@ -147,14 +147,17 @@ class MusicItem implements Item {
     return duration.inSeconds;
   }
 
-  void fetchDuration() {
+  // TODO: pass bytes instead of filepath
+  Future<void> fetchDurationAsync() async {
     if (extension != '.mp3') {
       logger.warn('Not mp3 fetchDuration');
       return;
     }
     logger.trace('mp3 fetchDuration');
     try {
-      final mp3 = MP3Processor.fromFile(File(filepath!));
+      final file = File(filepath!);
+      final bytes = await file.readAsBytes();
+      final mp3 = MP3Processor.fromBytes(bytes);
       duration = mp3.duration;
       logger.log('mp3 "$id" duration: $duration');
     } catch (e) {

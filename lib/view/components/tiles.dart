@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:music_player/logger.dart';
 import 'package:music_player/logic/MusicItem.dart' show MusicItem;
 import 'package:music_player/logic/lang.dart';
 import 'package:provider/provider.dart';
@@ -355,13 +356,17 @@ class _WideMiTileState extends State<WideMiTile> {
   void initState() {
     super.initState();
     _setTrailing();
+    hasMiDuration = widget.mi.durationInSeconds > 0;
   }
+
+  late bool hasMiDuration;
 
   @override
   void didUpdateWidget(covariant WideMiTile oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.isShowCheckbox != widget.isShowCheckbox ||
-        oldWidget.isSelected != widget.isSelected) {
+        oldWidget.isSelected != widget.isSelected ||
+        (!hasMiDuration && widget.mi.durationInSeconds > 0)) {
       _setTrailing();
     }
   }
@@ -392,6 +397,7 @@ class _WideMiTileState extends State<WideMiTile> {
     final appearanceState =
         Provider.of<AppearanceState>(context, listen: false);
     Color subtitleColor = appearanceState.colors[ColorType.subtitle]!;
+    hasMiDuration = widget.mi.durationInSeconds > 0;
     return Text(
       widget.mi.durationInSeconds > 0 ? widget.mi.time : '',
       maxLines: 1,

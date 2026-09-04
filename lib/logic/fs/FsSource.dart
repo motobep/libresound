@@ -215,23 +215,41 @@ class FsSource implements Source {
         }
         logger.log('Got music files without cache');
       }
-
-      // Set duration for the rest
-      for (var mi in _allMusicItems) {
-        if (mi.duration != const Duration(seconds: 0)) continue;
-        await _setDurationWithPlayer(mi);
-      }
-
-      _allMusicItems
-          .removeWhere((el) => el.duration == const Duration(seconds: 0));
-
       sortMusicItems();
 
-      cache.writeCachedInfoToFile(_allMusicItems, sourceDir);
+      (int selfIdx) async {
+        // final mini_stopwatch = Stopwatch()..start();
+
+        for (var mi in _allMusicItems) {
+          if (mi.duration != const Duration(seconds: 0)) continue;
+          // It's not sync but reading many files at once takes memory
+          // so just await one by one
+          await mi.fetchDurationAsync();
+        }
+
+        // Set duration for the rest
+        for (var mi in _allMusicItems) {
+          if (mi.duration != const Duration(seconds: 0)) continue;
+          // It's pretty sync so just await one by one
+          await _setDurationWithPlayer(mi);
+        }
+
+        // logger
+        //     .debug('load duration done: ${mini_stopwatch.elapsedMilliseconds}');
+
+        if (_afterItemsLoadIdx == selfIdx) {
+          cache.writeCachedInfoToFile(_allMusicItems, sourceDir);
+
+          loadCurrPage();
+          updateCurrPage();
+        }
+      }(++_afterItemsLoadIdx);
     } finally {
       _isLoadingMusicItems = false;
     }
   }
+
+  int _afterItemsLoadIdx = 0;
 
   void _checkIsMusicItemsEmpty() {
     if (_allMusicItems.isEmpty) {

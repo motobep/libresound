@@ -55,7 +55,7 @@ bool isDev() {
 }
 
 bool isCacheMusic = true;
-// bool isCacheMusic = false;
+// bool isCacheMusic = isProd();
 
 bool isMemoryFs = false;
 final fileSystem = isMemoryFs ? MemoryFileSystem() : const LocalFileSystem();
