@@ -238,6 +238,7 @@ abstract class Lang {
   abstract String Author;
   abstract String Published_at;
   abstract String Unpacked_size;
+  abstract String Downloads__genetive;
   abstract String Deleted_User;
 
   abstract String Approved_by;
@@ -526,6 +527,7 @@ Please add music to this folder or select a different folder in the Settings.'''
   String Author = 'Author';
   String Published_at = 'Published at';
   String Unpacked_size = 'Unpacked size';
+  String Downloads__genetive = 'Downloads';
   String Deleted_User = 'Deleted User';
 
   String Approved_by = 'Approved by';
@@ -814,6 +816,7 @@ class RuLang implements Lang {
   String Author = 'Автор';
   String Published_at = 'Опубликовано';
   String Unpacked_size = 'Распакованный размер';
+  String Downloads__genetive = 'Загрузок';
   String Deleted_User = 'Удаленный пользователь';
 
   String Approved_by = 'Одобрено';

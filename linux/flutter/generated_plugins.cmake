@@ -6,6 +6,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   audioplayers_linux
   flutter_js
   screen_retriever
+  url_launcher_linux
   window_manager
 )
 

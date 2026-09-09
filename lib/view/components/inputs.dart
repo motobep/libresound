@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:music_player/states/FocusState.dart';
 import 'package:music_player/view/components/buttons.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart'
+    show PhosphorIconsThin, PhosphorIconsRegular;
 import 'package:provider/provider.dart';
 
 import 'package:music_player/logger.dart';
@@ -160,6 +162,7 @@ class SelectInput<T> extends StatelessWidget {
     required this.onSelect,
     this.trailingIconData,
     this.trailingIconOnTap,
+    this.isCompact = false,
   });
 
   static SelectInput fromJson(
@@ -182,6 +185,7 @@ class SelectInput<T> extends StatelessWidget {
   final void Function(T?) onSelect;
   final IconData? trailingIconData;
   final void Function(T value)? trailingIconOnTap;
+  final bool isCompact;
 
   @override
   Widget build(BuildContext context) {
@@ -200,7 +204,7 @@ class SelectInput<T> extends StatelessWidget {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         hoverColor: appearanceState.lerpBgColor(0.02),
-        constraints: const BoxConstraints(maxHeight: 42),
+        constraints: BoxConstraints(maxHeight: isCompact ? 36 : 42),
         isDense: true,
         enabledBorder: OutlineInputBorder(
           borderSide: BorderSide(
@@ -224,6 +228,8 @@ class SelectInput<T> extends StatelessWidget {
           ),
         ),
       ),
+      trailingIcon: const Icon(PhosphorIconsRegular.caretDown, size: 14),
+      selectedTrailingIcon: const Icon(PhosphorIconsRegular.caretUp, size: 14),
       dropdownMenuEntries: elements
           .map<DropdownMenuEntry<T>>(
             (el) => DropdownMenuEntry<T>(

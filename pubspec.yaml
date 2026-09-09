@@ -61,6 +61,8 @@ dependencies:
     git:
       url: https://github.com/KasemJaffer/receive_sharing_intent.git
       ref: 2cea396843cd3ab1b5ec4334be4233864637874e
+  flutter_markdown_plus: ^1.0.12 # BSD-3
+  url_launcher: ^6.3.2 # BSD-3 like
 
   m4a_tags_handler:
     path: ./libraries/m4a_tags_handler

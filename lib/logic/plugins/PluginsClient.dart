@@ -33,8 +33,10 @@ class PluginsClient {
     return obj;
   }
 
-  Future<dynamic> getPlugins(String search, int page) async {
-    final url = _searchUrl(endpointUrl, search, page, lang.code_);
+  Future<dynamic> getPlugins(String search, int page,
+      {String? orderBy, String? orderDirection}) async {
+    final url = _searchUrl(endpointUrl, search, page, lang.code_,
+        orderBy: orderBy, orderDirection: orderDirection);
     final obj = await _getJson(url);
     return obj;
   }
@@ -85,10 +87,17 @@ class PluginsClient {
     );
   }
 
-  static Uri _searchUrl(Uri url, String search, int page, String lang) {
+  static Uri _searchUrl(Uri url, String search, int page, String lang,
+      {String? orderBy, String? orderDirection}) {
     return url.replace(
       pathSegments: [...url.pathSegments, 'plugins'],
-      queryParameters: {'search': search, 'page': '$page', 'lang': lang},
+      queryParameters: {
+        'search': search,
+        'page': '$page',
+        'lang': lang,
+        'order_by': orderBy,
+        'order_direction': orderDirection,
+      },
     );
   }
 

@@ -68,10 +68,19 @@ class PluginsPages {
 }
 
 class PluginsObj {
-  const PluginsObj(this.data, this.search, this.currPage);
+  const PluginsObj(
+    this.data,
+    this.search,
+    this.currPage, {
+    this.orderBy,
+    this.orderDirection,
+  });
   final dynamic data;
   final String search;
   final int currPage;
+
+  final String? orderBy;
+  final String? orderDirection;
 }
 
 // FIXME: error, when downloading new plugin (may be downloading new not compatibale version of the plugin) on anroid

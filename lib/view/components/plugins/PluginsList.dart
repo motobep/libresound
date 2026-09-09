@@ -3,6 +3,7 @@ import 'package:music_player/logger.dart';
 import 'package:music_player/logic/lang.dart';
 import 'package:music_player/states/AppearanceState.dart';
 import 'package:music_player/view/components/buttons.dart';
+import 'package:music_player/view/components/inputs.dart' show SelectInput;
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
 // import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -15,6 +16,8 @@ class PluginsList extends StatelessWidget {
     required this.onDownloadTap,
     required this.onInfoTap,
     required this.onPageTap,
+    required this.onSortChange,
+    required this.selectInitial,
   });
 
   final dynamic data;
@@ -22,6 +25,9 @@ class PluginsList extends StatelessWidget {
   final void Function(String name) onDownloadTap;
   final void Function(String name) onInfoTap;
   final void Function(int) onPageTap;
+  final void Function(String orderBy, String orderDirection) onSortChange;
+
+  final String? selectInitial;
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +35,15 @@ class PluginsList extends StatelessWidget {
     final int count = data['count'];
     final int limit = data['limit'];
     final int last = (count / limit).ceil();
+    final List sortBy = data['sort_by'];
+
+    final List<(String, String)> elements = sortBy.expand((el) {
+      return [
+        ('${el["value"] as String}-desc', '${el["text"] as String}  🡻'),
+        ('${el["value"] as String}-asc', '${el["text"] as String}  🡹'),
+      ];
+    }).toList();
+    final initial = selectInitial ?? elements[0].$1;
 
     final colorScheme = ColorScheme.of(context);
 
@@ -38,90 +53,115 @@ class PluginsList extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('${count} ${lang.plugins__genetive}'),
-        const SizedBox(height: 10),
-        for (var el in plugins)
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: SelectableText(
-                      "${el['name']}",
-                      style: TextStyle(
-                        fontSize: 16,
-                        letterSpacing: 0.75,
-                        color: colorScheme.secondary,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      maxLines: 2,
-                    ),
-                  ),
-                  const SizedBox(width: 12.0),
-                  AllOutlinedStandardButton(
-                    Icon(PhosphorIconsLight.downloadSimple,
-                        color: ColorScheme.of(context).onSurface),
-                    onTap: () {
-                      onDownloadTap(el['name']);
-                    },
-                  ),
-                  const SizedBox(width: 12.0),
-                  ToPageButton(
-                    '',
-                    onTap: () {
-                      onInfoTap(el['name']);
-                    },
-                    padding: const EdgeInsets.only(
-                        top: 10.0, bottom: 10.0, right: 10.0),
-                  ),
-                ],
-              ),
-              const SizedBox(width: 12.0),
-              if (el['approved_by'] != null && el['approved_by'] != '')
-                Text(
-                  "${lang.Approved_by} ${el['approved_by']}",
-                  style: TextStyle(
-                      fontSize: 12,
-                      fontStyle: FontStyle.italic,
-                      // letterSpacing: 0.75,
-                      color: colorScheme.primary),
-                ),
-              SelectableText(
-                  el['langs_longtitle'] ?? el['longtitle'] ?? el['title'],
-                  style: const TextStyle(fontSize: 18, letterSpacing: 0.75)),
-              const SizedBox(width: 8.0),
-              SelectableText(
-                el['langs_descr'] ?? el['descr'],
-                style: const TextStyle(fontSize: 15),
-              ),
-              const SizedBox(height: 6.0),
-              RichText(
-                text: TextSpan(
-                  style: TextStyle(
-                    fontFamily: 'Roboto',
-                    color: ColorScheme.of(context).secondary,
-                  ),
+        Row(
+          children: [
+            SelectInput(
+              elements: elements,
+              initial: initial,
+              onSelect: (v) {
+                gLogger.debug('value: $v');
+                var [orderBy, orderDirection] = v!.split('-');
+                onSortChange(orderBy, orderDirection);
+              },
+              isCompact: true,
+            ),
+            const SizedBox(width: 14),
+            Text('${count} ${lang.plugins__genetive}'),
+          ],
+        ),
+        const SizedBox(height: 16),
+        for (var el in plugins) ...[
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                  color: appearanceState.lerpBgColor(0.07), width: 2.0),
+              borderRadius: BorderRadius.circular(18.0),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TextSpan(
-                      text: '${lang.Author}: ',
-                    ),
-                    TextSpan(
-                      text: "${el['author'] ?? lang.Deleted_User}",
-                      style: TextStyle(
-                        color: ColorScheme.of(context).secondary,
-                        fontStyle:
-                            el['author'] == null ? FontStyle.italic : null,
+                    Expanded(
+                      child: SelectableText(
+                        "${el['name']}",
+                        style: TextStyle(
+                          fontSize: 16,
+                          letterSpacing: 0.75,
+                          color: colorScheme.secondary,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        maxLines: 2,
+                        minLines: 1,
                       ),
+                    ),
+                    const SizedBox(width: 12.0),
+                    AllOutlinedStandardButton(
+                      Icon(PhosphorIconsLight.downloadSimple,
+                          color: ColorScheme.of(context).onSurface),
+                      onTap: () {
+                        onDownloadTap(el['name']);
+                      },
+                    ),
+                    const SizedBox(width: 12.0),
+                    ToPageButton(
+                      '',
+                      onTap: () {
+                        onInfoTap(el['name']);
+                      },
+                      padding: const EdgeInsets.only(
+                          top: 10.0, bottom: 10.0, right: 10.0),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 18.0),
-            ],
+                const SizedBox(width: 12.0),
+                if (el['approved_by'] != null && el['approved_by'] != '')
+                  Text(
+                    "${lang.Approved_by} ${el['approved_by']}",
+                    style: TextStyle(
+                        fontSize: 12,
+                        fontStyle: FontStyle.italic,
+                        // letterSpacing: 0.75,
+                        color: colorScheme.primary),
+                  ),
+                SelectableText(
+                    el['langs_longtitle'] ?? el['longtitle'] ?? el['title'],
+                    style: const TextStyle(fontSize: 18, letterSpacing: 0.75)),
+                const SizedBox(width: 8.0),
+                SelectableText(
+                  el['langs_descr'] ?? el['descr'],
+                  style: const TextStyle(fontSize: 15),
+                ),
+                const SizedBox(height: 6.0),
+                RichText(
+                  text: TextSpan(
+                    style: TextStyle(
+                      fontFamily: 'Roboto',
+                      color: ColorScheme.of(context).secondary,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: '${lang.Author}: ',
+                      ),
+                      TextSpan(
+                        text: "${el['author'] ?? lang.Deleted_User}",
+                        style: TextStyle(
+                          color: ColorScheme.of(context).secondary,
+                          fontStyle:
+                              el['author'] == null ? FontStyle.italic : null,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
+          const SizedBox(height: 18.0),
+        ],
         const SizedBox(height: 14.0),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 7),

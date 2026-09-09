@@ -1,3 +1,6 @@
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import 'package:music_player/config.dart' as CONFIG;
 import 'package:music_player/logic/plugins/PluginsClient.dart';
 import 'package:music_player/logic/utils.dart' as utils;
@@ -85,15 +88,19 @@ class BrowsePluginsState extends State<BrowsePlugins> {
 
   Future<void> _loadHomePage() => _getPlugins('', 1);
 
-  Future<void> _getPlugins(String name, int page) async {
+  Future<void> _getPlugins(String name, int page,
+      {String? orderBy, String? orderDirection}) async {
     var appState = Provider.of<AppState>(context, listen: false);
     final pluginsPages = appState.pluginsPages;
 
     var data = await _safeCallAsync<dynamic>(
-        () async => await _pluginsClient.getPlugins(name, page), null);
+        () async => await _pluginsClient.getPlugins(name, page,
+            orderBy: orderBy, orderDirection: orderDirection),
+        null);
     gLogger.view('_getPlugins: $data');
 
-    pluginsPages.pluginsObj = PluginsObj(data, name, page);
+    pluginsPages.pluginsObj = PluginsObj(data, name, page,
+        orderBy: orderBy, orderDirection: orderDirection);
     appState.update();
   }
 
@@ -220,7 +227,9 @@ class BrowsePluginsState extends State<BrowsePlugins> {
                 focusNode: _focusNode,
                 isWideSuggestions: false,
                 hintText: lang.Search,
-                onSubmitted: (s) => _getPlugins(s, 1),
+                onSubmitted: (s) => _getPlugins(s, 1,
+                    orderBy: pluginsObj.orderBy,
+                    orderDirection: pluginsObj.orderDirection),
                 getSuggestions: _getSuggestionsForStatefullWidget,
                 prefixIcon: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -258,8 +267,25 @@ class BrowsePluginsState extends State<BrowsePlugins> {
                   appState.update();
                 },
                 onPageTap: (page) {
-                  _getPlugins(pluginsObj.search, page);
+                  _getPlugins(
+                    pluginsObj.search,
+                    page,
+                    orderBy: pluginsObj.orderBy,
+                    orderDirection: pluginsObj.orderDirection,
+                  );
                 },
+                onSortChange: (String orderBy, String orderDirection) {
+                  gLogger.debug('value: $orderBy, $orderDirection');
+                  _getPlugins(
+                    pluginsObj.search,
+                    pluginsObj.currPage,
+                    orderBy: orderBy,
+                    orderDirection: orderDirection,
+                  );
+                },
+                selectInitial: pluginsObj.orderBy != null
+                    ? '${pluginsObj.orderBy}-${pluginsObj.orderDirection}'
+                    : null,
               )
             : Center(
                 child: IconButton(
@@ -320,19 +346,29 @@ class _InfoPage extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 20),
-        _Tile(lang.Title, d['langs_title'] ?? d['title']),
-        _Tile(lang.Long_title, d['langs_longtitle'] ?? d['longtitle'],
-            optional: true),
-        _Tile(lang.Description, d['langs_descr'] ?? d['descr'], optional: true),
-        _Tile(lang.Version, "${d['version']}"),
-        _Tile(lang.Minimum_app_version, "${d['minimum_app_version']}"),
-        _Tile(lang.Permissions, d['permissions']),
-        _Tile(lang.Homepage, d['homepage'], optional: true),
-        _Tile(lang.Repository, d['repository'], optional: true),
-        _Tile(lang.Author, d['author'] ?? '<${lang.Deleted_User}>',
-            optional: true),
-        _Tile(lang.Published_at, d['published_at'], optional: true),
-        _Tile(lang.Unpacked_size, unpacked_size, optional: true),
+        SelectableText(d['langs_title'] ?? d['title'],
+            style: const TextStyle(fontSize: 24)),
+        const SizedBox(height: 10),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _Tile(lang.Long_title, d['langs_longtitle'] ?? d['longtitle'],
+                optional: true),
+            _Tile(lang.Version, "${d['version']}"),
+            _Tile(lang.Minimum_app_version, "${d['minimum_app_version']}"),
+            _Tile(lang.Permissions, d['permissions']),
+            _Tile(lang.Homepage, d['homepage'], optional: true),
+            _Tile(lang.Repository, d['repository'], optional: true),
+            _Tile(lang.Author, d['author'] ?? '<${lang.Deleted_User}>',
+                optional: true),
+            _Tile(lang.Published_at, d['published_at'], optional: true),
+            _Tile(lang.Unpacked_size, unpacked_size, optional: true),
+            _Tile(lang.Downloads__genetive, "${d['downloads']}",
+                optional: true),
+          ],
+        ),
+        const SizedBox(height: 16),
+        _Description(d),
       ],
     );
   }
@@ -349,15 +385,54 @@ class _Tile extends StatelessWidget {
   Widget build(BuildContext context) {
     if (optional == true && (value == null || value == ''))
       return const SizedBox();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4.0),
+      child: Wrap(
+        children: [
+          SelectableText('$name:',
+              style:
+                  const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w600)),
+          const SizedBox(width: 6.0),
+          SelectableText(value ?? '<Bad_value>',
+              style: const TextStyle(fontSize: 15.5)),
+        ],
+      ),
+    );
+  }
+}
+
+class _Description extends StatelessWidget {
+  const _Description(this.data);
+
+  final Map<String, dynamic> data;
+
+  @override
+  Widget build(BuildContext context) {
+    final d = data;
+
+    final readme = d['readme_md'];
+    final descr = d['langs_descr'] ?? d['descr'];
+    Widget w;
+    if (readme != null && readme != '' && readme is String) {
+      w = MarkdownBody(
+          data: readme.replaceAll('<br>', '\n'),
+          selectable: true,
+          onTapLink: (String text, String? href, String title) {
+            if (href != null) {
+              launchUrl(Uri.parse(href));
+            }
+          });
+    } else if (descr != null && descr != '') {
+      w = descr;
+    } else {
+      return const SizedBox();
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SelectableText(name,
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 2.0),
-        SelectableText(value ?? '<Bad_value>',
-            style: const TextStyle(fontSize: 15)),
-        const SizedBox(height: 16.0),
+        SelectableText(lang.Description, style: const TextStyle(fontSize: 20)),
+        const SizedBox(height: 4.0),
+        w,
       ],
     );
   }
