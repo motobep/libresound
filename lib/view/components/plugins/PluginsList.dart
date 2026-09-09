@@ -35,15 +35,29 @@ class PluginsList extends StatelessWidget {
     final int count = data['count'];
     final int limit = data['limit'];
     final int last = (count / limit).ceil();
-    final List sortBy = data['sort_by'];
+    final List? sortBy = data['sort_by'];
 
-    final List<(String, String)> elements = sortBy.expand((el) {
-      return [
-        ('${el["value"] as String}-desc', '${el["text"] as String}  🡻'),
-        ('${el["value"] as String}-asc', '${el["text"] as String}  🡹'),
-      ];
-    }).toList();
-    final initial = selectInitial ?? elements[0].$1;
+    Widget? selectInput;
+    if (sortBy != null) {
+      final List<(String, String)> elements = sortBy.expand((el) {
+        return [
+          ('${el["value"] as String}-desc', '${el["text"] as String}  🡻'),
+          ('${el["value"] as String}-asc', '${el["text"] as String}  🡹'),
+        ];
+      }).toList();
+      final initial = selectInitial ?? elements[0].$1;
+
+      selectInput = SelectInput(
+        elements: elements,
+        initial: initial,
+        onSelect: (v) {
+          gLogger.debug('value: $v');
+          var [orderBy, orderDirection] = v!.split('-');
+          onSortChange(orderBy, orderDirection);
+        },
+        isCompact: true,
+      );
+    }
 
     final colorScheme = ColorScheme.of(context);
 
@@ -55,17 +69,10 @@ class PluginsList extends StatelessWidget {
       children: [
         Row(
           children: [
-            SelectInput(
-              elements: elements,
-              initial: initial,
-              onSelect: (v) {
-                gLogger.debug('value: $v');
-                var [orderBy, orderDirection] = v!.split('-');
-                onSortChange(orderBy, orderDirection);
-              },
-              isCompact: true,
-            ),
-            const SizedBox(width: 14),
+            if (selectInput != null) ...[
+              selectInput,
+              const SizedBox(width: 14),
+            ],
             Text('${count} ${lang.plugins__genetive}'),
           ],
         ),
