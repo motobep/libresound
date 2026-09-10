@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:music_player/logger.dart';
 import 'package:music_player/logic/fs/files.dart' as fs;
 import 'package:music_player/logic/lang.dart';
+import 'package:music_player/main.dart' show config;
 import 'package:music_player/config.dart' as CONFIG;
 import 'package:music_player/states/AppearanceState.dart';
 import 'package:path_provider/path_provider.dart';
@@ -96,6 +97,19 @@ class SelectSourceDir extends StatelessWidget {
         (androidMusicDir.existsSync() || androidDownloadsDir.existsSync())) {
       List<File>? musicDirFiles;
       List<File>? downloadsDirFiles;
+      List<File>? sdMusicDirFiles;
+
+      // example value: /storage/0000-0000
+      final sdCardFirstPath =
+          config.sdCardsPaths.isNotEmpty ? config.sdCardsPaths[0] : null;
+      logger.debug('sdCardFirst: ${sdCardFirstPath}');
+      String? sdMusicPath;
+
+      if (sdCardFirstPath != null) {
+        sdMusicPath = '$sdCardFirstPath/Music';
+        sdMusicDirFiles = fs.fetchMusicFiles(sdMusicPath);
+        logger.debug('sdMusicDirFiles.length: ${sdMusicDirFiles}');
+      }
 
       try {
         musicDirFiles = fs.fetchMusicFiles(CONFIG.androidDefaultMusicDir);
@@ -136,64 +150,41 @@ class SelectSourceDir extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     if (musicDirFiles != null)
-                      Column(
-                        children: [
-                          const Icon(PhosphorIconsThin.musicNotes, size: 30),
-                          const SizedBox(
-                            height: 8,
-                          ),
-                          Text(
-                            lang.Music_folder,
-                            // textAlign: TextAlign.center,
-                          ),
-                          // TODO: implement properly
-                          Text(
-                            '${musicDirFiles.length} ${lang.tracks__genetive}',
-                            style: TextStyle(
-                                color: ColorScheme.of(context).secondary),
-                          ),
-                          const SizedBox(
-                            height: 12,
-                          ),
-                          StandardButton(lang.Choose, onTap: () async {
+                      _FastChoice(
+                          title: lang.Music_folder,
+                          icon: PhosphorIconsThin.musicNotes,
+                          filesCount: musicDirFiles.length,
+                          onTap: () async {
                             onSelect?.call();
                             await loadMusicDir(
                                 context, CONFIG.androidDefaultMusicDir);
                           }),
-                        ],
-                      ),
                     const SizedBox(
                       width: 38,
                     ),
                     if (downloadsDirFiles != null)
-                      Column(
-                        children: [
-                          const Icon(PhosphorIconsThin.download, size: 30),
-                          const SizedBox(
-                            height: 8,
-                          ),
-                          Text(
-                            lang.Downloads_folder,
-                            textAlign: TextAlign.center,
-                          ),
-                          // TODO: implement properly
-                          Text(
-                            '${downloadsDirFiles.length} ${lang.tracks__genetive}',
-                            style: TextStyle(
-                                color: ColorScheme.of(context).secondary),
-                          ),
-                          const SizedBox(
-                            height: 12,
-                          ),
-                          StandardButton(lang.Choose, onTap: () async {
+                      _FastChoice(
+                          title: lang.Downloads_folder,
+                          icon: PhosphorIconsThin.download,
+                          filesCount: downloadsDirFiles.length,
+                          onTap: () async {
                             onSelect?.call();
                             await loadMusicDir(
                                 context, CONFIG.androidDefaultDownloadsDir);
                           }),
-                        ],
-                      )
                   ],
                 ),
+                if (sdMusicDirFiles != null && sdMusicPath != null) ...[
+                  const SizedBox(height: 16),
+                  _FastChoice(
+                      title: '${lang.Music_folder} (SD Card)',
+                      icon: PhosphorIconsThin.simCard,
+                      filesCount: sdMusicDirFiles.length,
+                      onTap: () async {
+                        onSelect?.call();
+                        await loadMusicDir(context, sdMusicPath!);
+                      }),
+                ],
               ],
             ),
           ),
@@ -243,6 +234,44 @@ class SelectSourceDir extends StatelessWidget {
           pickFolderWidget,
         ],
       ),
+    );
+  }
+}
+
+class _FastChoice extends StatelessWidget {
+  const _FastChoice({
+    required this.title,
+    required this.icon,
+    required this.filesCount,
+    required this.onTap,
+  });
+
+  final String title;
+  final IconData icon;
+  final int filesCount;
+  final void Function() onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Icon(icon, size: 30),
+        const SizedBox(
+          height: 8,
+        ),
+        Text(
+          title,
+          textAlign: TextAlign.center,
+        ),
+        Text(
+          '${filesCount} ${lang.tracks__genetive}',
+          style: TextStyle(color: ColorScheme.of(context).secondary),
+        ),
+        const SizedBox(
+          height: 12,
+        ),
+        StandardButton(lang.Choose, onTap: onTap),
+      ],
     );
   }
 }

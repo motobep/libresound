@@ -64,8 +64,15 @@ class Android {
       String? relativePath = fm?[1];
 
       if (relativePath == null) {
-        gLogger.warn('relativePath is null');
-        continue;
+        gLogger.warn('relativePath is null, trying sdCard Regex');
+
+        final sdCardPattern = RegExp(r'^\/storage\/[\d\w \.-]+\/(.*)');
+        var fmSd = sdCardPattern.firstMatch(p);
+        relativePath = fmSd?[1];
+        if (relativePath == null) {
+          gLogger.warn('relativePath is null');
+          continue;
+        }
       }
 
       var id = pathToIdMap[relativePath];
@@ -95,6 +102,7 @@ class Android {
   static Future<Map<String, String>> buildMap() async {
     Map<String, String> pathToIdMap = {};
     var audioPaths = await getAudioPaths();
+    gLogger.debug('audioPaths: $audioPaths');
     int count = await PhotoManager.getAssetCount();
     gLogger.warn('asset count: $count');
 
@@ -116,7 +124,7 @@ class Android {
       for (final AssetEntity audio in audioFiles) {
         // print('  -  $audio: ${audio.title} [${audio.relativePath}] (${audio.duration}s)');
         String p = '${audio.relativePath}${audio.title}';
-        // gLogger.debug('path: $p - ${audio.id}');
+        gLogger.trace('path: $p - ${audio.id}');
         pathToIdMap[p] = audio.id;
       }
     }

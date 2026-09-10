@@ -31,6 +31,8 @@ class Config {
   Directory? _cliDir;
   Directory? _cliPlaylistsDir;
 
+  List<String> sdCardsPaths = [];
+
   Directory? get musicSourceDir => _musicSourceDir;
 
   Directory? get playlistsDir => _playlistsDir;
@@ -123,11 +125,26 @@ class Config {
       logger.log('getExternalStorageDirectories');
       var dirs =
           await getExternalStorageDirectories(type: StorageDirectory.music);
-      logger.blue('----- dir: $dirs');
-      var storage = await getExternalStorageDirectory();
-      logger.blue('----- storage: $storage');
-      var ddir = await getDownloadsDirectory();
-      logger.blue('----- ddir: $ddir');
+      logger.blue('--- dirs: $dirs');
+
+      if (dirs != null) {
+        final sdCardPattern = RegExp(r'^(\/storage\/[\d\w \.-]+)\/Android\/');
+
+        final List<String> paths = [];
+        for (var dir in dirs) {
+          String p = dir.path;
+          var fm = sdCardPattern.firstMatch(p);
+          if (fm?.groupCount == 1) {
+            paths.add(fm![1]!);
+          }
+        }
+        sdCardsPaths = paths;
+      }
+      // if (CONFIG.isDev()) {
+      //   // const defaultSdPath = '/storage/0000-0000';
+      //   const defaultSdPath = '/storage/emulated/0';
+      //   sdCardsPaths = [defaultSdPath, ...sdCardsPaths];
+      // }
     }
 
     File configFile = File(configFilepath);
