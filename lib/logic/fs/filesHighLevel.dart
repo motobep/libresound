@@ -101,9 +101,9 @@ class Android {
     for (final AssetPathEntity entity in audioPaths) {
       gLogger.log('Album: ${entity.name}');
 
-      if (!['Music', 'Download'].contains(entity.name)) {
-        continue;
-      }
+      // if (!['Music', 'Download'].contains(entity.name)) {
+      //   continue;
+      // }
 
       var pal = await entity.relativePathAsync;
       gLogger.log('pal: $pal');
@@ -116,7 +116,7 @@ class Android {
       for (final AssetEntity audio in audioFiles) {
         // print('  -  $audio: ${audio.title} [${audio.relativePath}] (${audio.duration}s)');
         String p = '${audio.relativePath}${audio.title}';
-        // print('path: $p - ${audio.id}');
+        // gLogger.debug('path: $p - ${audio.id}');
         pathToIdMap[p] = audio.id;
       }
     }
