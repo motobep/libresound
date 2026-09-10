@@ -27,7 +27,7 @@ class PluginsList extends StatelessWidget {
   final void Function(int) onPageTap;
   final void Function(String orderBy, String orderDirection) onSortChange;
 
-  final String? selectInitial;
+  final (String, String)? selectInitial;
 
   @override
   Widget build(BuildContext context) {
@@ -38,25 +38,36 @@ class PluginsList extends StatelessWidget {
     final List? sortBy = data['sort_by'];
 
     Widget? selectInput;
-    if (sortBy != null) {
-      final List<(String, String)> elements = sortBy.expand((el) {
-        return [
-          ('${el["value"] as String}-desc', '${el["text"] as String}  ↓'),
-          ('${el["value"] as String}-asc', '${el["text"] as String}  ↑'),
-        ];
-      }).toList();
-      final initial = selectInitial ?? elements[0].$1;
+    if (sortBy != null && sortBy.isNotEmpty) {
+      if (sortBy[0] is Map &&
+          !([
+            sortBy[0]['order_by'],
+            sortBy[0]['order_direction'],
+            sortBy[0]['text']
+          ].every((el) => el is String))) {
+        gLogger.error('Bad sortBy structure');
+      } else {
+        final List<((String, String), String)> elements = sortBy.expand((el) {
+          return [
+            (
+              (el['order_by'] as String, el['order_direction'] as String),
+              (el['text'] as String)
+            ),
+          ];
+        }).toList();
+        final (String, String) initial = selectInitial ?? elements[0].$1;
 
-      selectInput = SelectInput(
-        elements: elements,
-        initial: initial,
-        onSelect: (v) {
-          gLogger.debug('value: $v');
-          var [orderBy, orderDirection] = v!.split('-');
-          onSortChange(orderBy, orderDirection);
-        },
-        isCompact: true,
-      );
+        selectInput = SelectInput<(String, String)>(
+          elements: elements,
+          initial: initial,
+          onSelect: (v) {
+            gLogger.debug('value: $v');
+            var (orderBy, orderDirection) = v!;
+            onSortChange(orderBy, orderDirection);
+          },
+          isCompact: true,
+        );
+      }
     }
 
     final colorScheme = ColorScheme.of(context);

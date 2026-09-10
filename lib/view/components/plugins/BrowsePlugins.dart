@@ -284,7 +284,7 @@ class BrowsePluginsState extends State<BrowsePlugins> {
                   );
                 },
                 selectInitial: pluginsObj.orderBy != null
-                    ? '${pluginsObj.orderBy}-${pluginsObj.orderDirection}'
+                    ? (pluginsObj.orderBy!, pluginsObj.orderDirection!)
                     : null,
               )
             : Center(
