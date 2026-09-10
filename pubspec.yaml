@@ -3,7 +3,7 @@ description: A new Flutter project.
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.1.1+5
+version: 1.2.0+5
 
 environment:
   sdk: '>=3.0.0 <=3.29.1'
@@ -18,12 +18,12 @@ dependencies:
   audioplayers: # MIT
     git:
       url: git@github.com:motobep/audioplayers.git
-      ref: v5_with_equalizer
+      ref: 6c0e29f4f329d63ea2b35e8489dcedec09af3e1c
       path: packages/audioplayers
   audioplayers_android_exo:
     git:
       url: git@github.com:motobep/audioplayers.git
-      ref: v5_with_equalizer
+      ref: 6c0e29f4f329d63ea2b35e8489dcedec09af3e1c
       path: packages/audioplayers_android_exo
   mp3_info: ^0.2.1 # MIT
   id3tag: ^0.2.0 # MIT
@@ -40,7 +40,7 @@ dependencies:
   flutter_js: # MIT
     git:
       url: git@github.com:motobep/flutter_js.git
-      ref: dart_quickjs
+      ref: b61440ae37709ed1128b518acc3665cbeaf896a7
   # http: ^1.0.0 # BSD-3-Clause 
   archive: ^3.4.5 # MIT
   phosphor_flutter: ^2.1.0 # MIT
@@ -54,7 +54,7 @@ dependencies:
   webview_cookie_manager:
     git:
       url: https://github.com/fryette/webview_cookie_manager.git
-      ref: master
+      ref: 23d7475d9b9ac29f3cc92e91ac8a78ecb733a54d
   collection: ^1.19.1
   crypto: ^3.0.6
   receive_sharing_intent: # Apache License 2.0
@@ -71,17 +71,17 @@ dependency_overrides:
   audioplayers_platform_interface:
     git:
       url: https://github.com/motobep/audioplayers.git
-      ref: v5_with_equalizer
+      ref: 6c0e29f4f329d63ea2b35e8489dcedec09af3e1c
       path: packages/audioplayers_platform_interface
   audioplayers_linux:
     git:
       url: https://github.com/motobep/audioplayers.git
-      ref: v5_with_equalizer
+      ref: 6c0e29f4f329d63ea2b35e8489dcedec09af3e1c
       path: packages/audioplayers_linux
   audioplayers_windows:
     git:
       url: https://github.com/motobep/audioplayers.git
-      ref: v5_with_equalizer
+      ref: 6c0e29f4f329d63ea2b35e8489dcedec09af3e1c
       path: packages/audioplayers_windows
 
 dev_dependencies:

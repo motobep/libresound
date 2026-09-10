@@ -85,8 +85,8 @@ packages:
     dependency: "direct main"
     description:
       path: "packages/audioplayers"
-      ref: v5_with_equalizer
-      resolved-ref: "4c459e6ed8082cbe06f385be180e3fdc84c5373a"
+      ref: "6c0e29f4f329d63ea2b35e8489dcedec09af3e1c"
+      resolved-ref: "6c0e29f4f329d63ea2b35e8489dcedec09af3e1c"
       url: "git@github.com:motobep/audioplayers.git"
     source: git
     version: "5.2.1"
@@ -101,9 +101,11 @@ packages:
   audioplayers_android_exo:
     dependency: "direct main"
     description:
-      path: "../audioplayers/packages/audioplayers_android_exo"
-      relative: true
-    source: path
+      path: "packages/audioplayers_android_exo"
+      ref: "6c0e29f4f329d63ea2b35e8489dcedec09af3e1c"
+      resolved-ref: "6c0e29f4f329d63ea2b35e8489dcedec09af3e1c"
+      url: "git@github.com:motobep/audioplayers.git"
+    source: git
     version: "0.1.3"
   audioplayers_darwin:
     dependency: transitive
@@ -116,16 +118,18 @@ packages:
   audioplayers_linux:
     dependency: "direct overridden"
     description:
-      path: "../audioplayers/packages/audioplayers_linux"
-      relative: true
-    source: path
+      path: "packages/audioplayers_linux"
+      ref: "6c0e29f4f329d63ea2b35e8489dcedec09af3e1c"
+      resolved-ref: "6c0e29f4f329d63ea2b35e8489dcedec09af3e1c"
+      url: "https://github.com/motobep/audioplayers.git"
+    source: git
     version: "3.1.0"
   audioplayers_platform_interface:
     dependency: "direct overridden"
     description:
       path: "packages/audioplayers_platform_interface"
-      ref: v5_with_equalizer
-      resolved-ref: "2b25e510ead183ebeed538b2b74dbf41641e9591"
+      ref: "6c0e29f4f329d63ea2b35e8489dcedec09af3e1c"
+      resolved-ref: "6c0e29f4f329d63ea2b35e8489dcedec09af3e1c"
       url: "https://github.com/motobep/audioplayers.git"
     source: git
     version: "6.1.0"
@@ -141,8 +145,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/audioplayers_windows"
-      ref: v5_with_equalizer
-      resolved-ref: "2b25e510ead183ebeed538b2b74dbf41641e9591"
+      ref: "6c0e29f4f329d63ea2b35e8489dcedec09af3e1c"
+      resolved-ref: "6c0e29f4f329d63ea2b35e8489dcedec09af3e1c"
       url: "https://github.com/motobep/audioplayers.git"
     source: git
     version: "3.1.0"
@@ -346,9 +350,11 @@ packages:
   flutter_js:
     dependency: "direct main"
     description:
-      path: "../flutter_js"
-      relative: true
-    source: path
+      path: "."
+      ref: b61440ae37709ed1128b518acc3665cbeaf896a7
+      resolved-ref: b61440ae37709ed1128b518acc3665cbeaf896a7
+      url: "git@github.com:motobep/flutter_js.git"
+    source: git
     version: "0.8.5"
   flutter_launcher_icons:
     dependency: "direct dev"
@@ -1121,7 +1127,7 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: master
+      ref: "23d7475d9b9ac29f3cc92e91ac8a78ecb733a54d"
       resolved-ref: "23d7475d9b9ac29f3cc92e91ac8a78ecb733a54d"
       url: "https://github.com/fryette/webview_cookie_manager.git"
     source: git

@@ -18,7 +18,7 @@ const int maxLogFileSize = 50 * 1024 * 1024; // 50 mb
 
 const bool isThrottle = false;
 
-const version = '1.0.1';
+const version = '1.2.0';
 const buildDatetime = String.fromEnvironment('datetime');
 const buildMode = String.fromEnvironment('build_mode');
 

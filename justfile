@@ -10,6 +10,7 @@ is_demo := env('is_demo', '0')
 
 [group('dev')]
 run version='debug' platform=os():
+    dart run ./bin/check_version.dart
     IS_GST_PLAYER_LOG=1 flutter run \
         --{{version}} \
         --dart-define=build_mode=dev \
@@ -20,6 +21,7 @@ run version='debug' platform=os():
 
 [group('dev')]
 build target:
+    dart run ./bin/check_version.dart
     flutter build {{target}} \
         --dart-define=build_mode=prod \
         --dart-define=datetime={{build_time}} \
