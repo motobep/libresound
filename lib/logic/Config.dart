@@ -76,7 +76,7 @@ class Config {
       // _playlistsDir = Directory('$dir/LibreSound/playlists');
       if (![CONFIG.androidDefaultMusicDir, CONFIG.androidDefaultDownloadsDir]
           .contains(dir)) {
-        logger.error('Unsupported dir: $dir');
+        logger.warn('Support not fully guaranteed for dir: $dir');
       }
       final filename = pathPkg.basename(dir);
       playlists_dir = Directory('$appDir/playlists/$filename');
@@ -118,6 +118,17 @@ class Config {
   /// Throws
   Future<void> _initConfigMap() async {
     _appDirpath = await _getAppDir();
+
+    if (Platform.isAndroid) {
+      logger.log('getExternalStorageDirectories');
+      var dirs =
+          await getExternalStorageDirectories(type: StorageDirectory.music);
+      logger.blue('----- dir: $dirs');
+      var storage = await getExternalStorageDirectory();
+      logger.blue('----- storage: $storage');
+      var ddir = await getDownloadsDirectory();
+      logger.blue('----- ddir: $ddir');
+    }
 
     File configFile = File(configFilepath);
     if (!configFile.existsSync()) {

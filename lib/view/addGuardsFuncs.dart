@@ -6,6 +6,7 @@ import 'package:music_player/logic/fs/files.dart' as fs;
 import 'package:music_player/logic/lang.dart';
 import 'package:music_player/config.dart' as CONFIG;
 import 'package:music_player/states/AppearanceState.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
 
@@ -196,15 +197,15 @@ class SelectSourceDir extends StatelessWidget {
               ],
             ),
           ),
-          // Padding(
-          //   padding: const EdgeInsets.symmetric(vertical: 30.0),
-          //   child: Text(lang.Or),
-          // ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 30.0),
+            child: Text(lang.Or),
+          ),
         ];
       }
     }
 
-    Widget pcWidget = _PickButton(
+    Widget pickFolderWidget = _PickButton(
       onTap: () {
         onSelect?.call();
         chooseMusicDir(context);
@@ -239,7 +240,7 @@ class SelectSourceDir extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           if (Platform.isAndroid) ...androidWidgets,
-          if (!Platform.isAndroid) pcWidget,
+          pickFolderWidget,
         ],
       ),
     );

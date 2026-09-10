@@ -41,8 +41,8 @@ class PluginsList extends StatelessWidget {
     if (sortBy != null) {
       final List<(String, String)> elements = sortBy.expand((el) {
         return [
-          ('${el["value"] as String}-desc', '${el["text"] as String}  🡻'),
-          ('${el["value"] as String}-asc', '${el["text"] as String}  🡹'),
+          ('${el["value"] as String}-desc', '${el["text"] as String}  ↓'),
+          ('${el["value"] as String}-asc', '${el["text"] as String}  ↑'),
         ];
       }).toList();
       final initial = selectInitial ?? elements[0].$1;

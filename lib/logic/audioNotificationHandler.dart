@@ -44,41 +44,47 @@ class MyAudioHandler extends BaseAudioHandler
       if (event.begin) {
         switch (event.type) {
           case AudioInterruptionType.duck:
+            logger.debug('begin AudioInterruptionType.duck');
             // Another app started playing audio and we should duck.
             if (playback.playState == PlayState.playing) {
-              pause();
+              _pause();
             }
             break;
           case AudioInterruptionType.pause:
+            logger.debug('begin AudioInterruptionType.pause');
             if (playback.playState == PlayState.playing) {
-              pause();
+              _pause();
             } else {
               _isIgnoreNextResume = true;
             }
           case AudioInterruptionType.unknown:
+            logger.debug('begin AudioInterruptionType.unknown');
             // Another app started playing audio and we should pause.
             if (playback.playState == PlayState.playing) {
-              pause();
+              _pause();
             }
             break;
         }
       } else {
         switch (event.type) {
           case AudioInterruptionType.duck:
+            logger.debug('end AudioInterruptionType.duck');
             // The interruption ended and we should unduck.
             if (playback.playState == PlayState.pause) {
-              play();
+              _play();
             }
             break;
           case AudioInterruptionType.pause:
+            logger.debug('end AudioInterruptionType.pause');
             // The interruption ended and we should resume.
             if (_isIgnoreNextResume) {
               _isIgnoreNextResume = false;
             } else if (playback.playState == PlayState.pause) {
-              play();
+              _play();
             }
             break;
           case AudioInterruptionType.unknown:
+            logger.debug('end AudioInterruptionType.unknown');
             // The interruption ended but we should not resume.
             break;
         }
@@ -88,7 +94,7 @@ class MyAudioHandler extends BaseAudioHandler
       // The user unplugged the headphones, so we should pause or lower the volume.
       if (playback.playState == PlayState.playing) {
         logger.log('pause on headphones unplug');
-        pause();
+        _pause();
       }
     });
   }
@@ -237,18 +243,23 @@ class MyAudioHandler extends BaseAudioHandler
     }
   }
 
-  // Methods that are called by user
+  // Methods called by user
   @override
   Future<void> play() async {
-    logger.log('play');
+    logger.log(
+        'play. playState: ${playback.playState}, _isIgnoreNextResume=$_isIgnoreNextResume');
     await playback.togglePlayback();
   }
 
   @override
   Future<void> pause() async {
-    logger.log('pause');
+    logger.log(
+        'pause. playState: ${playback.playState}, _isIgnoreNextResume=$_isIgnoreNextResume');
     await playback.togglePlayback();
   }
+
+  Future<void> _play() => play();
+  Future<void> _pause() => pause();
 
   // FIXME: Too greedy with media buttons. After another player paused, buttons become ours.
   @override

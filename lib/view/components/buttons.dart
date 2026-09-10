@@ -15,23 +15,28 @@ import 'package:music_player/states/AppState.dart' show AppState;
 import 'package:music_player/states/PlaybackState.dart';
 import 'package:music_player/states/AppearanceState.dart';
 
+import 'package:music_player/view/App.dart' show navigatorKey;
 import 'package:music_player/view/snackBarFuncs.dart';
 import 'package:music_player/view/components/iconsMap.dart';
 
+// TODO: remove arg
 void chooseMusicDir(BuildContext context) async {
   String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
   if (selectedDirectory == null) {
-    gLogger.view('Canceled picker');
+    gLogger.log('Canceled picker');
     return;
   }
 
-  if (context.mounted) {
-    await loadMusicDir(context, selectedDirectory);
+  final ctx = navigatorKey.currentContext!;
+  if (ctx.mounted) {
+    await loadMusicDir(ctx, selectedDirectory);
+  } else {
+    gLogger.warn('chooseMusicDir: ctx.mounted == false');
   }
 }
 
 Future<void> loadMusicDir(BuildContext context, String dirPath) async {
-  gLogger.view('selectedDirectory: $dirPath');
+  gLogger.log('selectedDirectory: $dirPath');
 
   var messengerFunc = getSnackBarMessangerFunc(context);
   AppState appState = Provider.of<AppState>(context, listen: false);
