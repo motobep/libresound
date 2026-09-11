@@ -58,9 +58,13 @@ class DraggableQueue extends StatelessWidget {
     var secondaryColor = ColorScheme.of(context).secondary;
 
     final primaryColor = ColorScheme.of(context).surface;
+
+    // TODO: consider using and transition color to primary on full width
+    // final endColor = AppearanceState.getQueueBtnBottomColor(primaryColor);
     final queueBtnColor = appearanceState.ambientMode == AmbientMode.off
         ? appearanceState.queueBtnColor()
         : primaryColor;
+    // : endColor;
 
     return DraggableScrollableSheet(
         snapAnimationDuration: const Duration(milliseconds: 180),

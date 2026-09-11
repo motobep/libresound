@@ -196,6 +196,18 @@ class AppearanceState extends ChangeNotifier {
     return (startColor, endColor);
   }
 
+  static Color getQueueBtnBottomColor(color) {
+    const delta = 0.15;
+    const clampBottom = 0.05;
+
+    final hsl = HSLColor.fromColor(color);
+    final bottomL = (hsl.lightness - delta / 2).clamp(clampBottom, 1.0);
+
+    final l = bottomL + 0.15 * CONFIG.minQueueSheetChildSize;
+    final endColor = hsl.withLightness(l).toColor();
+    return endColor;
+  }
+
   Color _getReverseThemeColor() {
     if (_idDarkBg()) {
       return Colors.white;
