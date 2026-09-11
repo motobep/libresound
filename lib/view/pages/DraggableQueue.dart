@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:music_player/config.dart' as CONFIG;
 import 'package:music_player/logger.dart';
+import 'package:music_player/logic/enums.dart';
 import 'package:music_player/states/AppState.dart';
 import 'package:music_player/view/App.dart' show gPadding;
 import 'package:music_player/view/components/QueueOrLyrics.dart';
@@ -56,6 +57,11 @@ class DraggableQueue extends StatelessWidget {
 
     var secondaryColor = ColorScheme.of(context).secondary;
 
+    final primaryColor = ColorScheme.of(context).surface;
+    final queueBtnColor = appearanceState.ambientMode == AmbientMode.off
+        ? appearanceState.queueBtnColor()
+        : primaryColor;
+
     return DraggableScrollableSheet(
         snapAnimationDuration: const Duration(milliseconds: 180),
         snap: true,
@@ -70,7 +76,7 @@ class DraggableQueue extends StatelessWidget {
                 child: Container(
                   width: width,
                   decoration: BoxDecoration(
-                    color: appearanceState.queueBtnColor(),
+                    color: queueBtnColor,
                     borderRadius: const BorderRadius.vertical(
                       // top: Radius.elliptical(15, 12),
                       top: Radius.elliptical(15, 10),

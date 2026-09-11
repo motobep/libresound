@@ -8,7 +8,8 @@ import 'package:flutter/material.dart'
         ColorScheme,
         Colors,
         DynamicSchemeVariant,
-        Image;
+        Image,
+        HSLColor;
 import 'package:m4a_tags_handler/Tags.dart';
 
 import 'package:music_player/config.dart' as CONFIG;
@@ -159,7 +160,7 @@ class AppearanceState extends ChangeNotifier {
   }
 
   Color queueBtnColor() {
-    return lerpBgColor(0.04);
+    return lerpBgColor(0.035);
   }
 
   Color inactiveTrackColor() {
@@ -180,6 +181,19 @@ class AppearanceState extends ChangeNotifier {
 
   Color lerpBgColor(double val) {
     return Color.lerp(colors[ColorType.bg], _getReverseThemeColor(), val)!;
+  }
+
+  static (Color, Color) getGradient(color) {
+    const delta = 0.15;
+    const clampBottom = 0.05;
+
+    final hsl = HSLColor.fromColor(color);
+    final bottomL = (hsl.lightness - delta / 2).clamp(clampBottom, 1.0);
+    final topL = bottomL + delta;
+
+    final startColor = hsl.withLightness(topL).toColor();
+    final endColor = hsl.withLightness(bottomL).toColor();
+    return (startColor, endColor);
   }
 
   Color _getReverseThemeColor() {

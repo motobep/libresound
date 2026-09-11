@@ -168,7 +168,7 @@ const AyuLikeThemeColors ayuLikeThemeColors = AyuLikeThemeColors();
 
 const ThemeColors defaultTheme = draculaLikeThemeColors;
 
-const double dynamicThemeContrastLevel = 0.68; // was 52
+const double dynamicThemeContrastLevel = 0.52;
 
 const int maxCachedMusicInfoEntries = 5;
 const int maxRecentPlaylistsLength = 20;

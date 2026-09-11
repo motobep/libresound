@@ -103,8 +103,27 @@ class PlaybackControlsBody extends StatelessWidget {
     bool isSelectionHidden =
         context.select<SelectionState, bool>((s) => s.isEmpty);
 
+    final appearanceState =
+        Provider.of<AppearanceState>(context, listen: false);
+    final primaryColor = ColorScheme.of(context).surface;
+    final (startColor, endColor) = AppearanceState.getGradient(primaryColor);
+
     return Container(
-      color: ColorScheme.of(context).surface,
+      decoration: BoxDecoration(
+        color: appearanceState.ambientMode == AmbientMode.off
+            ? primaryColor
+            : null,
+        gradient: appearanceState.ambientMode != AmbientMode.off
+            ? LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: <Color>[
+                  startColor,
+                  endColor,
+                ],
+              )
+            : null,
+      ),
       child: Stack(
         children: [
           Column(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
