@@ -87,7 +87,7 @@ packages:
       path: "packages/audioplayers"
       ref: "6c0e29f4f329d63ea2b35e8489dcedec09af3e1c"
       resolved-ref: "6c0e29f4f329d63ea2b35e8489dcedec09af3e1c"
-      url: "git@github.com:motobep/audioplayers.git"
+      url: "https://github.com/motobep/audioplayers.git"
     source: git
     version: "5.2.1"
   audioplayers_android:
@@ -104,7 +104,7 @@ packages:
       path: "packages/audioplayers_android_exo"
       ref: "6c0e29f4f329d63ea2b35e8489dcedec09af3e1c"
       resolved-ref: "6c0e29f4f329d63ea2b35e8489dcedec09af3e1c"
-      url: "git@github.com:motobep/audioplayers.git"
+      url: "https://github.com/motobep/audioplayers.git"
     source: git
     version: "0.1.3"
   audioplayers_darwin:
@@ -353,7 +353,7 @@ packages:
       path: "."
       ref: b61440ae37709ed1128b518acc3665cbeaf896a7
       resolved-ref: b61440ae37709ed1128b518acc3665cbeaf896a7
-      url: "git@github.com:motobep/flutter_js.git"
+      url: "https://github.com/motobep/flutter_js.git"
     source: git
     version: "0.8.5"
   flutter_launcher_icons:

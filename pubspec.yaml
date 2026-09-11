@@ -3,7 +3,7 @@ description: A new Flutter project.
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.2.0+5
+version: 1.2.0+6
 
 environment:
   sdk: '>=3.0.0 <=3.29.1'
@@ -17,12 +17,12 @@ dependencies:
   path_provider: ^2.0.13 # BSD-3-Clause
   audioplayers: # MIT
     git:
-      url: git@github.com:motobep/audioplayers.git
+      url: https://github.com/motobep/audioplayers.git
       ref: 6c0e29f4f329d63ea2b35e8489dcedec09af3e1c
       path: packages/audioplayers
   audioplayers_android_exo:
     git:
-      url: git@github.com:motobep/audioplayers.git
+      url: https://github.com/motobep/audioplayers.git
       ref: 6c0e29f4f329d63ea2b35e8489dcedec09af3e1c
       path: packages/audioplayers_android_exo
   mp3_info: ^0.2.1 # MIT
@@ -39,7 +39,7 @@ dependencies:
   audio_session: 0.2.2 # MIT
   flutter_js: # MIT
     git:
-      url: git@github.com:motobep/flutter_js.git
+      url: https://github.com/motobep/flutter_js.git
       ref: b61440ae37709ed1128b518acc3665cbeaf896a7
   # http: ^1.0.0 # BSD-3-Clause 
   archive: ^3.4.5 # MIT
