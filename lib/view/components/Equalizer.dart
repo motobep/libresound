@@ -1,10 +1,8 @@
-import 'dart:io' show Platform;
-
 import 'package:flutter/material.dart';
-import 'package:music_player/config.dart' as CONFIG;
 import 'package:music_player/logger.dart';
-import 'package:music_player/logic/Config.dart';
+import 'package:music_player/logic/EqPresets.dart';
 import 'package:music_player/logic/lang.dart';
+import 'package:music_player/main.dart' show config;
 import 'package:music_player/states/AppState.dart';
 import 'package:music_player/view/components/inputs.dart';
 import 'package:provider/provider.dart';
@@ -16,146 +14,228 @@ import 'package:music_player/states/AppearanceState.dart';
 class EqualizerWidget extends StatelessWidget {
   final Equalizer equalizer;
 
-  EqualizerWidget({
+  const EqualizerWidget({
     super.key,
     required this.equalizer,
   });
+
+  @override
+  Widget build(BuildContext context) {
+    final appState = Provider.of<AppState>(context, listen: false);
+    final settings = appState.eqSettings;
+
+    if (settings.isEmpty) {
+      return const Text('Equalizer widget errored');
+    }
+
+    return _EqControls(
+        isEnabled: settings['isEnabled'] as bool,
+        setIsEnabled: (bool v) {
+          settings['isEnabled'] = v;
+          equalizer.setEnabled(v);
+          config.saveProperty('isEqEnabled', v);
+        },
+        equalizer: equalizer,
+        bands: settings['bands'] as List,
+        limits: settings['limits'] as Map);
+  }
+}
+
+class _EqControls extends StatefulWidget {
+  const _EqControls({
+    required this.isEnabled,
+    required this.setIsEnabled,
+    required this.equalizer,
+    required this.bands,
+    required this.limits,
+  });
+
+  final bool isEnabled;
+  final void Function(bool) setIsEnabled;
+  final Equalizer equalizer;
+  final List<dynamic> bands;
+  final Map<dynamic, dynamic> limits;
+
+  @override
+  State<_EqControls> createState() => _EqControlsState();
+}
+
+class _EqControlsState extends State<_EqControls> {
+  List<dynamic> bands = [];
+
+  @override
+  void initState() {
+    super.initState();
+    bands = widget.bands;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final equalizer = widget.equalizer;
+
+    final presets = [
+      (EqPreset.custom, lang.eq__Custom),
+      (EqPreset.classical, lang.eq__Classical),
+      (EqPreset.club, lang.eq__Club),
+      (EqPreset.dance, lang.eq__Dance),
+      (EqPreset.enhanced_bass, lang.eq__Enhanced_bass),
+      (EqPreset.enhanced_bass_and_tremble, lang.eq__Enhanced_bass_and_tremble),
+      (EqPreset.enhanced_tremble, lang.eq__Enhanced_tremble),
+      (EqPreset.large_hall, lang.eq__Large_hall),
+      (EqPreset.live, lang.eq__Live),
+      (EqPreset.party, lang.eq__Party),
+      (EqPreset.pop, lang.eq__Pop),
+      (EqPreset.reggae, lang.eq__Reggae),
+      (EqPreset.rock, lang.eq__Rock),
+      (EqPreset.ska, lang.eq__Ska),
+      (EqPreset.soft, lang.eq__Soft),
+      (EqPreset.soft_rock, lang.eq__Soft_rock),
+      (EqPreset.techno, lang.eq__Techno),
+    ];
+    final elements = presets;
+
+    final List<double> gains = bands.map((b) => b['gain'] as double).toList();
+    final EqPreset presetInitial = _findPreset(gains) ?? EqPreset.custom;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(lang.Equalizer, style: const TextStyle(fontSize: 22.0)),
+            const SizedBox(width: 4.0),
+            CheckboxInput(
+              initial: widget.isEnabled,
+              onSelect: (val) {
+                widget.setIsEnabled(val);
+                setState(() {});
+                return true;
+              },
+            )
+          ],
+        ),
+        const SizedBox(height: 6.0),
+        SelectInput<EqPreset>(
+            elements: elements,
+            initial: presetInitial,
+            isCompact: true,
+            onSelect: (preset) async {
+              gLogger.log('eqPreset: $preset');
+              if (preset == EqPreset.custom) {
+                gLogger.log('\tCustom preset');
+              } else {
+                final List<double> gains = eqPresets_10_band[preset]!;
+                assert(gains.length == bands.length, 'Bad gains length');
+                for (var i = 0; i < gains.length; i++) {
+                  final gain = gains[i];
+                  await _setBandGain(i, gain);
+                }
+              }
+              bands = [...bands];
+              setState(() {});
+            }),
+        const SizedBox(height: 12.0),
+        Flexible(
+          child: _EqBands(
+            equalizer: equalizer,
+            bands: bands,
+            limits: widget.limits,
+            onGainChange: (i, value) async {
+              await _setBandGain(i, value);
+              setState(() {});
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  EqPreset? _findPreset(List<double> gains) {
+    for (var p in EqPreset.values) {
+      final g = eqPresets_10_band[p];
+      if (g == null) continue;
+      if (_compareGains(g, gains)) {
+        return p;
+      }
+    }
+    return null;
+  }
+
+  bool _compareGains(List<double> left, List<double> right) {
+    assert(left.length == right.length,
+        'gains.length: ${left.length} != ${right.length}');
+    if (left.length != right.length) return false;
+
+    for (var i = 0; i < left.length; i++) {
+      if (left[i] != right[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  Future<void> _setBandGain(int i, double gain) async {
+    bands[i]['gain'] = gain;
+    config.saveProperty('EQ.gain-$i', gain);
+    await widget.equalizer.setBand(i, {'gain': gain});
+  }
+}
+
+class _EqBands extends StatelessWidget {
+  _EqBands({
+    required this.equalizer,
+    required this.bands,
+    required this.limits,
+    required this.onGainChange,
+  });
+
+  final Equalizer equalizer;
+  final List<dynamic> bands;
+  final Map<dynamic, dynamic> limits;
+  final Function(int i, double value) onGainChange;
 
   final ScrollController scrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
-    Config config = Provider.of<AppState>(context, listen: false).config;
+    gLogger.blue('_EqBands');
+    final numBands = bands.length;
 
-    return FutureBuilder<Map<String, dynamic>>(
-      future: () async {
-        try {
-          int numBands = (await equalizer.getNumberOfBands())!;
-          final limits = await equalizer.getLimits();
+    return Scrollbar(
+      controller: scrollController,
+      child: ListView(
+        controller: scrollController,
+        scrollDirection: Axis.horizontal,
+        children: [
+          ...((List.generate(numBands, (i) => i)).map(
+            (i) {
+              final band = bands[i] as Map;
 
-          final bands = [];
-          var frequencies = [
-            32.0,
-            64.0,
-            125.0,
-            250.0,
-            500.0,
-            1000.0,
-            2000.0,
-            4000.0,
-            8000.0,
-            16000.0
-          ];
+              final gain = band['gain'] as double;
+              final freq = band['frequency'] as double;
 
-          bool? isEqEnabled = config.getProperty('isEqEnabled');
-          bool isEnabled = isEqEnabled ?? false;
-          await equalizer.setEnabled(isEnabled);
+              final gainLimits = limits['gain'] as List;
 
-          if (CONFIG.isDemo && true) {
-            frequencies = [60, 230, 910, 4000, 14000];
-            numBands = frequencies.length;
-          }
-
-          for (var i = 0; i < numBands; i++) {
-            if (Platform.isLinux || Platform.isWindows) {
-              await equalizer.setBand(i, {
-                'bandwidth': frequencies[i] / 1.5,
-                'frequency': frequencies[i]
-              });
-            }
-
-            // Setting from config storage
-            double? gainProp = config.getProperty('EQ.gain-$i');
-            await equalizer.setBand(i, {
-              'gain': gainProp ?? 0.0,
-            });
-
-            final el = (await equalizer.getBand(i))!;
-            bands.add(el);
-          }
-          return {
-            'isEnabled': isEnabled,
-            'numBands': numBands,
-            'limits': limits,
-            'bands': bands,
-          };
-        } catch (e) {
-          gLogger.error('Exception in EqualizerWidget: $e');
-          rethrow;
-        }
-      }(),
-      builder: (context, AsyncSnapshot<Map<String, dynamic>> snapshot) {
-        if (snapshot.hasError) {
-          return const Text('Equalizer widget errored');
-        }
-        if (!snapshot.hasData) {
-          return const Text('Equalizer...');
-        }
-        final isEnabled = snapshot.data!['isEnabled'] as bool;
-        final numBands = snapshot.data!['numBands'] as int;
-        final limits = snapshot.data!['limits'] as Map;
-        final bands = snapshot.data!['bands'] as List;
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Text(lang.Enabled),
-                CheckboxInput(
-                  initial: isEnabled,
-                  onSelect: (val) {
-                    equalizer.setEnabled(val!);
-                    config.saveProperty('isEqEnabled', val);
-                    return true;
-                  },
-                )
-              ],
-            ),
-            const SizedBox(height: 8.0),
-            SizedBox(
-              height: 380.0,
-              child: Scrollbar(
-                controller: scrollController,
-                child: ListView(
-                  controller: scrollController,
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    ...((List.generate(numBands, (i) => i)).map(
-                      (i) {
-                        final band = bands[i] as Map;
-
-                        final gain = band['gain'] as double;
-                        final freq = band['frequency'] as double;
-
-                        final gainLimits = limits['gain'] as List;
-
-                        if (gainLimits.length == 2) {
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 12.0),
-                            child: _EqSlider(
-                              name: _toHzString(freq),
-                              value: gain,
-                              min: gainLimits[0] as double,
-                              max: gainLimits[1] as double,
-                              onChangeEnd: (value) async {
-                                config.saveProperty('EQ.gain-$i', value);
-                                equalizer.setBand(i, {'gain': value});
-                              },
-                            ),
-                          );
-                        } else {
-                          return const SizedBox.shrink();
-                        }
-                      },
-                    ).toList()),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        );
-      },
+              if (gainLimits.length == 2) {
+                return Padding(
+                  padding: const EdgeInsets.only(right: 0.0),
+                  child: _EqSlider(
+                    name: _toHzString(freq),
+                    value: gain,
+                    min: gainLimits[0] as double,
+                    max: gainLimits[1] as double,
+                    onChangeEnd: (value) async {
+                      onGainChange(i, value);
+                    },
+                  ),
+                );
+              } else {
+                return const SizedBox.shrink();
+              }
+            },
+          ).toList()),
+        ],
+      ),
     );
   }
 }
@@ -198,6 +278,15 @@ class _EqSliderState extends State<_EqSlider> {
   }
 
   @override
+  void didUpdateWidget(covariant oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.value != oldWidget.value && widget.value != _value) {
+      _value = widget.value;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final appearanceState =
         Provider.of<AppearanceState>(context, listen: false);
@@ -209,7 +298,7 @@ class _EqSliderState extends State<_EqSlider> {
         children: [
           Text('${_value.toStringAsFixed(1)} dB',
               style: TextStyle(color: color, fontSize: 13.0)),
-          const SizedBox(height: 10.0),
+          const SizedBox(height: 6.0),
           Expanded(
             child: RotatedBox(
               quarterTurns: -1,
@@ -239,7 +328,7 @@ class _EqSliderState extends State<_EqSlider> {
           // Text(
           //     '${widget.min.toStringAsFixed(0)}~${widget.max.toStringAsFixed(0)} dB',
           //     style: TextStyle(color: color, fontSize: 12.0)),
-          const SizedBox(height: 8.0),
+          const SizedBox(height: 4.0),
           Text(widget.name),
         ],
       ),

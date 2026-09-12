@@ -173,7 +173,7 @@ void showActionsContextMenu(BuildContext context, Offset pos) {
       return PopScope(
         canPop: false,
         onPopInvokedWithResult: (didPop, result) {
-          gLogger.view('didPop: $didPop');
+          gLogger.debug('didPop: $didPop');
           if (didPop) {
             return;
           }

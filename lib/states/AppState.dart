@@ -3,6 +3,9 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart' show WidgetsBinding;
 
+import 'package:audioplayers/audioplayers.dart' show Equalizer;
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+
 import 'package:music_player/config.dart' as CONFIG;
 import 'package:music_player/logger.dart';
 import 'package:music_player/logic/Config.dart';
@@ -25,7 +28,6 @@ import 'package:music_player/view/components/BottomControls.dart';
 import 'package:music_player/view/pages/DraggableQueue.dart';
 import 'package:music_player/view/pages/PluginsPage.dart';
 import 'package:music_player/view/pages/SettingsPage.dart' show Settings;
-import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 class AppState extends ChangeNotifier {
   AppState(this.config, this.playback, this.pluginManager) : super() {
@@ -329,6 +331,9 @@ class AppState extends ChangeNotifier {
     } else {
       await changeSource(currentSource.sourceId);
     }
+
+    await _initEqSettingsAsync();
+
     await _loadPlugins(pluginManager.getInstalledPlugins());
     if (!CONFIG.isDisableDownloadPlugins &&
         config.getProperty('isAutoCheckPluginUpdates', orElse: true)) {
@@ -635,6 +640,78 @@ class AppState extends ChangeNotifier {
         },
       ),
     ];
+  }
+
+  // Equalizer
+  Map<String, Object> eqSettings = {};
+
+  Future<void> _initEqSettingsAsync() async {
+    final (settings, err) = await _initEqalizerSettingsAsync();
+    if (err == null) {
+      logger.log('EqSettings: $settings');
+      eqSettings = settings;
+    }
+  }
+
+  Future<(Map<String, Object>, Object?)> _initEqalizerSettingsAsync() async {
+    try {
+      await playback.equalizerAwait;
+      Equalizer equalizer = playback.equalizer;
+
+      int numBands = (await equalizer.getNumberOfBands())!;
+      final limits = (await equalizer.getLimits())!;
+
+      final bands = [];
+      var frequencies = [
+        32.0,
+        64.0,
+        125.0,
+        250.0,
+        500.0,
+        1000.0,
+        2000.0,
+        4000.0,
+        8000.0,
+        16000.0
+      ];
+
+      bool? isEqEnabled = config.getProperty('isEqEnabled');
+      bool isEnabled = isEqEnabled ?? false;
+      await equalizer.setEnabled(isEnabled);
+
+      if (CONFIG.isDemo && true) {
+        frequencies = [60, 230, 910, 4000, 14000];
+        numBands = frequencies.length;
+      }
+
+      for (var i = 0; i < numBands; i++) {
+        if (Platform.isLinux || Platform.isWindows) {
+          await equalizer.setBand(i,
+              {'bandwidth': frequencies[i] / 1.5, 'frequency': frequencies[i]});
+        }
+
+        // Setting from config storage
+        double? gainProp = config.getProperty('EQ.gain-$i');
+        await equalizer.setBand(i, {
+          'gain': gainProp ?? 0.0,
+        });
+
+        final el = (await equalizer.getBand(i))!;
+        bands.add(el);
+      }
+      return (
+        {
+          'isEnabled': isEnabled,
+          'numBands': numBands,
+          'limits': limits,
+          'bands': bands,
+        },
+        null
+      );
+    } catch (e) {
+      gLogger.error('Exception in EqualizerWidget: $e');
+      return ({} as Map<String, Object>, e);
+    }
   }
 
   late final AutoplaySources autoplaySources = AutoplaySources(notifyListeners);

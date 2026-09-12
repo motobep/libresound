@@ -267,6 +267,25 @@ abstract class Lang {
   abstract String phrase__only_allowed;
 
   abstract String Autoplay;
+
+  // Eq Preset
+  abstract String eq__Custom;
+  abstract String eq__Classical;
+  abstract String eq__Club;
+  abstract String eq__Dance;
+  abstract String eq__Enhanced_bass;
+  abstract String eq__Enhanced_bass_and_tremble;
+  abstract String eq__Enhanced_tremble;
+  abstract String eq__Large_hall;
+  abstract String eq__Live;
+  abstract String eq__Party;
+  abstract String eq__Pop;
+  abstract String eq__Reggae;
+  abstract String eq__Rock;
+  abstract String eq__Ska;
+  abstract String eq__Soft;
+  abstract String eq__Soft_rock;
+  abstract String eq__Techno;
 }
 
 class EnLang implements Lang {
@@ -561,6 +580,25 @@ The music player developer is not responsible for plugins. There is no guarantee
   String phrase__only_allowed = 'Only letters, spaces and "-", "_" are allowed';
 
   String Autoplay = 'Autoplay';
+
+  // Eq Preset
+  String eq__Custom = 'Custom';
+  String eq__Classical = 'Classical';
+  String eq__Club = 'Club';
+  String eq__Dance = 'Dance';
+  String eq__Enhanced_bass = 'Enhanced bass';
+  String eq__Enhanced_bass_and_tremble = 'Enhanced bass and tremble';
+  String eq__Enhanced_tremble = 'Enhanced tremble';
+  String eq__Large_hall = 'Large hall';
+  String eq__Live = 'Live';
+  String eq__Party = 'Party';
+  String eq__Pop = 'Pop';
+  String eq__Reggae = 'Reggae';
+  String eq__Rock = 'Rock';
+  String eq__Ska = 'Ska';
+  String eq__Soft = 'Soft';
+  String eq__Soft_rock = 'Soft rock';
+  String eq__Techno = 'Techno';
 }
 
 class RuLang implements Lang {
@@ -848,6 +886,25 @@ class RuLang implements Lang {
   String phrase__only_allowed = 'Разрешены только буквы, пробелы и "-", "_"';
 
   String Autoplay = 'Автовоспроизведение';
+
+  // Eq Preset
+  String eq__Custom = 'Пользовательский';
+  String eq__Classical = 'Классическая музыка';
+  String eq__Club = 'Клубная музыка';
+  String eq__Dance = 'Танцевальная музыка';
+  String eq__Enhanced_bass = 'Усиленные НЧ';
+  String eq__Enhanced_bass_and_tremble = 'Усиленные НЧ и ВЧ';
+  String eq__Enhanced_tremble = 'Усиленные ВЧ';
+  String eq__Large_hall = 'Большой зал';
+  String eq__Live = 'Концерт';
+  String eq__Party = 'Вечеринка';
+  String eq__Pop = 'Поп';
+  String eq__Reggae = 'Регги';
+  String eq__Rock = 'Рок';
+  String eq__Ska = 'Ска';
+  String eq__Soft = 'Мягкое звучание';
+  String eq__Soft_rock = 'Софт-рок';
+  String eq__Techno = 'Техно';
 }
 
 Lang lang = EnLang();

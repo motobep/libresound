@@ -1,3 +1,4 @@
+import 'dart:async' show Completer;
 import 'dart:io' show Platform;
 
 import 'package:audioplayers/audioplayers.dart' show AudioEventType, Equalizer;
@@ -97,6 +98,10 @@ class Playback {
 
   Equalizer get equalizer {
     return _playback.audioPlayer.equalizer;
+  }
+
+  Future<void> get equalizerAwait {
+    return _playback.audioPlayer.creatingCompleter.future;
   }
 
   ProgressCounter get progressCounter {
