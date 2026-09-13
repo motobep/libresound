@@ -333,6 +333,7 @@ class _RadioGroupInputState extends State<RadioGroupInput> {
 }
 
 class CheckboxInput extends StatefulWidget {
+  /// [height] is only for toggler
   const CheckboxInput({
     super.key,
     this.text,
@@ -340,6 +341,7 @@ class CheckboxInput extends StatefulWidget {
     required this.onSelect,
     this.borderColor,
     this.isToggler = false,
+    this.height,
   });
 
   final String? text;
@@ -347,6 +349,7 @@ class CheckboxInput extends StatefulWidget {
   final bool Function(bool) onSelect;
   final Color? borderColor;
   final bool isToggler;
+  final double? height;
 
   static CheckboxInput fromJson(
       dynamic o, Future<void> Function(bool jsArg) onToggleFunc,
@@ -408,7 +411,7 @@ class _CheckboxInputState extends State<CheckboxInput> {
             ),
           )
         : SizedBox(
-            height: 30,
+            height: widget.height ?? 30,
             child: FittedBox(
               child: CupertinoSwitch(
                 value: _isChecked,

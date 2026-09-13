@@ -248,3 +248,20 @@ const double tabsBottomPad = !isDemo ? 0 : 12;
 const double playbackTopPad = !isDemo ? 8 : 8 + 24;
 
 const bool debugShowCheckedModeBanner = !isDemo;
+
+const List<double> frequencies_10_band = [
+  32.0,
+  64.0,
+  125.0,
+  250.0,
+  500.0,
+  1000.0,
+  2000.0,
+  4000.0,
+  8000.0,
+  16000.0
+];
+
+const List<double> frequencies_5_band = [60, 230, 910, 4000, 14000];
+
+const double eqSliderWidth = 52;

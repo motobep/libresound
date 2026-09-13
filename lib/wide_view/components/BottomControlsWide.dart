@@ -1,9 +1,5 @@
-import 'package:music_player/logger.dart' show gLogger;
 import 'package:music_player/states/AppState.dart';
-import 'package:music_player/states/AppearanceState.dart';
 import 'package:music_player/states/SelectionState.dart';
-import 'package:music_player/view/PageRouter.dart' show PageRouter;
-import 'package:music_player/view/components/Equalizer.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 
@@ -17,6 +13,7 @@ import 'package:music_player/logic/MusicItem.dart';
 import 'package:music_player/logic/playback/Playback.dart' show Playback;
 
 import 'package:music_player/view/components/VolumeControls.dart';
+import 'package:music_player/view/components/Equalizer.dart';
 import 'package:music_player/view/pages/PlaybackControlsPage.dart';
 import 'package:music_player/view/components/parts.dart' show TrackDescription;
 import 'package:music_player/view/components/getIconFuncs.dart'
@@ -146,70 +143,4 @@ class BottomControlsWide extends StatelessWidget {
       ),
     );
   }
-}
-
-void showEqualizerContextMenu(BuildContext context, Offset pos) {
-  double vh = MediaQuery.of(context).size.height;
-  double vw = MediaQuery.of(context).size.width;
-  const double iconSize = 20;
-  final double width = 560;
-  final double height = 400;
-  final top = pos.dy + height + 8.0 > vh ? pos.dy - height - iconSize : pos.dy;
-  final left = pos.dx + width + 8.0 > vw ? pos.dx - width - iconSize : pos.dx;
-
-  final appearanceState = Provider.of<AppearanceState>(context, listen: false);
-  var equalizer =
-      Provider.of<PlaybackState>(context, listen: false).playback.equalizer;
-
-  showGeneralDialog(
-    context: context,
-    pageBuilder: (_, __, ___) {
-      return PopScope(
-        canPop: false,
-        onPopInvokedWithResult: (didPop, result) {
-          gLogger.debug('didPop: $didPop');
-          if (didPop) {
-            return;
-          }
-          PageRouter.back(context);
-        },
-        child: Stack(
-          children: [
-            Positioned(
-              left: left,
-              top: top,
-              child: Material(
-                child: Container(
-                  width: width,
-                  height: height,
-                  decoration: BoxDecoration(
-                    color: ColorScheme.of(context).surface,
-                    boxShadow: const [
-                      BoxShadow(
-                          color: Color(0x20000000),
-                          blurRadius: 12.0,
-                          blurStyle: BlurStyle.outer)
-                    ],
-                    border: Border.all(
-                        color: appearanceState.lerpBgColor(0.07), width: 1.0),
-                    borderRadius: BorderRadius.circular(5.0),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 14.0, horizontal: 16.0),
-                  child: SizedBox(
-                    height: height,
-                    child: EqualizerWidget(equalizer: equalizer),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    },
-    // barrierColor: Colors.black12,
-    barrierColor: Colors.transparent,
-    barrierDismissible: true,
-    barrierLabel: 'barrier_label',
-  );
 }

@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:music_player/logger.dart';
 import 'package:music_player/logic/utils.dart' show formatDuration;
 import 'package:music_player/states/SelectionState.dart';
+import 'package:music_player/view/components/Equalizer.dart'
+    show showEqualizerDialog;
 import 'package:provider/provider.dart';
 
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -142,16 +144,28 @@ class PlaybackControlsBody extends StatelessWidget {
                     icon: const Icon(PhosphorIconsLight.caretDown),
                     iconSize: iconSmSize,
                   ),
-                  IconButton(
-                    onPressed: isSelectionHidden
-                        ? () {
-                            showCurrItemDialog(musicItem,
-                                sectionIndex: CONSTS.queueSectionIdx);
-                          }
-                        : null,
-                    icon: const Icon(PhosphorIconsRegular.dotsThreeVertical),
-                    iconSize: iconSmSize,
-                  ),
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          showEqualizerDialog(context);
+                        },
+                        icon: const Icon(PhosphorIconsThin.sliders),
+                        iconSize: iconSmSize,
+                      ),
+                      IconButton(
+                        onPressed: isSelectionHidden
+                            ? () {
+                                showCurrItemDialog(musicItem,
+                                    sectionIndex: CONSTS.queueSectionIdx);
+                              }
+                            : null,
+                        icon:
+                            const Icon(PhosphorIconsRegular.dotsThreeVertical),
+                        iconSize: iconSmSize,
+                      ),
+                    ],
+                  )
                 ],
               ),
             ),

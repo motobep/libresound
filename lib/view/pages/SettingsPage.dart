@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:music_player/logic/Config.dart' show Config;
 import 'package:music_player/view/PageRouter.dart';
-import 'package:music_player/view/addGuardsFuncs.dart';
 import 'package:music_player/view/components/VolumeControls.dart';
 import 'package:music_player/view/components/dialogs.dart'
     show SelectSourceDirDialog;
@@ -240,7 +239,7 @@ class SettingsBody extends StatelessWidget {
       'Equalizer' => [
           Heading(lang.Equalizer),
           const SizedBox(height: 6.0),
-          EqualizerWidget(equalizer: equalizer),
+          const EqualizerWidget(),
         ],
       'KeyBindings' => [
           Heading(lang.Key_bindings),

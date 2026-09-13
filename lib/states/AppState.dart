@@ -662,24 +662,14 @@ class AppState extends ChangeNotifier {
       final limits = (await equalizer.getLimits())!;
 
       final bands = [];
-      var frequencies = [
-        32.0,
-        64.0,
-        125.0,
-        250.0,
-        500.0,
-        1000.0,
-        2000.0,
-        4000.0,
-        8000.0,
-        16000.0
-      ];
+      var frequencies = CONFIG.frequencies_10_band;
 
       bool? isEqEnabled = config.getProperty('isEqEnabled');
       bool isEnabled = isEqEnabled ?? false;
       await equalizer.setEnabled(isEnabled);
 
       if (CONFIG.isDemo && true) {
+        // if (CONFIG.isDev()) {
         frequencies = [60, 230, 910, 4000, 14000];
         numBands = frequencies.length;
       }

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:music_player/config.dart' as CONFIG;
 import 'package:music_player/logger.dart';
 import 'package:music_player/logic/EqPresets.dart';
 import 'package:music_player/logic/lang.dart';
 import 'package:music_player/main.dart' show config;
 import 'package:music_player/states/AppState.dart';
+import 'package:music_player/states/PlaybackState.dart' show PlaybackState;
+import 'package:music_player/view/PageRouter.dart' show PageRouter;
 import 'package:music_player/view/components/inputs.dart';
 import 'package:provider/provider.dart';
 
@@ -11,12 +14,11 @@ import 'package:audioplayers/audioplayers.dart' show Equalizer;
 
 import 'package:music_player/states/AppearanceState.dart';
 
-class EqualizerWidget extends StatelessWidget {
-  final Equalizer equalizer;
+const double padHor = 16;
 
+class EqualizerWidget extends StatelessWidget {
   const EqualizerWidget({
     super.key,
-    required this.equalizer,
   });
 
   @override
@@ -24,21 +26,44 @@ class EqualizerWidget extends StatelessWidget {
     final appState = Provider.of<AppState>(context, listen: false);
     final settings = appState.eqSettings;
 
+    final equalizer =
+        Provider.of<PlaybackState>(context, listen: false).playback.equalizer;
+
     if (settings.isEmpty) {
       return const Text('Equalizer widget errored');
     }
 
-    return _EqControls(
-        isEnabled: settings['isEnabled'] as bool,
-        setIsEnabled: (bool v) {
-          settings['isEnabled'] = v;
-          equalizer.setEnabled(v);
-          config.saveProperty('isEqEnabled', v);
-        },
-        equalizer: equalizer,
-        bands: settings['bands'] as List,
-        limits: settings['limits'] as Map);
+    final int? numBands = settings['numBands'] as int?;
+    final (width, height) = calcEqSizes(numBands);
+
+    return Container(
+      // color: Colors.blue,
+      width: width,
+      height: height,
+      padding: const EdgeInsets.symmetric(horizontal: padHor),
+      child: _EqControls(
+          isEnabled: settings['isEnabled'] as bool,
+          setIsEnabled: (bool v) {
+            settings['isEnabled'] = v;
+            equalizer.setEnabled(v);
+            config.saveProperty('isEqEnabled', v);
+          },
+          equalizer: equalizer,
+          bands: settings['bands'] as List,
+          limits: settings['limits'] as Map),
+    );
   }
+}
+
+(double, double) calcEqSizes(int? numBands) {
+  double width = 400;
+  if (numBands != null) {
+    width = numBands * CONFIG.eqSliderWidth + padHor * 2 + 4;
+  } else {
+    gLogger.error('calcEqSizes(): numBands is null');
+  }
+  const double height = 400;
+  return (width, height);
 }
 
 class _EqControls extends StatefulWidget {
@@ -95,46 +120,58 @@ class _EqControlsState extends State<_EqControls> {
     final elements = presets;
 
     final List<double> gains = bands.map((b) => b['gain'] as double).toList();
+
     final EqPreset presetInitial = _findPreset(gains) ?? EqPreset.custom;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(lang.Equalizer, style: const TextStyle(fontSize: 22.0)),
-            const SizedBox(width: 4.0),
-            CheckboxInput(
-              initial: widget.isEnabled,
-              onSelect: (val) {
-                widget.setIsEnabled(val);
-                setState(() {});
-                return true;
-              },
-            )
+            Padding(
+              padding: const EdgeInsets.only(right: 10.0),
+              child: CheckboxInput(
+                initial: widget.isEnabled,
+                onSelect: (val) {
+                  widget.setIsEnabled(val);
+                  setState(() {});
+                  return true;
+                },
+                isToggler: true,
+                height: 26,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 6.0),
-        SelectInput<EqPreset>(
-            elements: elements,
-            initial: presetInitial,
-            isCompact: true,
-            onSelect: (preset) async {
-              gLogger.log('eqPreset: $preset');
-              if (preset == EqPreset.custom) {
-                gLogger.log('\tCustom preset');
-              } else {
-                final List<double> gains = eqPresets_10_band[preset]!;
-                assert(gains.length == bands.length, 'Bad gains length');
-                for (var i = 0; i < gains.length; i++) {
-                  final gain = gains[i];
-                  await _setBandGain(i, gain);
+        if (gains.length == 10 || gains.length == 5) ...[
+          SelectInput<EqPreset>(
+              elements: elements,
+              initial: presetInitial,
+              isCompact: true,
+              onSelect: (preset) async {
+                gLogger.log('eqPreset: $preset');
+                if (preset == EqPreset.custom) {
+                  gLogger.log('\tCustom preset');
+                } else {
+                  final presetGains = _getEqPreset(bands.length);
+                  if (presetGains == null) return;
+
+                  final List<double> gains = presetGains[preset]!;
+                  assert(gains.length == bands.length, 'Bad gains length');
+                  for (var i = 0; i < gains.length; i++) {
+                    final gain = gains[i];
+                    await _setBandGain(i, gain);
+                  }
                 }
-              }
-              bands = [...bands];
-              setState(() {});
-            }),
-        const SizedBox(height: 12.0),
+                bands = [...bands];
+                setState(() {});
+              }),
+          const SizedBox(height: 12.0),
+        ],
         Flexible(
           child: _EqBands(
             equalizer: equalizer,
@@ -151,9 +188,16 @@ class _EqControlsState extends State<_EqControls> {
   }
 
   EqPreset? _findPreset(List<double> gains) {
+    final preset = _getEqPreset(gains.length);
+    if (preset == null) return null;
+
     for (var p in EqPreset.values) {
-      final g = eqPresets_10_band[p];
+      final g = preset[p];
       if (g == null) continue;
+      if (g.length != gains.length) {
+        gLogger.error('gains.length: ${g.length} != ${gains.length}');
+        return null;
+      }
       if (_compareGains(g, gains)) {
         return p;
       }
@@ -164,7 +208,6 @@ class _EqControlsState extends State<_EqControls> {
   bool _compareGains(List<double> left, List<double> right) {
     assert(left.length == right.length,
         'gains.length: ${left.length} != ${right.length}');
-    if (left.length != right.length) return false;
 
     for (var i = 0; i < left.length; i++) {
       if (left[i] != right[i]) {
@@ -172,6 +215,17 @@ class _EqControlsState extends State<_EqControls> {
       }
     }
     return true;
+  }
+
+  Map<EqPreset, List<double>>? _getEqPreset(int numBands) {
+    if (numBands == 10) {
+      return eqPresets_10_band;
+    }
+    if (numBands == 5) {
+      return eqPresets_5_band;
+    }
+    gLogger.error('No preset for numBands: $numBands');
+    return null;
   }
 
   Future<void> _setBandGain(int i, double gain) async {
@@ -241,10 +295,12 @@ class _EqBands extends StatelessWidget {
 }
 
 String _toHzString(double freq) {
-  String suffix = 'Hz';
+  // String suffix = 'Hz';
+  String suffix = '';
   if (freq >= 1000) {
     freq /= 1000;
-    suffix = 'KHz';
+    // suffix = 'KHz';
+    suffix = 'K';
   }
   return '${freq.toStringAsFixed(0)} ${suffix}';
 }
@@ -293,7 +349,7 @@ class _EqSliderState extends State<_EqSlider> {
     var color = appearanceState.lerpBgColor(0.6);
 
     return SizedBox(
-      width: 52,
+      width: CONFIG.eqSliderWidth,
       child: Column(
         children: [
           Text('${_value.toStringAsFixed(1)} dB',
@@ -334,4 +390,80 @@ class _EqSliderState extends State<_EqSlider> {
       ),
     );
   }
+}
+
+void showEqualizerContextMenu(BuildContext context, Offset pos) {
+  final appState = Provider.of<AppState>(context, listen: false);
+  final settings = appState.eqSettings;
+  final int? numBands = settings['numBands'] as int?;
+
+  final (width, height) = calcEqSizes(numBands);
+
+  // double vh = MediaQuery.of(context).size.height;
+  // double vw = MediaQuery.of(context).size.width;
+  const double iconSize = 20;
+  final top = pos.dy - height - iconSize - 10;
+  // final left = pos.dx + width + 8.0 > vw ? pos.dx - width - iconSize : pos.dx;
+  const right = 8.0;
+
+  final appearanceState = Provider.of<AppearanceState>(context, listen: false);
+
+  showGeneralDialog(
+    context: context,
+    pageBuilder: (_, __, ___) {
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) {
+          gLogger.debug('didPop: $didPop');
+          if (didPop) {
+            return;
+          }
+          PageRouter.back(context);
+        },
+        child: Stack(
+          children: [
+            Positioned(
+              right: right,
+              top: top,
+              child: Material(
+                child: Container(
+                  width: width,
+                  height: height,
+                  decoration: BoxDecoration(
+                    color: ColorScheme.of(context).surface,
+                    boxShadow: const [
+                      BoxShadow(
+                          color: Color(0x20000000),
+                          blurRadius: 12.0,
+                          blurStyle: BlurStyle.outer)
+                    ],
+                    border: Border.all(
+                        color: appearanceState.lerpBgColor(0.07), width: 1.0),
+                    borderRadius: BorderRadius.circular(5.0),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 14.0),
+                  child: const EqualizerWidget(),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+    // barrierColor: Colors.black12,
+    barrierColor: Colors.transparent,
+    barrierDismissible: true,
+    barrierLabel: 'barrier_label',
+  );
+}
+
+void showEqualizerDialog(BuildContext context) {
+  showDialog(
+      context: context,
+      builder: (context) {
+        return const AlertDialog(
+          contentPadding: EdgeInsets.symmetric(vertical: 14.0),
+          content: EqualizerWidget(),
+        );
+      });
 }
