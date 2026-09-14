@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:music_player/config.dart' as CONFIG;
+import 'package:music_player/logic/Source.dart' show Source;
+import 'package:music_player/logic/enums.dart' show Pages;
 import 'package:music_player/states/AppearanceState.dart';
 import 'package:music_player/view/PageRouter.dart';
 import 'package:provider/provider.dart';
@@ -16,10 +19,14 @@ class SortByWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final mainPage = context.select<AppState, Pages>((s) => s.mainPage);
+    final source = context.select<AppState, Source>((s) => s.currentSource);
     List? sortItems = context
         .select<AppState, List?>((s) => s.fsSource.currPage.props['sortItems']);
 
-    if (sortItems == null) {
+    if (mainPage != Pages.source ||
+        source.sourceId != CONFIG.fsSourceId ||
+        sortItems == null) {
       return const SizedBox.shrink();
     }
 
