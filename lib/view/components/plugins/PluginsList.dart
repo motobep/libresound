@@ -92,31 +92,80 @@ class PluginsList extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               border: Border.all(
-                  color: appearanceState.lerpBgColor(0.07), width: 2.0),
-              borderRadius: BorderRadius.circular(18.0),
+                  color: appearanceState.lerpBgColor(0.07), width: 1.0),
+              borderRadius: BorderRadius.circular(12.0),
+              color: appearanceState.lerpBgColor(0.03),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
-            child: Column(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: SelectableText(
-                        "${el['name']}",
-                        style: TextStyle(
-                          fontSize: 16,
-                          letterSpacing: 0.75,
-                          color: colorScheme.secondary,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        maxLines: 2,
-                        minLines: 1,
+                    SelectableText(
+                      "${el['name']}",
+                      style: TextStyle(
+                        fontSize: 16,
+                        letterSpacing: 0.75,
+                        color: colorScheme.secondary,
+                        overflow: TextOverflow.ellipsis,
                       ),
+                      maxLines: 2,
+                      minLines: 1,
                     ),
                     const SizedBox(width: 12.0),
+                    if (el['approved_by'] != null && el['approved_by'] != '')
+                      Text(
+                        "${lang.Approved_by} ${el['approved_by']}",
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontStyle: FontStyle.italic,
+                            // letterSpacing: 0.75,
+                            color: colorScheme.primary),
+                      ),
+                    SelectableText(
+                        el['langs_longtitle'] ?? el['longtitle'] ?? el['title'],
+                        style:
+                            const TextStyle(fontSize: 18, letterSpacing: 0.75)),
+                    const SizedBox(width: 8.0),
+                    SelectableText(
+                      el['langs_descr'] ?? el['descr'],
+                      style: const TextStyle(fontSize: 15),
+                    ),
+                    const SizedBox(height: 6.0),
+                    SelectableText(
+                      '${lang.Downloads__genetive}: ${el['downloads']}',
+                    ),
+                    const SizedBox(height: 4.0),
+                    RichText(
+                      text: TextSpan(
+                        style: TextStyle(
+                          fontFamily: 'Roboto',
+                          color: ColorScheme.of(context).secondary,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: '${lang.Author}: ',
+                          ),
+                          TextSpan(
+                            text: "${el['author'] ?? lang.Deleted_User}",
+                            style: TextStyle(
+                              color: ColorScheme.of(context).secondary,
+                              fontStyle: el['author'] == null
+                                  ? FontStyle.italic
+                                  : null,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
                     AllOutlinedStandardButton(
                       Icon(PhosphorIconsLight.downloadSimple,
                           color: ColorScheme.of(context).onSurface),
@@ -124,7 +173,7 @@ class PluginsList extends StatelessWidget {
                         onDownloadTap(el['name']);
                       },
                     ),
-                    const SizedBox(width: 12.0),
+                    const SizedBox(height: 48.0),
                     ToPageButton(
                       '',
                       onTap: () {
@@ -134,46 +183,6 @@ class PluginsList extends StatelessWidget {
                           top: 10.0, bottom: 10.0, right: 10.0),
                     ),
                   ],
-                ),
-                const SizedBox(width: 12.0),
-                if (el['approved_by'] != null && el['approved_by'] != '')
-                  Text(
-                    "${lang.Approved_by} ${el['approved_by']}",
-                    style: TextStyle(
-                        fontSize: 12,
-                        fontStyle: FontStyle.italic,
-                        // letterSpacing: 0.75,
-                        color: colorScheme.primary),
-                  ),
-                SelectableText(
-                    el['langs_longtitle'] ?? el['longtitle'] ?? el['title'],
-                    style: const TextStyle(fontSize: 18, letterSpacing: 0.75)),
-                const SizedBox(width: 8.0),
-                SelectableText(
-                  el['langs_descr'] ?? el['descr'],
-                  style: const TextStyle(fontSize: 15),
-                ),
-                const SizedBox(height: 6.0),
-                RichText(
-                  text: TextSpan(
-                    style: TextStyle(
-                      fontFamily: 'Roboto',
-                      color: ColorScheme.of(context).secondary,
-                    ),
-                    children: [
-                      TextSpan(
-                        text: '${lang.Author}: ',
-                      ),
-                      TextSpan(
-                        text: "${el['author'] ?? lang.Deleted_User}",
-                        style: TextStyle(
-                          color: ColorScheme.of(context).secondary,
-                          fontStyle:
-                              el['author'] == null ? FontStyle.italic : null,
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
               ],
             ),

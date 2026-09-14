@@ -11,7 +11,7 @@ import 'package:music_player/view/components/dialogs.dart'
     show SelectSourceDirDialog;
 import 'package:music_player/view/components/inputs.dart';
 import 'package:music_player/view/pages/AppearancePage.dart'
-    show SpaceLine, boxPadding;
+    show SpaceLine, boxPadding, buildBoxDecoration;
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart'
@@ -28,7 +28,7 @@ import 'package:music_player/states/AppearanceState.dart';
 import 'package:music_player/view/components/KeyBindigsTable.dart';
 import 'package:music_player/view/snackBarFuncs.dart';
 import 'package:music_player/view/components/buttons.dart'
-    show chooseMusicDir, StandardButton, ToPageButton, getBackBtn, SimpleButton;
+    show chooseMusicDir, ToPageButton, getBackBtn, SimpleButton;
 
 final DateFormat _formatter = DateFormat('yy-MM-dd_HH-mm-ss');
 const int lastLogLinesNum = 500;
@@ -107,11 +107,7 @@ class SettingsBody extends StatelessWidget {
       isCompact: true,
     );
 
-    final boxDecoration = BoxDecoration(
-      color: appearanceState.lerpBgColor(0.03),
-      border: Border.all(color: appearanceState.lerpBgColor(0.07), width: 1.0),
-      borderRadius: BorderRadius.circular(12.0),
-    );
+    final boxDecoration = buildBoxDecoration(appearanceState);
 
     List<Widget> widgets = switch (settings.currPage) {
       'Main' => [

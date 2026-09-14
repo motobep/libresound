@@ -18,6 +18,8 @@ import 'package:music_player/view/components/buttons.dart';
 import 'package:music_player/view/components/plugins/BrowsePlugins.dart'
     show downloadPluginAndExtract;
 import 'package:music_player/view/components/plugins/PluginControlsBody.dart';
+import 'package:music_player/view/pages/AppearancePage.dart'
+    show boxPadding, buildBoxDecoration, SpaceLine;
 import 'package:music_player/view/pages/PluginsPage.dart'
     show PluginsPages, onSuccessfulPluginInstall;
 import 'package:music_player/view/snackBarFuncs.dart';
@@ -53,43 +55,59 @@ class MyPlugins extends StatelessWidget {
       );
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(lang.Install_from_zip_file),
-        const SizedBox(height: 8),
-        StandardButton(
-          lang.Choose,
-          onTap: () async {
-            gLogger.view('Picking');
-            var messengerFunc = getSnackBarMessangerFunc(context);
-            FilePickerResult? result = await FilePicker.platform.pickFiles();
-            if (result == null) {
-              gLogger.view('Canceled choosing zip');
-              return;
-            }
+    final appearanceState =
+        Provider.of<AppearanceState>(context, listen: false);
+    final boxDecoration = buildBoxDecoration(appearanceState);
 
-            String archivePath = result.files.single.path!;
-            String targetDir = config.pluginsInstalledDir;
-            gLogger.view(archivePath);
+    return Container(
+      decoration: boxDecoration,
+      padding: boxPadding,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(lang.Install_from_zip_file),
+              const SizedBox(height: 8),
+              SimpleButton(
+                text: lang.Choose,
+                icon: const Icon(PhosphorIconsRegular.folderOpen),
+                onTap: () async {
+                  gLogger.view('Picking');
+                  var messengerFunc = getSnackBarMessangerFunc(context);
+                  FilePickerResult? result =
+                      await FilePicker.platform.pickFiles();
+                  if (result == null) {
+                    gLogger.view('Canceled choosing zip');
+                    return;
+                  }
 
-            try {
-              await extractFileToDisk(archivePath, targetDir);
-            } catch (e) {
-              gLogger.error('Error while extracting zip: $e');
-              var err = lang.Error_occurred_while_extracting_zip_archive;
-              messengerFunc(err);
-            }
+                  String archivePath = result.files.single.path!;
+                  String targetDir = config.pluginsInstalledDir;
+                  gLogger.view(archivePath);
 
-            onSuccessfulPluginInstall(context);
-            gLogger.view('Picking END');
-          },
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: _MyPluginsList(toDownloadPlugins: toDownloadPlugins),
-        ),
-      ],
+                  try {
+                    await extractFileToDisk(archivePath, targetDir);
+                  } catch (e) {
+                    gLogger.error('Error while extracting zip: $e');
+                    var err = lang.Error_occurred_while_extracting_zip_archive;
+                    messengerFunc(err);
+                  }
+
+                  onSuccessfulPluginInstall(context);
+                  gLogger.view('Picking END');
+                },
+              ),
+            ],
+          ),
+          const SpaceLine(),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: _MyPluginsList(toDownloadPlugins: toDownloadPlugins),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -127,7 +145,7 @@ class _MyPluginsList extends StatelessWidget {
 
     return Column(
       children: [
-        for (var plugin in pluginsList)
+        for (var (index, plugin) in pluginsList.indexed) ...[
           ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 0.0),
             title: Row(
@@ -239,6 +257,8 @@ class _MyPluginsList extends StatelessWidget {
               ],
             ),
           ),
+          if (index < pluginsList.length - 1) const SpaceLine(padVer: 8),
+        ],
       ],
     );
   }

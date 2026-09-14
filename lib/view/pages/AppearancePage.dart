@@ -19,6 +19,12 @@ import 'package:music_player/view/snackBarFuncs.dart';
 
 const boxPadding = EdgeInsets.symmetric(horizontal: 20.0, vertical: 18);
 
+BoxDecoration buildBoxDecoration(appearanceState) => BoxDecoration(
+      color: appearanceState.lerpBgColor(0.03),
+      border: Border.all(color: appearanceState.lerpBgColor(0.07), width: 1.0),
+      borderRadius: BorderRadius.circular(12.0),
+    );
+
 class AppearancePage extends StatelessWidget {
   const AppearancePage({super.key});
 
@@ -67,11 +73,7 @@ class AppearanceBody extends StatelessWidget {
 
     final customTheme = appearanceState.getCustomTheme();
 
-    final boxDecoration = BoxDecoration(
-      color: appearanceState.lerpBgColor(0.03),
-      border: Border.all(color: appearanceState.lerpBgColor(0.07), width: 1.0),
-      borderRadius: BorderRadius.circular(12.0),
-    );
+    final boxDecoration = buildBoxDecoration(appearanceState);
 
     const double maxWidth = 700;
 
@@ -504,7 +506,9 @@ class ColorExample extends StatelessWidget {
 }
 
 class SpaceLine extends StatelessWidget {
-  const SpaceLine({super.key});
+  const SpaceLine({super.key, this.padVer = 18.0});
+
+  final double padVer;
 
   @override
   Widget build(BuildContext context) {
@@ -512,7 +516,7 @@ class SpaceLine extends StatelessWidget {
         Provider.of<AppearanceState>(context, listen: false);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 18.0),
+      padding: EdgeInsets.symmetric(vertical: padVer),
       child: Container(
         height: 1,
         width: double.infinity,

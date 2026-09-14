@@ -123,20 +123,19 @@ class _PluginsBodyState extends State<PluginsBody> {
     }
 
     widgets = [
-      if (!CONFIG.isDisableDownloadPlugins)
-        TopTabs(
-          elements: tabs,
-          initial: pluginsPages.stackIdx,
-          onSelect: (index) {
-            setState(() {
-              pluginsPages.stackIdx = index;
-              appState.update();
-            });
-            return false;
-          },
-          mainAxisAlignment: mainAxisAlignment,
-        ),
-      if (!CONFIG.isDisableDownloadPlugins) const SizedBox(height: 15),
+      TopTabs(
+        elements: tabs,
+        initial: pluginsPages.stackIdx,
+        onSelect: (index) {
+          setState(() {
+            pluginsPages.stackIdx = index;
+            appState.update();
+          });
+          return false;
+        },
+        mainAxisAlignment: mainAxisAlignment,
+      ),
+      const SizedBox(height: 15),
       if (pluginsPages.stackIdx == myPluginsIdx)
         MyPlugins(toDownloadPlugins: () {
           setState(() {
@@ -153,7 +152,7 @@ class _PluginsBodyState extends State<PluginsBody> {
     return Stack(
       children: [
         ScrollingPageWrapper(widgets),
-        if (!isPluginsDisclaimerRead && !CONFIG.isDisableDownloadPlugins) ...[
+        if (!isPluginsDisclaimerRead) ...[
           Positioned(
             child: Container(
               padding: const EdgeInsets.only(
@@ -252,67 +251,6 @@ class _PluginsBodyState extends State<PluginsBody> {
                         const SizedBox(height: 14.0),
                         StandardButton(lang.Continue, onTap: () {
                           config.saveProperty('isPluginsDisclaimerRead', true);
-                          appState.update();
-                        }),
-                        const SizedBox(height: 6.0),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-        if (!isPluginsMiniDisclaimerRead &&
-            CONFIG.isDisableDownloadPlugins) ...[
-          Positioned(
-            child: Container(
-              padding: const EdgeInsets.only(
-                  top: 50.0, bottom: 20, left: 8, right: 8),
-              color: appearanceState.lerpBgColor(0.00).withAlpha(230),
-              child: Center(
-                child: Container(
-                  // color: appearanceState.lerpBgColor(0.00),
-                  decoration: BoxDecoration(
-                    color: appearanceState.colors[ColorType.bg],
-                    border: Border.all(
-                        color: appearanceState.lerpBgColor(0.07), width: 1.0),
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  width: 600,
-                  padding: const EdgeInsets.all(24.0),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          lang.Plugins,
-                          style: const TextStyle(fontSize: 20),
-                        ),
-                        const SizedBox(height: 10.0),
-                        SelectableText(
-                          lang.phrase__plugin_welcome,
-                          style: const TextStyle(height: 1.6),
-                          // softWrap: true,
-                        ),
-                        const SizedBox(height: 18.0),
-                        SelectableText(
-                          '${lang.Warning}',
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                        const SizedBox(height: 8.0),
-                        SelectableText(
-                          '${lang.phrase__disclaimer}',
-                          style: const TextStyle(height: 1.6),
-                          // softWrap: true,
-                        ),
-                        const SizedBox(height: 20.0),
-                        Text('${lang.This_message_will_not_appear_again}.'),
-                        const SizedBox(height: 14.0),
-                        StandardButton(lang.Continue, onTap: () {
-                          config.saveProperty(
-                              'isPluginsMiniDisclaimerRead', true);
                           appState.update();
                         }),
                         const SizedBox(height: 6.0),
