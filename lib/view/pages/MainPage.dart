@@ -5,6 +5,7 @@ import 'package:music_player/view/components/Drawers.dart';
 import 'package:music_player/view/components/ScrolledOpacityAnimation.dart';
 import 'package:music_player/view/components/ScrollingPageWrapper.dart';
 import 'package:music_player/view/components/SelectionInfo.dart';
+import 'package:music_player/view/components/SortByWidget.dart';
 import 'package:music_player/view/components/plugins/PluginControlsBody.dart';
 import 'package:provider/provider.dart';
 
@@ -244,6 +245,7 @@ AppBar getAppBar(BuildContext context) {
 
   if (!isOnlySearch) {
     rightWidgets.add(const DownloadsIndicator());
+    rightWidgets.add(const SortByWidget());
     // If show queue button
     if (false)
       rightWidgets.add(
