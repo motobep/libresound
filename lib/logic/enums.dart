@@ -286,3 +286,12 @@ enum PageDescrType {
   controls,
   webView,
 }
+
+enum SortBy {
+  titleAsc,
+  titleDesc,
+  durationAsc,
+  durationDesc,
+  // modifiedAsc,
+  // modifiedDesc,
+}

@@ -261,10 +261,9 @@ abstract class Lang {
   abstract String Albums;
 
   abstract String songs;
-
   abstract String Favourites;
-
   abstract String phrase__only_allowed;
+  abstract String Duration;
 
   abstract String Autoplay;
 
@@ -578,6 +577,7 @@ The music player developer is not responsible for plugins. There is no guarantee
 
   String Favourites = 'Favourites';
   String phrase__only_allowed = 'Only letters, spaces and "-", "_" are allowed';
+  String Duration = 'Duration';
 
   String Autoplay = 'Autoplay';
 
@@ -884,6 +884,7 @@ class RuLang implements Lang {
 
   String Favourites = 'Избранное';
   String phrase__only_allowed = 'Разрешены только буквы, пробелы и "-", "_"';
+  String Duration = 'Время';
 
   String Autoplay = 'Автовоспроизведение';
 

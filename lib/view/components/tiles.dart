@@ -366,7 +366,8 @@ class _WideMiTileState extends State<WideMiTile> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.isShowCheckbox != widget.isShowCheckbox ||
         oldWidget.isSelected != widget.isSelected ||
-        (!hasMiDuration && widget.mi.durationInSeconds > 0)) {
+        (!hasMiDuration && widget.mi.durationInSeconds > 0) ||
+        oldWidget.mi.durationInSeconds != widget.mi.durationInSeconds) {
       _setTrailing();
     }
   }

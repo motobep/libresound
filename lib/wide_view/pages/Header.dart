@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:music_player/logger.dart';
 import 'package:music_player/states/AppState.dart';
 import 'package:music_player/states/AppearanceState.dart';
+import 'package:music_player/view/PageRouter.dart';
 import 'package:music_player/view/components/DownloadsIndicator.dart';
 import 'package:music_player/view/components/SelectionInfo.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -32,13 +33,27 @@ class Header extends StatelessWidget {
     bool isShowLyrics = context.select<AppState, bool>((s) => s.isShowLyrics);
     bool hasLyrics = context.select<AppState, bool>((s) => s.hasLyrics);
 
+    final appState = Provider.of<AppState>(context, listen: false);
+    List? sortItems = context
+        .select<AppState, List?>((s) => s.fsSource.currPage.props['sortItems']);
+
     // Right controls
     List<Widget> rightWidgets = [
       const DownloadsIndicator(),
-      const SelectionInfo()
+      const SelectionInfo(),
+      // Sort button
+      if (sortItems != null)
+        InkWell(
+          onTapUp: (details) {
+            gLogger.debug('sort');
+            var pos = details.globalPosition;
+            showSortByContextMenu(context, pos);
+          },
+          mouseCursor: SystemMouseCursors.click,
+          child: const Icon(PhosphorIconsThin.sortAscending),
+        ),
     ];
 
-    final appState = Provider.of<AppState>(context, listen: false);
     List<String> rightControls = context
         .select<AppState, List<String>>((s) => s.currentSource.rightControls);
     // Settings btn
@@ -149,4 +164,99 @@ class Header extends StatelessWidget {
       ),
     );
   }
+}
+
+void showSortByContextMenu(BuildContext context, Offset pos) {
+  double vh = MediaQuery.of(context).size.height;
+  double vw = MediaQuery.of(context).size.width;
+  const double iconSize = 20;
+  final top = pos.dy + 8.0 > vh ? pos.dy - iconSize - 10 : pos.dy + 10;
+  final right = vw - pos.dx;
+
+  final appState = Provider.of<AppState>(context, listen: false);
+  final appearanceState = Provider.of<AppearanceState>(context, listen: false);
+
+  final sortItems = appState.fsSource.buildSortItems();
+  final sortBy = appState.fsSource.getSortBy();
+
+  showGeneralDialog(
+    context: context,
+    pageBuilder: (_, __, ___) {
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) {
+          gLogger.debug('didPop: $didPop');
+          if (didPop) {
+            return;
+          }
+          PageRouter.back(context);
+        },
+        child: Stack(
+          children: [
+            Positioned(
+              right: right,
+              top: top,
+              child: Material(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: ColorScheme.of(context).surface,
+                    boxShadow: const [
+                      BoxShadow(
+                          color: Color(0x20000000),
+                          blurRadius: 12.0,
+                          blurStyle: BlurStyle.outer)
+                    ],
+                    border: Border.all(
+                        color: appearanceState.lerpBgColor(0.07), width: 1.0),
+                    borderRadius: BorderRadius.circular(5.0),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4),
+                  child: IntrinsicWidth(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        for (var el in sortItems)
+                          TextButton.icon(
+                            onPressed: () {
+                              PageRouter.back(context);
+                              appState.fsSource.setSortItem(el.$1);
+                            },
+                            iconAlignment: IconAlignment.end,
+                            icon: Icon(
+                              el.$1.name.endsWith('Asc')
+                                  ? PhosphorIconsThin.arrowDown
+                                  : PhosphorIconsThin.arrowUp,
+                              color: el.$1 == sortBy
+                                  ? ColorScheme.of(context).primary
+                                  : ColorScheme.of(context).onSurface,
+                            ),
+                            label: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                el.$2,
+                                style: TextStyle(
+                                  color: el.$1 == sortBy
+                                      ? ColorScheme.of(context).primary
+                                      : ColorScheme.of(context).onSurface,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+    // barrierColor: Colors.black12,
+    barrierColor: Colors.transparent,
+    barrierDismissible: true,
+    barrierLabel: 'barrier_label',
+  );
 }

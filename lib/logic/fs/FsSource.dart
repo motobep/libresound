@@ -13,7 +13,7 @@ import 'package:music_player/logger.dart';
 import 'package:music_player/logic/Config.dart';
 import 'package:music_player/logic/DialogDescr.dart';
 import 'package:music_player/logic/GroupItem.dart';
-import 'package:music_player/logic/Item.dart' show IndexedItem;
+import 'package:music_player/logic/Item.dart' show IndexedItem, Item;
 import 'package:music_player/logic/JsonStorage.dart';
 import 'package:music_player/logic/PageDescr.dart';
 import 'package:music_player/logic/ActionButtonDescr.dart';
@@ -339,6 +339,15 @@ class FsSource implements Source {
               icon: IconName.shuffle,
               onTap: shuffleAction,
             ),
+            props: {
+              'sortBy': SortBy.titleAsc,
+              'sortItems': [
+                (SortBy.titleAsc, (lang.Title)),
+                (SortBy.titleDesc, (lang.Title)),
+                (SortBy.durationAsc, (lang.Duration)),
+                (SortBy.durationDesc, (lang.Duration)),
+              ],
+            },
           )
         ],
         FsStacks.playlists: [
@@ -354,6 +363,13 @@ class FsSource implements Source {
               icon: IconName.plus,
               onTap: showCreatePlaylistDialog,
             ),
+            props: {
+              'sortBy': SortBy.titleAsc,
+              'sortItems': [
+                (SortBy.titleAsc, (lang.Title)),
+                (SortBy.titleDesc, (lang.Title)),
+              ],
+            },
           )
         ],
         FsStacks.artists: [
@@ -365,6 +381,13 @@ class FsSource implements Source {
                 rowsCount: -1,
               )
             ],
+            props: {
+              'sortBy': SortBy.titleAsc,
+              'sortItems': [
+                (SortBy.titleAsc, (lang.Title)),
+                (SortBy.titleDesc, (lang.Title)),
+              ],
+            },
           )
         ],
         FsStacks.albums: [
@@ -376,6 +399,13 @@ class FsSource implements Source {
                 rowsCount: -1,
               )
             ],
+            props: {
+              'sortBy': SortBy.titleAsc,
+              'sortItems': [
+                (SortBy.titleAsc, (lang.Title)),
+                (SortBy.titleDesc, (lang.Title)),
+              ],
+            },
           )
         ],
         FsStacks.search: [
@@ -465,12 +495,13 @@ class FsSource implements Source {
         assert(false, 'Wrong group branch: $groupCategory');
     }
     final idx = names.indexOf(CONFIG.favouritesPlaylist);
+    const compareFn = _compareStrAsc;
     if (idx == -1) {
-      names.sort((a, b) => a.compareTo(b));
+      names.sort(compareFn);
     } else {
       // Put favouritesPlaylist on top
       final v = names.removeAt(idx);
-      names.sort((a, b) => a.compareTo(b));
+      names.sort(compareFn);
       names.insert(0, v);
     }
 
@@ -549,7 +580,9 @@ class FsSource implements Source {
     if (_currPageStackName == FsStacks.all) {
       logger.log('load all');
       currPage.title = lang.Tracks;
-      currPage.setFirstItemlist(_allMusicItems);
+
+      final itemlist = _sortedItemList(_allMusicItems);
+      currPage.setFirstItemlist(itemlist);
       if (CONFIG.isDemo) {
         _setDemoMainPage();
       }
@@ -571,7 +604,9 @@ class FsSource implements Source {
         // Shuold not be here
         _ => '[Should not be here]'
       };
-      currPage.setFirstItemlist(_getGroupList(_currPageStackName));
+
+      final itemlist = _sortedItemList(_getGroupList(_currPageStackName));
+      currPage.setFirstItemlist(itemlist);
       return;
     }
 
@@ -581,7 +616,9 @@ class FsSource implements Source {
     String groupCategory = _categoryFromGroupId(groupId);
     List<MusicItem> tracklist =
         _getTracklistFromGroup(groupName, groupCategory);
-    currPage.setFirstItemlist(tracklist);
+
+    final itemlist = _sortedItemList(tracklist);
+    currPage.setFirstItemlist(itemlist);
 
     // Possible Performance issue: Extra work
     final groups = _getGroupList(groupCategory);
@@ -653,6 +690,7 @@ class FsSource implements Source {
       ],
       props: {
         'groupId': groupId,
+        // No sort
       },
     ));
     loadCurrPage();
@@ -842,6 +880,7 @@ class FsSource implements Source {
         ),
       ], props: {
         'groupId': artistId,
+        // No sort
       });
       if (_currPageStack.length == 2) {
         // Replacing last page
@@ -1194,6 +1233,48 @@ class FsSource implements Source {
     assert(FsStacks.list.contains(name), 'Wrong stack: $name');
   }
 
+  SortBy? getSortBy() {
+    final sort_by = currPage.props['sortBy'];
+    return sort_by;
+  }
+
+  void setSortItem(SortBy sortBy) {
+    if (getSortBy() == sortBy) return;
+
+    currPage.props['sortBy'] = sortBy;
+    loadCurrPage();
+    updateCurrPage();
+  }
+
+  List<(SortBy, String)> buildSortItems() {
+    return currPage.props['sortItems'];
+  }
+
+  List<T> _sortedItemList<T extends Item>(List<T> itemlist) {
+    final sort_by = getSortBy();
+    if (sort_by == SortBy.titleAsc) {
+      return [
+        ...itemlist
+      ]..sort((a, b) => a.title.toUpperCase().compareTo(b.title.toUpperCase()));
+    }
+    if (sort_by == SortBy.titleDesc) {
+      return [
+        ...itemlist
+      ]..sort((a, b) => b.title.toUpperCase().compareTo(a.title.toUpperCase()));
+    }
+    if (sort_by == SortBy.durationAsc) {
+      final v = ([...itemlist] as List<MusicItem>)
+        ..sort((a, b) => a.duration.compareTo(b.duration));
+      return v as List<T>;
+    }
+    if (sort_by == SortBy.durationDesc) {
+      final v = ([...itemlist] as List<MusicItem>)
+        ..sort((a, b) => b.duration.compareTo(a.duration));
+      return v as List<T>;
+    }
+    return itemlist;
+  }
+
   Logger logger;
 
   void _setDemoMainPage() {
@@ -1475,3 +1556,8 @@ bool _matchWord(String needle, String haystack) {
   var re = RegExp(reStr, caseSensitive: false);
   return re.hasMatch(haystack);
 }
+
+int _compareStrAsc(String a, String b) =>
+    a.toUpperCase().compareTo(b.toUpperCase());
+// int _compareStrDesc(String a, String b) =>
+//     b.toUpperCase().compareTo(a.toUpperCase());
