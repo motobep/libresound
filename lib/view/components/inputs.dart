@@ -163,6 +163,7 @@ class SelectInput<T> extends StatelessWidget {
     this.trailingIconData,
     this.trailingIconOnTap,
     this.isCompact = false,
+    this.width,
   });
 
   static SelectInput fromJson(
@@ -186,6 +187,7 @@ class SelectInput<T> extends StatelessWidget {
   final IconData? trailingIconData;
   final void Function(T value)? trailingIconOnTap;
   final bool isCompact;
+  final double? width;
 
   @override
   Widget build(BuildContext context) {
@@ -197,6 +199,7 @@ class SelectInput<T> extends StatelessWidget {
         gLogger.blue('sel=$sel');
         onSelect(sel);
       },
+      width: width,
       enableSearch: false,
       enableFilter: false,
       requestFocusOnTap: false,
@@ -209,7 +212,7 @@ class SelectInput<T> extends StatelessWidget {
         enabledBorder: OutlineInputBorder(
           borderSide: BorderSide(
             width: 1.0,
-            color: appearanceState.lerpBgColor(0.20),
+            color: appearanceState.lerpBgColor(0.15),
           ),
           borderRadius: const BorderRadius.all(Radius.circular(5.0)),
         ),
@@ -224,7 +227,7 @@ class SelectInput<T> extends StatelessWidget {
         side: WidgetStateProperty.all(
           BorderSide(
             width: 1.0,
-            color: appearanceState.lerpBgColor(0.20),
+            color: appearanceState.lerpBgColor(0.15),
           ),
         ),
       ),

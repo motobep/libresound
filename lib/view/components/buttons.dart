@@ -175,6 +175,53 @@ class TabButton extends StatelessWidget {
   }
 }
 
+/// An alternative to StandardButton
+class SimpleButton extends StatelessWidget {
+  const SimpleButton({
+    super.key,
+    required this.text,
+    this.icon,
+    required this.onTap,
+  });
+
+  final String text;
+  final Icon? icon;
+  final void Function() onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final appearanceState =
+        Provider.of<AppearanceState>(context, listen: false);
+    Color _bgColor = appearanceState.colors[ColorType.bg]!;
+
+    return TextButton.icon(
+      icon: icon,
+      label: Text(
+        text,
+        style: const TextStyle(
+          fontWeight: FontWeight.normal,
+        ),
+      ),
+      onPressed: onTap,
+      style: ButtonStyle(
+        backgroundColor: WidgetStateColor.resolveWith((states) => _bgColor),
+        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+            RoundedRectangleBorder(
+          side: BorderSide(
+            width: 1.0,
+            color: appearanceState.lerpBgColor(0.15),
+          ),
+          borderRadius: BorderRadius.circular(6.0),
+        )),
+        padding: const WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.symmetric(
+          horizontal: 14.0,
+          vertical: 15.0,
+        )),
+      ),
+    );
+  }
+}
+
 class StandardButton extends StatelessWidget {
   const StandardButton(this.text,
       {super.key, required this.onTap, this.bgColor, this.fgColor});

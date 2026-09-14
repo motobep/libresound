@@ -10,6 +10,8 @@ import 'package:music_player/view/components/VolumeControls.dart';
 import 'package:music_player/view/components/dialogs.dart'
     show SelectSourceDirDialog;
 import 'package:music_player/view/components/inputs.dart';
+import 'package:music_player/view/pages/AppearancePage.dart'
+    show SpaceLine, boxPadding;
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart'
@@ -26,7 +28,7 @@ import 'package:music_player/states/AppearanceState.dart';
 import 'package:music_player/view/components/KeyBindigsTable.dart';
 import 'package:music_player/view/snackBarFuncs.dart';
 import 'package:music_player/view/components/buttons.dart'
-    show chooseMusicDir, StandardButton, ToPageButton, getBackBtn;
+    show chooseMusicDir, StandardButton, ToPageButton, getBackBtn, SimpleButton;
 
 final DateFormat _formatter = DateFormat('yy-MM-dd_HH-mm-ss');
 const int lastLogLinesNum = 500;
@@ -106,12 +108,10 @@ class SettingsBody extends StatelessWidget {
     );
 
     final boxDecoration = BoxDecoration(
-      color: appearanceState.lerpBgColor(0.04),
+      color: appearanceState.lerpBgColor(0.03),
       border: Border.all(color: appearanceState.lerpBgColor(0.07), width: 1.0),
       borderRadius: BorderRadius.circular(12.0),
     );
-
-    const boxPadding = EdgeInsets.symmetric(horizontal: 20.0, vertical: 18);
 
     List<Widget> widgets = switch (settings.currPage) {
       'Main' => [
@@ -142,7 +142,7 @@ class SettingsBody extends StatelessWidget {
                     ),
                   ],
                 ),
-                const _Spacer(),
+                const SpaceLine(),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -150,8 +150,8 @@ class SettingsBody extends StatelessWidget {
                     langSelect,
                   ],
                 ),
-                if (!appState.isWide || true) ...[
-                  const _Spacer(),
+                if (!appState.isWide) ...[
+                  const SpaceLine(),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -194,7 +194,7 @@ class SettingsBody extends StatelessWidget {
                     ),
                   ],
                 ),
-                const _Spacer(),
+                const SpaceLine(),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -256,7 +256,7 @@ class SettingsBody extends StatelessWidget {
                   ],
                 ),
                 if (CONFIG.isDev()) ...[
-                  const _Spacer(),
+                  const SpaceLine(),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -280,7 +280,7 @@ class SettingsBody extends StatelessWidget {
                           }),
                     ],
                   ),
-                  const _Spacer(),
+                  const SpaceLine(),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -343,76 +343,108 @@ class SettingsBody extends StatelessWidget {
       'Log' => [
           Heading(lang.For_developers),
           const SizedBox(height: 10.0),
-          StandardButton('Copy log to clipboard', onTap: () async {
-            final logFile = File(config.logFilepath);
-            try {
-              final contents = logFile.readAsStringSync();
-              await Clipboard.setData(ClipboardData(text: contents));
-            } catch (e) {
-              gLogger.error('Exception copying log file to clipboard: $e');
-            }
-          }),
+          SimpleButton(
+              text: 'Copy log to clipboard',
+              onTap: () async {
+                final logFile = File(config.logFilepath);
+                try {
+                  final contents = logFile.readAsStringSync();
+                  await Clipboard.setData(ClipboardData(text: contents));
+                } catch (e) {
+                  gLogger.error('Exception copying log file to clipboard: $e');
+                }
+              }),
           const SizedBox(height: 10.0),
-          StandardButton('Copy log to downloads', onTap: () async {
-            try {
-              final dirPath = switch (Platform.operatingSystem) {
-                'android' => CONFIG.androidDefaultDownloadsDir,
-                'linux' => '${Platform.environment["HOME"]}/Downloads',
-                _ => ''
-              };
+          SimpleButton(
+              text: 'Copy log to downloads',
+              onTap: () async {
+                try {
+                  final dirPath = switch (Platform.operatingSystem) {
+                    'android' => CONFIG.androidDefaultDownloadsDir,
+                    'linux' => '${Platform.environment["HOME"]}/Downloads',
+                    _ => ''
+                  };
 
-              final Directory dir = Directory(dirPath);
-              if (dir.existsSync()) {
-                final f = File(logFilepath!);
-                final dateStr = _formatter.format(DateTime.now());
-                final newPath = '${dir.absolute.path}/mp_log_$dateStr.txt';
-                f.copySync(newPath);
-                gLogger.log('Logfile Copied to: $newPath');
-              } else {
-                gLogger.warn('No dir: $dir');
-              }
-            } catch (e) {
-              gLogger.error('Exception copying log file to downloads: $e');
-            }
-          }),
+                  final Directory dir = Directory(dirPath);
+                  if (dir.existsSync()) {
+                    final f = File(logFilepath!);
+                    final dateStr = _formatter.format(DateTime.now());
+                    final newPath = '${dir.absolute.path}/mp_log_$dateStr.txt';
+                    f.copySync(newPath);
+                    gLogger.log('Logfile Copied to: $newPath');
+                  } else {
+                    gLogger.warn('No dir: $dir');
+                  }
+                } catch (e) {
+                  gLogger.error('Exception copying log file to downloads: $e');
+                }
+              }),
           const SizedBox(height: 24.0),
-          ..._getLogToggler(
-              config, 'logging.isLogToFile', (b) => Logger.isLogToFile = b),
-          ..._getLogToggler(
-              config, 'logging.isLogDebug', (b) => Logger.isLogDebug = b),
-          ..._getLogToggler(
-              config, 'logging.isLogTrace', (b) => Logger.isLogTrace = b),
-          ..._getLogToggler(
-              config, 'logging.isLogView', (b) => Logger.isLogView = b),
-          ..._getLogToggler(
-              config, 'logging.isLogBuild', (b) => Logger.isLogBuild = b),
-          const SizedBox(height: 24.0),
-          const Heading('Watch Plugins Directories\n(app reload is necessary)'),
-          const SizedBox(height: 6.0),
-          CheckboxInput(
-            isToggler: true,
-            initial: config.getProperty('isWatchPluginDirs') ?? false,
-            onSelect: (bool value) {
-              gLogger.view('toggle watch plugins dir switch');
-              bool v = config.getProperty('isWatchPluginDirs') ?? false;
-              config.saveProperty('isWatchPluginDirs', !v);
-              appState.update();
-              return true;
-            },
-          ),
-          const SizedBox(height: 24.0),
-          const Heading('Disable certificate check\n(app reload is necessary)'),
-          const SizedBox(height: 6.0),
-          CheckboxInput(
-            isToggler: true,
-            initial: config.getProperty('isCheckCertificate') ?? false,
-            onSelect: (bool value) {
-              gLogger.view('toggle check certificate switch');
-              bool v = config.getProperty('isCheckCertificate') ?? false;
-              config.saveProperty('isCheckCertificate', !v);
-              appState.update();
-              return true;
-            },
+          Container(
+            decoration: boxDecoration,
+            padding: boxPadding,
+            // width: double.infinity,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _getLogToggler(config, 'logging.isLogToFile',
+                    (b) => Logger.isLogToFile = b),
+                const SpaceLine(),
+                _getLogToggler(
+                    config, 'logging.isLogDebug', (b) => Logger.isLogDebug = b),
+                const SpaceLine(),
+                _getLogToggler(
+                    config, 'logging.isLogTrace', (b) => Logger.isLogTrace = b),
+                const SpaceLine(),
+                _getLogToggler(
+                    config, 'logging.isLogView', (b) => Logger.isLogView = b),
+                const SpaceLine(),
+                _getLogToggler(
+                    config, 'logging.isLogBuild', (b) => Logger.isLogBuild = b),
+                const SpaceLine(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                        'Watch Plugins Directories\n(app reload is necessary)'),
+                    CheckboxInput(
+                      isToggler: true,
+                      initial: config.getProperty('isWatchPluginDirs') ?? false,
+                      onSelect: (bool value) {
+                        gLogger.view('toggle watch plugins dir switch');
+                        bool v =
+                            config.getProperty('isWatchPluginDirs') ?? false;
+                        config.saveProperty('isWatchPluginDirs', !v);
+                        appState.update();
+                        return true;
+                      },
+                    ),
+                  ],
+                ),
+                const SpaceLine(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                        'Disable certificate check\n(app reload is necessary)'),
+                    const SizedBox(height: 6.0),
+                    CheckboxInput(
+                      isToggler: true,
+                      initial:
+                          config.getProperty('isCheckCertificate') ?? false,
+                      onSelect: (bool value) {
+                        gLogger.view('toggle check certificate switch');
+                        bool v =
+                            config.getProperty('isCheckCertificate') ?? false;
+                        config.saveProperty('isCheckCertificate', !v);
+                        appState.update();
+                        return true;
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 20.0),
           ExpansionTile(
@@ -454,72 +486,6 @@ class SettingsBody extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class SimpleButton extends StatelessWidget {
-  const SimpleButton({
-    super.key,
-    required this.text,
-    this.icon,
-    required this.onTap,
-  });
-
-  final String text;
-  final Icon? icon;
-  final void Function() onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final appearanceState =
-        Provider.of<AppearanceState>(context, listen: false);
-    // Color _bgColor = appearanceState.buttonColor();
-    Color _bgColor = appearanceState.colors[ColorType.bg]!;
-
-    return TextButton.icon(
-      icon: icon,
-      label: Text(
-        text,
-        style: const TextStyle(
-          fontWeight: FontWeight.normal,
-        ),
-      ),
-      onPressed: onTap,
-      style: ButtonStyle(
-        backgroundColor: WidgetStateColor.resolveWith((states) => _bgColor),
-        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-            RoundedRectangleBorder(
-          side: BorderSide(
-            width: 1.0,
-            color: appearanceState.lerpBgColor(0.15),
-          ),
-          borderRadius: BorderRadius.circular(6.0),
-        )),
-        padding: const WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.symmetric(
-          horizontal: 14.0,
-          vertical: 15.0,
-        )),
-      ),
-    );
-  }
-}
-
-class _Spacer extends StatelessWidget {
-  const _Spacer();
-
-  @override
-  Widget build(BuildContext context) {
-    final appearanceState =
-        Provider.of<AppearanceState>(context, listen: false);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 18.0),
-      child: Container(
-        height: 1,
-        width: double.infinity,
-        color: appearanceState.lerpBgColor(0.2),
       ),
     );
   }
@@ -590,21 +556,23 @@ class Heading extends StatelessWidget {
   }
 }
 
-List<Widget> _getLogToggler(
+Widget _getLogToggler(
     Config config, String propName, void Function(bool b) fn) {
-  return [
-    Heading(propName.split('.').last),
-    const SizedBox(height: 6.0),
-    CheckboxInput(
-      isToggler: true,
-      initial: config.getProperty(propName) ?? false,
-      onSelect: (bool value) {
-        gLogger.view('${propName}: $value');
-        bool b = !(config.getProperty(propName) ?? false);
-        config.saveProperty(propName, b);
-        fn(b);
-        return true;
-      },
-    )
-  ];
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Text(propName.split('.').last),
+      CheckboxInput(
+        isToggler: true,
+        initial: config.getProperty(propName) ?? false,
+        onSelect: (bool value) {
+          gLogger.view('${propName}: $value');
+          bool b = !(config.getProperty(propName) ?? false);
+          config.saveProperty(propName, b);
+          fn(b);
+          return true;
+        },
+      )
+    ],
+  );
 }

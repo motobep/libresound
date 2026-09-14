@@ -146,6 +146,7 @@ abstract class Lang {
   abstract String Everywhere;
 
   abstract String Custom_Font;
+  abstract String Corners;
   abstract String Supported_formats;
   abstract String Font;
   abstract String Thumbnail_corners;
@@ -440,6 +441,7 @@ Please add music to this folder or select a different folder in the Settings.'''
   String Everywhere = 'Everywhere';
 
   String Custom_Font = 'Custom Font';
+  String Corners = 'Corners';
   String Supported_formats = 'Supported formats';
   String Font = 'Font';
   String Thumbnail_corners = 'Thumbnail corners';
@@ -753,6 +755,7 @@ class RuLang implements Lang {
   String Everywhere = 'Везде';
 
   String Custom_Font = 'Пользовательский шрифт';
+  String Corners = 'Углы';
   String Supported_formats = 'Поддерживаемые форматы';
   String Font = 'Шрифт';
   String Thumbnail_corners = 'Углы миниатюры';

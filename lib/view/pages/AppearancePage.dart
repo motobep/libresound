@@ -2,6 +2,8 @@ import 'package:music_player/logger.dart';
 import 'package:music_player/logic/enums.dart';
 import 'package:music_player/logic/lang.dart';
 import 'package:music_player/view/components/inputs.dart' show SelectInput;
+import 'package:music_player/view/pages/SettingsPage.dart' show Heading;
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 
@@ -12,8 +14,10 @@ import 'package:music_player/config.dart' as CONFIG;
 
 import 'package:music_player/states/AppearanceState.dart';
 import 'package:music_player/view/components/buttons.dart'
-    show StandardButton, getBackBtn;
+    show StandardButton, getBackBtn, SimpleButton;
 import 'package:music_player/view/snackBarFuncs.dart';
+
+const boxPadding = EdgeInsets.symmetric(horizontal: 20.0, vertical: 18);
 
 class AppearancePage extends StatelessWidget {
   const AppearancePage({super.key});
@@ -63,6 +67,14 @@ class AppearanceBody extends StatelessWidget {
 
     final customTheme = appearanceState.getCustomTheme();
 
+    final boxDecoration = BoxDecoration(
+      color: appearanceState.lerpBgColor(0.03),
+      border: Border.all(color: appearanceState.lerpBgColor(0.07), width: 1.0),
+      borderRadius: BorderRadius.circular(12.0),
+    );
+
+    const double maxWidth = 700;
+
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: CONFIG.pagePaddingHor,
@@ -71,160 +83,221 @@ class AppearanceBody extends StatelessWidget {
       child: Align(
         alignment: Alignment.topCenter,
         child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(lang.Color_Palettes),
-              const SizedBox(height: 10),
-              SizedBox(
-                width: double.infinity,
-                height: 60,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    if (customTheme != null) ...[
-                      GestureDetector(
-                        onTap: () {
-                          appearanceState.changeTheme(customTheme);
-                        },
-                        child: Pallete(customTheme),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 10.0, horizontal: 8.0),
-                        child: Container(
-                          color: ColorScheme.of(context).secondary,
-                          width: 0.75,
-                          height: double.infinity,
-                        ),
-                      ),
-                    ],
-                    for (var theme in themes)
-                      GestureDetector(
-                        onTap: () {
-                          appearanceState.changeTheme(theme);
-                        },
-                        child: Pallete(theme),
-                      ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(lang.Colors),
-              const SizedBox(height: 5),
-              for (var entry in buttons.entries)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Row(
-                    // crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(width: 5),
-                      ColorExample(appearanceState.colors[entry.value]!, 20),
-                      const SizedBox(width: 12),
-                      StandardButton(entry.key, onTap: () {
-                        showColorPicker(
-                          context,
-                          entry.value,
-                          appearanceState,
-                          (Color color) {
-                            appearanceState.changeColor_n(entry.value, color);
-                          },
-                        );
-                      }),
-                    ],
-                  ),
-                ),
-              const SizedBox(height: 10),
-              StandardButton(lang.Save_palette, onTap: () {
-                appearanceState.saveCustomPalette();
-              }),
-              const SizedBox(height: 42 - 8),
-              Text(lang.Dynamic_theme),
-              const SizedBox(height: 6),
-              SelectInput(
-                elements: ambientModes,
-                initial: appearanceState.ambientMode,
-                onSelect: (mode) {
-                  appearanceState.onAmbientModeChange(mode!);
-                },
-              ),
-              const SizedBox(height: 32),
-              Text(lang.Custom_Font),
-              const SizedBox(height: 4),
-              Text(
-                '${lang.Supported_formats}: ttf, otf.',
-                style: TextStyle(
-                    fontSize: 12, color: ColorScheme.of(context).secondary),
-              ),
-              const SizedBox(height: 12),
-              Row(
+          child: Center(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: maxWidth),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  StandardButton(lang.Reset, onTap: () {
-                    appearanceState.resetFont();
-                  }),
-                  const SizedBox(width: 10),
-                  StandardButton(
-                    lang.Choose,
-                    onTap: () async {
-                      var messengerFunc = getSnackBarMessangerFunc(context);
-                      FilePickerResult? result =
-                          await FilePicker.platform.pickFiles();
-
-                      if (result != null) {
-                        String path = result.files.single.path!;
-                        gLogger.view(path);
-                        String? err = await appearanceState.changeFont(path);
-                        if (err != null) {
-                          messengerFunc(err);
-                        }
-                      } else {
-                        gLogger.view('Canceled choosing font');
-                      }
-                    },
-                  ),
-                  const SizedBox(width: 20),
-                  Expanded(
-                    child: SelectableText(
-                      '${lang.Font}: ${appearanceState.fontPath}',
-                      minLines: 1,
-                      maxLines: 3,
+                  Heading(lang.Colors),
+                  Container(
+                    decoration: boxDecoration,
+                    padding: boxPadding,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(lang.Color_Palettes),
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 60,
+                          child: ListView(
+                            scrollDirection: Axis.horizontal,
+                            children: [
+                              if (customTheme != null) ...[
+                                GestureDetector(
+                                  onTap: () {
+                                    appearanceState.changeTheme(customTheme);
+                                  },
+                                  child: Pallete(customTheme),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 10.0, horizontal: 8.0),
+                                  child: Container(
+                                    color: ColorScheme.of(context).secondary,
+                                    width: 0.75,
+                                    height: double.infinity,
+                                  ),
+                                ),
+                              ],
+                              for (var theme in themes)
+                                GestureDetector(
+                                  onTap: () {
+                                    appearanceState.changeTheme(theme);
+                                  },
+                                  child: Pallete(theme),
+                                ),
+                            ],
+                          ),
+                        ),
+                        const SpaceLine(),
+                        Text(lang.Colors),
+                        const SizedBox(height: 5),
+                        for (var entry in buttons.entries)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Row(
+                              // crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(width: 5),
+                                ColorExample(
+                                    appearanceState.colors[entry.value]!, 20),
+                                const SizedBox(width: 12),
+                                StandardButton(entry.key, onTap: () {
+                                  showColorPicker(
+                                    context,
+                                    entry.value,
+                                    appearanceState,
+                                    (Color color) {
+                                      appearanceState.changeColor_n(
+                                          entry.value, color);
+                                    },
+                                  );
+                                }),
+                              ],
+                            ),
+                          ),
+                        const SizedBox(height: 10),
+                        SimpleButton(
+                            text: lang.Save_palette,
+                            onTap: () {
+                              appearanceState.saveCustomPalette();
+                            }),
+                        const SpaceLine(),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(lang.Dynamic_theme),
+                            SelectInput(
+                              elements: ambientModes,
+                              initial: appearanceState.ambientMode,
+                              onSelect: (mode) {
+                                appearanceState.onAmbientModeChange(mode!);
+                              },
+                              isCompact: true,
+                              width: 220,
+                            ),
+                          ],
+                        )
+                      ],
                     ),
                   ),
+                  const SizedBox(height: 28),
+                  Heading(lang.Custom_Font),
+                  Container(
+                    decoration: boxDecoration,
+                    padding: boxPadding,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SelectableText(
+                                  '${lang.Font}: ${appearanceState.fontPath}',
+                                  minLines: 1,
+                                  maxLines: 3,
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  '${lang.Supported_formats}: ttf, otf.',
+                                  style: TextStyle(
+                                      fontSize: 12,
+                                      color: ColorScheme.of(context).secondary),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                SimpleButton(
+                                    text: lang.Reset,
+                                    icon: const Icon(PhosphorIconsRegular
+                                        .arrowCounterClockwise),
+                                    onTap: () {
+                                      appearanceState.resetFont();
+                                    }),
+                                const SizedBox(width: 10),
+                                SimpleButton(
+                                  text: lang.Choose,
+                                  icon: const Icon(
+                                      PhosphorIconsRegular.folderOpen),
+                                  onTap: () async {
+                                    var messengerFunc =
+                                        getSnackBarMessangerFunc(context);
+                                    FilePickerResult? result =
+                                        await FilePicker.platform.pickFiles();
+
+                                    if (result != null) {
+                                      String path = result.files.single.path!;
+                                      gLogger.view(path);
+                                      String? err = await appearanceState
+                                          .changeFont(path);
+                                      if (err != null) {
+                                        messengerFunc(err);
+                                      }
+                                    } else {
+                                      gLogger.view('Canceled choosing font');
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+                  Heading(lang.Corners),
+                  Container(
+                    decoration: boxDecoration,
+                    padding: boxPadding,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(lang.Thumbnail_corners),
+                        const SizedBox(height: 10),
+                        DoubleSlider(
+                            initial: appearanceState.thumbnailRadius,
+                            range: 18,
+                            onChangeEnd: (value) {
+                              appearanceState.changeThumbnailRadius(value);
+                            }),
+                        const SizedBox(height: 20),
+                        Text(lang.Cover_corners),
+                        const SizedBox(height: 10),
+                        DoubleSlider(
+                            initial: appearanceState.coverRadius,
+                            range: 30,
+                            onChangeEnd: (value) {
+                              appearanceState.changeCoverRadius(value);
+                            }),
+                        if (CONFIG.isDev()) ...[
+                          const SizedBox(height: 20),
+                          const Text(
+                              'Content padding (Only wide displays) (Experimental)'),
+                          const SizedBox(height: 10),
+                          DoubleSlider(
+                              initial: appearanceState.contentPaddingBaseHor,
+                              range: 50,
+                              onChangeEnd: (value) {
+                                appearanceState
+                                    .changeContentPaddingBaseHor(value);
+                              }),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
                 ],
               ),
-              const SizedBox(height: 42),
-              Text(lang.Thumbnail_corners),
-              const SizedBox(height: 10),
-              DoubleSlider(
-                  initial: appearanceState.thumbnailRadius,
-                  range: 18,
-                  onChangeEnd: (value) {
-                    appearanceState.changeThumbnailRadius(value);
-                  }),
-              const SizedBox(height: 20),
-              Text(lang.Cover_corners),
-              const SizedBox(height: 10),
-              DoubleSlider(
-                  initial: appearanceState.coverRadius,
-                  range: 30,
-                  onChangeEnd: (value) {
-                    appearanceState.changeCoverRadius(value);
-                  }),
-              if (CONFIG.isDev()) ...[
-                const SizedBox(height: 20),
-                const Text(
-                    'Content padding (Only wide displays) (Experimental)'),
-                const SizedBox(height: 10),
-                DoubleSlider(
-                    initial: appearanceState.contentPaddingBaseHor,
-                    range: 50,
-                    onChangeEnd: (value) {
-                      appearanceState.changeContentPaddingBaseHor(value);
-                    }),
-              ],
-              const SizedBox(height: 50),
-            ],
+            ),
           ),
         ),
       ),
@@ -426,6 +499,25 @@ class ColorExample extends StatelessWidget {
           color: color,
           shape: BoxShape.circle,
           border: Border.all(color: Colors.white)),
+    );
+  }
+}
+
+class SpaceLine extends StatelessWidget {
+  const SpaceLine({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final appearanceState =
+        Provider.of<AppearanceState>(context, listen: false);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 18.0),
+      child: Container(
+        height: 1,
+        width: double.infinity,
+        color: appearanceState.lerpBgColor(0.2),
+      ),
     );
   }
 }
