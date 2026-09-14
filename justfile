@@ -5,7 +5,6 @@ _list:
   @just --list --unsorted
 
 build_time := datetime('%Y_%m_%d–%H:%M')
-is_disable_download_plugins := env('is_disable_download_plugins', '0')
 is_demo := env('is_demo', '0')
 
 [group('dev')]
@@ -15,7 +14,6 @@ run version='debug' platform=os():
         --{{version}} \
         --dart-define=build_mode=dev \
         --dart-define=datetime={{build_time}} \
-        --dart-define=is_disable_download_plugins={{is_disable_download_plugins}} \
         --dart-define=is_demo={{is_demo}} \
         -d {{platform}}
 
@@ -24,8 +22,7 @@ build target:
     dart run ./bin/check_version.dart
     flutter build {{target}} \
         --dart-define=build_mode=prod \
-        --dart-define=datetime={{build_time}} \
-        --dart-define=is_disable_download_plugins={{is_disable_download_plugins}}
+        --dart-define=datetime={{build_time}}
 
 # copy/zip+copy target
 [group('dev')]

@@ -88,6 +88,7 @@ abstract class Lang {
   abstract String Equalizer;
   abstract String Licenses;
   abstract String For_developers;
+  abstract String phrase__clear_cache;
   abstract String Clear;
   abstract String Cache_cleared;
   abstract String phrase__cache_errored;
@@ -377,6 +378,7 @@ class EnLang implements Lang {
   String Equalizer = 'Equalizer';
   String Licenses = 'Licenses';
   String For_developers = 'For developers';
+  String phrase__clear_cache = 'Clear cache: cached files, track durations';
   String Clear = 'Clear';
   String Cache_cleared = 'Cache cleared';
   String phrase__cache_errored =
@@ -690,6 +692,8 @@ class RuLang implements Lang {
   String Equalizer = 'Эквалайзер';
   String Licenses = 'Лицензии';
   String For_developers = 'Для разработчиков';
+  String phrase__clear_cache =
+      'Очистить кэш: кэшированные файлы, длительность треков';
   String Clear = 'Очистить';
   String Cache_cleared = 'Кэш очищен';
   String phrase__cache_errored = 'Что-то пошло не так при очистке кэша';

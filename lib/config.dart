@@ -223,8 +223,8 @@ const Duration connectionTimeout =
     Duration(seconds: mode == VersionMode.dev ? 32 : 120);
 const double smThumbnail = 50;
 
-const isDisableDownloadPlugins =
-    String.fromEnvironment('is_disable_download_plugins') == '1' ? true : false;
+// TODO: remove
+const isDisableDownloadPlugins = false;
 
 // const bool isUseNestedPlaylistsDir = true;
 const bool isUseNestedPlaylistsDir = mode == VersionMode.dev ? false : false;

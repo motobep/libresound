@@ -218,7 +218,7 @@ class SelectInput<T> extends StatelessWidget {
       menuStyle: MenuStyle(
         shape: WidgetStateProperty.all<RoundedRectangleBorder>(
           RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5.0),
+            borderRadius: BorderRadius.circular(6.0),
           ),
         ),
         side: WidgetStateProperty.all(
