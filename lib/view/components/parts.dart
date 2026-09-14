@@ -35,7 +35,7 @@ class TrackDescription extends StatelessWidget {
         .select<PlaybackState, String>((s) => s.playback.progressFormatted);
 
     String subtitle = appState.isWide
-        ? '${progressFormatted} / ${musicItem.time} · ${musicItem.subtitle}'
+        ? '${progressFormatted} / ${musicItem.time} · ${musicItem.artistName}'
         : musicItem.subtitle;
 
     return Row(
@@ -50,6 +50,7 @@ class TrackDescription extends StatelessWidget {
                       });
                 }
               : null,
+          mouseCursor: SystemMouseCursors.click,
           child: Container(
             width: imgSize,
             height: imgSize,

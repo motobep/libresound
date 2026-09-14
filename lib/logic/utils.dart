@@ -83,6 +83,13 @@ PictureTag bytesToPictureTag(Uint8List bytes, {String? mimeType}) {
   return picture;
 }
 
+String formatBottomLine(String time, String artist) {
+  if (time == '0:00') {
+    return artist;
+  }
+  return '$time · $artist';
+}
+
 List<List<String>> prefixList(List<List<String>> list, String prefix) {
   for (var t in list) {
     t[0] = '$prefix${t[0]}';
