@@ -1,3 +1,4 @@
+import 'package:music_player/config.dart' as CONFIG;
 import 'package:music_player/states/AppState.dart';
 import 'package:music_player/states/SelectionState.dart';
 import 'package:provider/provider.dart';
@@ -115,13 +116,23 @@ class BottomControlsWide extends StatelessWidget {
                     spacing: 4.0,
                     children: [
                       VolumeControls(isAlwaysVisible: !appState.isWide),
-                      InkWell(
-                        onTapUp: (details) {
-                          var pos = details.globalPosition;
-                          showEqualizerContextMenu(context, pos);
-                        },
-                        mouseCursor: SystemMouseCursors.click,
-                        child: const Icon(PhosphorIconsThin.sliders),
+                      Material(
+                        child: InkWell(
+                          onTapUp: (details) {
+                            var pos = details.globalPosition;
+                            showEqualizerContextMenu(context, pos);
+                          },
+                          mouseCursor: SystemMouseCursors.click,
+                          customBorder: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                                CONFIG.Default.iconOverlayRadius),
+                          ),
+                          child: const SizedBox(
+                            width: CONFIG.Default.iconSize,
+                            height: CONFIG.Default.iconSize,
+                            child: Icon(PhosphorIconsThin.sliders),
+                          ),
+                        ),
                       ),
                       IconButton(
                         onPressed: isSelectionHidden

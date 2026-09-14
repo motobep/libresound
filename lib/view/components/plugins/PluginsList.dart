@@ -246,6 +246,7 @@ class _Box extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = ColorScheme.of(context).primary;
     return InkWell(
+      mouseCursor: SystemMouseCursors.click,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 5),
         child: Text(

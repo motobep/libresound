@@ -198,6 +198,10 @@ class MaterialAppThemed extends StatelessWidget {
             overlayColor: WidgetStateColor.resolveWith(
                 (_) => appearanceState.hoverColor()),
             enabledMouseCursor: SystemMouseCursors.click,
+            shape: RoundedRectangleBorder(
+              borderRadius:
+                  BorderRadius.circular(CONFIG.Default.iconOverlayRadius),
+            ),
           ),
         ),
         textButtonTheme: TextButtonThemeData(

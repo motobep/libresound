@@ -284,6 +284,9 @@ class PlaybackControlsBody extends StatelessWidget {
                               color: ColorScheme.of(context).surface,
                             )),
                         iconSize: iconLgSize,
+                        style: TextButton.styleFrom(
+                          shape: const CircleBorder(),
+                        ),
                       ),
                       const SizedBox(width: 4),
                       IconButton(

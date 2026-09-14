@@ -1,3 +1,4 @@
+import 'package:music_player/config.dart' as CONFIG;
 import 'package:music_player/states/PlaybackState.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
@@ -83,18 +84,28 @@ class VolumeControlsState extends State<VolumeControls> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(left: 10.0, right: 12),
-            child: InkWell(
-              mouseCursor: SystemMouseCursors.click,
-              onTap: () {
-                if (!isMuted) {
-                  playback.setVolume(0);
-                } else {
-                  playback.setVolume(config.getProperty('volume'));
-                }
-                setState(() => setIsMuted(!isMuted));
-              },
-              child: Icon(iconData, size: 22.0),
+            padding: const EdgeInsets.only(left: 10.0, right: 6),
+            child: Material(
+              child: SizedBox(
+                width: CONFIG.Default.iconSize,
+                height: CONFIG.Default.iconSize,
+                child: InkWell(
+                  mouseCursor: SystemMouseCursors.click,
+                  customBorder: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(CONFIG.Default.iconOverlayRadius),
+                  ),
+                  onTap: () {
+                    if (!isMuted) {
+                      playback.setVolume(0);
+                    } else {
+                      playback.setVolume(config.getProperty('volume'));
+                    }
+                    setState(() => setIsMuted(!isMuted));
+                  },
+                  child: Icon(iconData, size: 22.0),
+                ),
+              ),
             ),
           ),
         ],

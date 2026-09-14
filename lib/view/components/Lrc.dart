@@ -13,7 +13,7 @@ TextStyle styleDefault = TextStyle(
   color: secondaryColor,
   fontSize: 20,
   fontWeight: FontWeight.w400,
-  height: 2.0,
+  height: 1.5,
   letterSpacing: 0.5,
 );
 

@@ -32,14 +32,24 @@ class SortByWidget extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(left: 6.0, right: 2),
-      child: InkWell(
-        onTapUp: (details) {
-          gLogger.debug('sort');
-          var pos = details.globalPosition;
-          showSortByContextMenu(context, pos);
-        },
-        mouseCursor: SystemMouseCursors.click,
-        child: const Icon(PhosphorIconsThin.sortAscending),
+      child: Material(
+        child: InkWell(
+          onTapUp: (details) {
+            gLogger.debug('sort');
+            var pos = details.globalPosition;
+            showSortByContextMenu(context, pos);
+          },
+          mouseCursor: SystemMouseCursors.click,
+          customBorder: RoundedRectangleBorder(
+            borderRadius:
+                BorderRadius.circular(CONFIG.Default.iconOverlayRadius),
+          ),
+          child: const SizedBox(
+            width: CONFIG.Default.iconSize,
+            height: CONFIG.Default.iconSize,
+            child: Icon(PhosphorIconsThin.sortAscending),
+          ),
+        ),
       ),
     );
   }

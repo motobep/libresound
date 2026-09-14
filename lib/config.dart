@@ -232,8 +232,10 @@ const bool isUseNestedPlaylistsDir = mode == VersionMode.dev ? false : false;
 const String syncVersion = '1.0.0';
 
 class Default {
-  static double thumbnailRadius = 4;
-  static double coverRadius = 10;
+  static const double thumbnailRadius = 4;
+  static const double coverRadius = 10;
+  static const double iconOverlayRadius = 4;
+  static const double iconSize = 40;
 }
 
 const beforePauseAsyncTimeout = Duration(seconds: 2);
