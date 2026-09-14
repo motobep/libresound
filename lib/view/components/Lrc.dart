@@ -13,6 +13,7 @@ TextStyle styleDefault = TextStyle(
   color: secondaryColor,
   fontSize: 20,
   fontWeight: FontWeight.w400,
+  height: 2.0,
   letterSpacing: 0.5,
 );
 
@@ -181,7 +182,8 @@ class _LrcState extends State<Lrc> {
       if (_scrollController.hasClients) {
         gLogger.view('lyrics to zero');
         _scrollController.animateTo(0,
-            duration: CONFIG.scrollAnimationDuration, curve: Curves.easeOutCubic);
+            duration: CONFIG.scrollAnimationDuration,
+            curve: Curves.easeOutCubic);
       }
       setState(() {});
     }
@@ -349,6 +351,7 @@ class _LrcState extends State<Lrc> {
   }
 }
 
+// TODO: delete?
 class MyPainter extends CustomPainter {
   MyPainter(this.lyrics, this.fontFamily, {super.repaint});
   List<LyricsLine> lyrics;

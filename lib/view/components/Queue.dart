@@ -194,6 +194,7 @@ class _QueueState extends State<Queue> {
           },
           itemCount: playbackQueue.length,
           itemBuilder: (BuildContext context, int index) {
+            // gLogger.debug('build item $index');
             MusicItem mi = playbackQueue.getMusicItem(index);
             bool isFocused = isPaneActive && focusIndex == index;
             bool isLoading = downloadsState.hasPlayId(mi.sourceId, mi.id);

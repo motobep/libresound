@@ -74,6 +74,7 @@ class DraggableQueue extends StatelessWidget {
         maxChildSize: maxQueuePercent,
         controller: queueSheetController,
         builder: (BuildContext context, ScrollController scrollController) {
+          // gLogger.build('DraggableScrollableSheet.builder');
           return SingleChildScrollView(
             controller: scrollController,
             child: GestureDetector(
