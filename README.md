@@ -1,5 +1,3 @@
-![banner](./assets/docs/banner_mp_1024x500.png)
-
 # LibreSound - Extendable music player
 
 **LibreSound** is a music player that can be easily extended to get more features. **The plugin system** is like a lego set: you can add **new music** sources, **lyrics** and **functionality**. It's all up to you. No ads, no subscriptions; free & open-source.
