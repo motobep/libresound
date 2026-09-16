@@ -75,6 +75,10 @@ class PluginsList extends StatelessWidget {
     final appearanceState =
         Provider.of<AppearanceState>(context, listen: false);
 
+    final itemBgColor = appearanceState
+        .lerpBgColor(0.03)
+        .withAlpha(appearanceState.overBgAlpha);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -94,7 +98,7 @@ class PluginsList extends StatelessWidget {
               border: Border.all(
                   color: appearanceState.lerpBgColor(0.07), width: 1.0),
               borderRadius: BorderRadius.circular(12.0),
-              color: appearanceState.lerpBgColor(0.03),
+              color: itemBgColor,
             ),
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
             child: Row(

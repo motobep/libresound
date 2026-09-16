@@ -113,6 +113,10 @@ class _ActionsDialog extends StatelessWidget {
 
     final dialogFuncs = getDialogFuncs();
     final accentColor = Theme.of(context).colorScheme.tertiary;
+
+    final appearanceState =
+        Provider.of<AppearanceState>(context, listen: false);
+
     return TextButtonTheme(
         data: TextButtonThemeData(
           style: TextButton.styleFrom(
@@ -134,6 +138,7 @@ class _ActionsDialog extends StatelessWidget {
             focusState.unfocusActions();
           },
           child: AlertDialog(
+            backgroundColor: appearanceState.overBgColorWithAlpha(),
             contentPadding: const EdgeInsets.all(20),
             content: Column(
               mainAxisSize: MainAxisSize.min,
@@ -186,7 +191,7 @@ void showActionsContextMenu(BuildContext context, Offset pos) {
               top: top,
               child: Container(
                 decoration: BoxDecoration(
-                  color: ColorScheme.of(context).surface,
+                  color: appearanceState.overBgColorWithAlpha(),
                   boxShadow: const [
                     BoxShadow(
                         color: Color(0x20000000),

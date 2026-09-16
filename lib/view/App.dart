@@ -163,7 +163,7 @@ class MaterialAppThemed extends StatelessWidget {
           if (states.contains(WidgetState.dragged)) {
             return appearanceState.inactiveTrackColor();
           }
-          return appearanceState.chosenTabColor();
+          return appearanceState.lerpBgColor(0.05);
         })),
         primaryColor: primary,
         hoverColor: appearanceState.hoverColor(),

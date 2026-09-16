@@ -83,7 +83,7 @@ class _TopTabsState extends State<TopTabs> {
         border: Border(
             bottom: BorderSide(
           width: 1,
-          color: appearanceState.chosenTabColor(),
+          color: appearanceState.lerpBgColor(0.05),
         )),
       ),
       padding: EdgeInsets.symmetric(

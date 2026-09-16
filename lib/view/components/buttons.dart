@@ -139,7 +139,7 @@ class TabButton extends StatelessWidget {
     Color _fgColor = ColorScheme.of(context).primary;
     Color _bgColor = isActive
         ? appearanceState.chosenTabColor()
-        : ColorScheme.of(context).surface;
+        : appearanceState.bgColorOrTransparent();
     final icon = iconsMap[iconName]?.call(PhosphorIconsStyle.thin);
 
     return TextButton(

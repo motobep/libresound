@@ -113,8 +113,8 @@ class TileBase extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color focusColor =
         context.select<AppearanceState, Color>((s) => s.focusColor());
-    final Color selectedBgColor =
-        context.select<AppearanceState, Color>((s) => s.lerpBgColor(0.04));
+    final Color selectedBgColor = context.select<AppearanceState, Color>(
+        (s) => s.lerpBgColor(0.04).withAlpha(s.overBgAlpha));
     Color borderColor =
         context.select<AppearanceState, Color>((s) => s.lerpBgColor(0.40));
     Color? bgColor;

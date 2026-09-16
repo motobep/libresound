@@ -86,6 +86,7 @@ class VolumeControlsState extends State<VolumeControls> {
           Padding(
             padding: const EdgeInsets.only(left: 10.0, right: 6),
             child: Material(
+              color: Colors.transparent,
               child: SizedBox(
                 width: CONFIG.Default.iconSize,
                 height: CONFIG.Default.iconSize,

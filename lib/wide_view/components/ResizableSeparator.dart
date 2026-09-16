@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:music_player/logger.dart';
-import 'package:provider/provider.dart';
-import 'package:music_player/states/AppearanceState.dart';
 
 class ResizeableSeparator extends StatelessWidget {
   const ResizeableSeparator({
@@ -21,8 +19,6 @@ class ResizeableSeparator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color bgColor =
-        context.select<AppearanceState, Color>((s) => s.colors[ColorType.bg]!);
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onHorizontalDragUpdate: (details) {
@@ -34,8 +30,7 @@ class ResizeableSeparator extends StatelessWidget {
       },
       child: MouseRegion(
         cursor: SystemMouseCursors.resizeLeftRight,
-        child: Container(
-          color: bgColor,
+        child: SizedBox(
           width: width,
           height: height,
           child: Center(

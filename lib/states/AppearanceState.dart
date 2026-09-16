@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' show max, min;
 import 'package:flutter/foundation.dart' show mapEquals;
 import 'package:flutter/material.dart'
     show
@@ -51,6 +52,9 @@ class AppearanceState extends ChangeNotifier {
   };
   AmbientMode ambientMode = AmbientMode.off;
   String fontPath = CONFIG.fontFamilyDefault;
+  String? bgImagePath;
+  int bgAlpha = CONFIG.Default.bgAlpha;
+  int overBgAlpha = CONFIG.Default.overBgAlpha; // not customizable
   double thumbnailRadius = CONFIG.Default.thumbnailRadius;
   double coverRadius = CONFIG.Default.coverRadius;
   double contentPaddingBaseHor = CONFIG.defaultContentPaddingBaseHor;
@@ -79,6 +83,17 @@ class AppearanceState extends ChangeNotifier {
     if (ambientModeJson != null) {
       ambientMode = AmbientMode.fromJson(ambientModeJson);
     }
+
+    final imagePath = _getPropWithWarn('bgImagePath');
+    if (imagePath != null && !File(imagePath).existsSync()) {
+      bgImagePath = null;
+    } else {
+      bgImagePath = imagePath;
+    }
+
+    bgAlpha = _getPropWithWarn('bgAlpha') ?? bgAlpha;
+    overBgAlpha = _calcOverBgAlpha();
+
     thumbnailRadius = _getPropWithWarn('thumbnailRadius') ?? thumbnailRadius;
     coverRadius = _getPropWithWarn('coverRadius') ?? coverRadius;
     contentPaddingBaseHor =
@@ -159,6 +174,17 @@ class AppearanceState extends ChangeNotifier {
     saveColors();
   }
 
+  // TODO: consider replacing
+  Color bgColorOrTransparent() {
+    if (bgImagePath == null || bgAlpha == 255) return colors[ColorType.bg]!;
+    return Colors.transparent;
+  }
+
+  Color overBgColorWithAlpha() {
+    final alpha = bgImagePath != null ? overBgAlpha : 255;
+    return colors[ColorType.bg]!.withAlpha(alpha);
+  }
+
   Color queueBtnColor() {
     return lerpBgColor(0.035);
   }
@@ -168,7 +194,7 @@ class AppearanceState extends ChangeNotifier {
   }
 
   Color chosenTabColor() {
-    return lerpBgColor(0.05);
+    return lerpBgColor(0.05).withAlpha(overBgAlpha);
   }
 
   Color separatorColor() {
@@ -229,11 +255,12 @@ class AppearanceState extends ChangeNotifier {
   }
 
   Color focusColor() {
-    return lerpBgColor(0.08);
+    // return lerpBgColor(0.08);
+    return lerpBgColor(0.08).withAlpha(overBgAlpha);
   }
 
   Color focusSuggestionColor() {
-    return lerpBgColor(0.12);
+    return lerpBgColor(0.12).withAlpha(overBgAlpha);
   }
 
   /// Notifies
@@ -275,6 +302,47 @@ class AppearanceState extends ChangeNotifier {
     bool ok = config.saveProperty('custom_palette', clrs);
     notifyListeners();
     return ok;
+  }
+
+  // Bb
+
+  /// Notifies
+  String? changeBgImagePath(String path) {
+    RegExp regex = RegExp(r'\.(png|jpg|jpeg)$');
+    bool found = regex.hasMatch(path);
+    if (!found) {
+      var err = 'File must have "png", "jpg", "jpeg" extension.';
+      gLogger.warn(err);
+      return err;
+    }
+
+    bgImagePath = path;
+    overBgAlpha = _calcOverBgAlpha();
+    config.saveProperty('bgImagePath', bgImagePath);
+    notifyListeners();
+
+    return null;
+  }
+
+  /// Notifies
+  void resetBgImagePath() {
+    bgImagePath = null;
+    overBgAlpha = _calcOverBgAlpha();
+    config.saveProperty('bgImagePath', null);
+    notifyListeners();
+  }
+
+  void changeBgAlpha(int value) {
+    assert(0 <= value && value <= 255, 'Bad alpha: $value');
+    bgAlpha = value;
+    overBgAlpha = _calcOverBgAlpha();
+    notifyListeners();
+    config.saveProperty('bgAlpha', bgAlpha);
+  }
+
+  int _calcOverBgAlpha() {
+    if (bgImagePath == null) return 255;
+    return max(min(bgAlpha, CONFIG.Default.overBgAlpha), 10);
   }
 
   // Fonts

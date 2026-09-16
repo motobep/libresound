@@ -179,8 +179,9 @@ class AppState extends ChangeNotifier {
     ];
   }
 
+  /// Sorted asc
   List<Null Function()> _getSidebarSourceOnTaps() {
-    final sourcesIds = sources.values.map((s) => s.sourceId);
+    final sourcesIds = sources.values.map((s) => s.sourceId).toList()..sort();
     return [
       for (var id in sourcesIds)
         () {
@@ -222,6 +223,7 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> reloadPlugin(plugins.PluginInfo plugin) async {
+    logger.log('reloadPlugin: ${plugin.id}');
     final prevSourceId = currentSource.sourceId;
 
     if (plugin.isSource) {

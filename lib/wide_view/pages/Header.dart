@@ -114,11 +114,14 @@ class Header extends StatelessWidget {
         ));
     rightWidgets.add(toggleBtn);
 
+    Color bgColorWithAlpha =
+        context.select<AppearanceState, Color>((s) => s.bgColorOrTransparent());
+
     return Container(
       height: 66,
       padding: const EdgeInsets.symmetric(horizontal: 30.0),
       child: Container(
-        color: ColorScheme.of(context).surface,
+        color: bgColorWithAlpha,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

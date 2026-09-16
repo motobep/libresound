@@ -152,6 +152,11 @@ abstract class Lang {
   abstract String Thumbnail_corners;
   abstract String Cover_corners;
   abstract String Pick_color;
+  abstract String Wallpaper;
+  abstract String Opacity;
+
+  abstract String Only_for_wide_displays;
+  abstract String Experimental;
 
   // Sync
   abstract String Deactivate;
@@ -447,6 +452,11 @@ Please add music to this folder or select a different folder in the Settings.'''
   String Thumbnail_corners = 'Thumbnail corners';
   String Cover_corners = 'Cover corners';
   String Pick_color = 'Pick color';
+  String Wallpaper = 'Wallpaper';
+  String Opacity = 'Opacity';
+
+  String Only_for_wide_displays = 'Only for wide displays';
+  String Experimental = 'Experimental';
 
   // Sync
   String Deactivate = 'Deactivate';
@@ -761,6 +771,11 @@ class RuLang implements Lang {
   String Thumbnail_corners = 'Углы миниатюры';
   String Cover_corners = 'Углы обложки';
   String Pick_color = 'Выбрать цвет';
+  String Wallpaper = 'Обои';
+  String Opacity = 'Непрозрачность';
+
+  String Only_for_wide_displays = 'Только для широких дисплеев';
+  String Experimental = 'Экспериментально';
 
   // Sync
   String Deactivate = 'Выключить';

@@ -1,5 +1,6 @@
 import 'package:music_player/config.dart' as CONFIG;
 import 'package:music_player/states/AppState.dart';
+import 'package:music_player/states/AppearanceState.dart' show AppearanceState;
 import 'package:music_player/states/SelectionState.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +33,9 @@ class BottomControlsWide extends StatelessWidget {
     IconData icon = getPlayIcon(playback.playState);
     IconData repeatIcon = getRepeatIcon(playback.repeatState);
 
+    Color bgColorWithAlpha =
+        context.select<AppearanceState, Color>((s) => s.bgColorOrTransparent());
+
     bool isSelectionHidden =
         context.select<SelectionState, bool>((s) => s.isEmpty);
 
@@ -40,8 +44,7 @@ class BottomControlsWide extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.only(bottom: 2.0),
-      color: Theme.of(context).colorScheme.surface,
-      // color: Colors.blue,
+      color: bgColorWithAlpha,
       child: Column(
         children: [
           const PlaybackSlider(thumbRadius: 1.0, activeThumbRadius: 6.0),
@@ -117,6 +120,7 @@ class BottomControlsWide extends StatelessWidget {
                     children: [
                       VolumeControls(isAlwaysVisible: !appState.isWide),
                       Material(
+                        color: Colors.transparent,
                         child: InkWell(
                           onTapUp: (details) {
                             var pos = details.globalPosition;

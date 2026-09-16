@@ -1,6 +1,7 @@
 import 'package:music_player/logger.dart';
 import 'package:music_player/logic/enums.dart';
 import 'package:music_player/logic/lang.dart';
+import 'package:music_player/states/AppState.dart' show AppState;
 import 'package:music_player/view/components/inputs.dart' show SelectInput;
 import 'package:music_player/view/pages/SettingsPage.dart' show Heading;
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -19,8 +20,11 @@ import 'package:music_player/view/snackBarFuncs.dart';
 
 const boxPadding = EdgeInsets.symmetric(horizontal: 20.0, vertical: 18);
 
-BoxDecoration buildBoxDecoration(appearanceState) => BoxDecoration(
-      color: appearanceState.lerpBgColor(0.03),
+BoxDecoration buildBoxDecoration(AppearanceState appearanceState) =>
+    BoxDecoration(
+      color: appearanceState
+          .lerpBgColor(0.03)
+          .withAlpha(appearanceState.overBgAlpha),
       border: Border.all(color: appearanceState.lerpBgColor(0.07), width: 1.0),
       borderRadius: BorderRadius.circular(12.0),
     );
@@ -46,6 +50,7 @@ class AppearanceBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     gLogger.build('AppearanceBody');
+    final appState = Provider.of<AppState>(context, listen: false);
     final appearanceState =
         Provider.of<AppearanceState>(context, listen: false);
     var themes = [
@@ -186,6 +191,99 @@ class AppearanceBody extends StatelessWidget {
                       ],
                     ),
                   ),
+                  if (appState.isWide) ...[
+                    const SizedBox(height: 28),
+                    Heading(
+                        '${lang.Wallpaper}. (${lang.Experimental}, ${lang.Only_for_wide_displays})'),
+                    Container(
+                      decoration: boxDecoration,
+                      padding: boxPadding,
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Flexible(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      SelectableText(
+                                        '${lang.Wallpaper}${appearanceState.bgImagePath != null ? ": ${appearanceState.bgImagePath}" : ""}',
+                                        minLines: 1,
+                                        maxLines: 3,
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        '${lang.Supported_formats}: png, jpg, jpeg.',
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            color: ColorScheme.of(context)
+                                                .secondary),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    SimpleButton(
+                                        text: lang.Reset,
+                                        icon: const Icon(PhosphorIconsRegular
+                                            .arrowCounterClockwise),
+                                        onTap: () {
+                                          appearanceState.resetBgImagePath();
+                                        }),
+                                    const SizedBox(width: 10),
+                                    SimpleButton(
+                                      text: lang.Choose,
+                                      icon: const Icon(
+                                          PhosphorIconsRegular.folderOpen),
+                                      onTap: () async {
+                                        var messengerFunc =
+                                            getSnackBarMessangerFunc(context);
+                                        FilePickerResult? result =
+                                            await FilePicker.platform
+                                                .pickFiles();
+
+                                        if (result != null) {
+                                          String path =
+                                              result.files.single.path!;
+                                          gLogger.view(path);
+                                          String? err = appearanceState
+                                              .changeBgImagePath(path);
+                                          if (err != null) {
+                                            messengerFunc(err);
+                                          }
+                                        } else {
+                                          gLogger.trace(
+                                              'Canceled choosing bg image');
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            const SpaceLine(),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(lang.Opacity),
+                                const SizedBox(height: 10),
+                                DoubleSlider(
+                                    initial:
+                                        appearanceState.bgAlpha / 255 * 100,
+                                    range: 100,
+                                    onChangeEnd: (value) {
+                                      final int alpha =
+                                          (value / 100 * 255).round();
+                                      appearanceState.changeBgAlpha(alpha);
+                                    }),
+                              ],
+                            )
+                          ]),
+                    ),
+                  ],
                   const SizedBox(height: 28),
                   Heading(lang.Custom_Font),
                   Container(
@@ -197,22 +295,25 @@ class AppearanceBody extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SelectableText(
-                                  '${lang.Font}: ${appearanceState.fontPath}',
-                                  minLines: 1,
-                                  maxLines: 3,
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  '${lang.Supported_formats}: ttf, otf.',
-                                  style: TextStyle(
-                                      fontSize: 12,
-                                      color: ColorScheme.of(context).secondary),
-                                ),
-                              ],
+                            Flexible(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SelectableText(
+                                    '${lang.Font}: ${appearanceState.fontPath}',
+                                    minLines: 1,
+                                    maxLines: 3,
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '${lang.Supported_formats}: ttf, otf.',
+                                    style: TextStyle(
+                                        fontSize: 12,
+                                        color:
+                                            ColorScheme.of(context).secondary),
+                                  ),
+                                ],
+                              ),
                             ),
                             const SizedBox(height: 12),
                             Row(

@@ -31,7 +31,8 @@ class Tabs extends StatelessWidget {
       padding: EdgeInsets.symmetric(
           horizontal: appearanceState.contentPaddingBaseHor + 10, vertical: 4),
       decoration: BoxDecoration(
-        color: ColorScheme.of(context).surface,
+        // color: appearanceState.bgColorOrTransparent(),
+        color: Colors.transparent,
         border: Border(
             top: BorderSide(
           width: 1,

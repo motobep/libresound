@@ -72,8 +72,8 @@ class _QueueState extends State<Queue> {
   Widget build(BuildContext context) {
     gLogger.build(runtimeType);
     final lang = context.select<AppearanceState, Lang>((s) => s.lang);
-    Color bgColor =
-        context.select<AppearanceState, Color>((s) => s.colors[ColorType.bg]!);
+    // Color bgColorWithAlpha =
+    //     context.select<AppearanceState, Color>((s) => s.bgColorWithAlpha());
     Color focusColor =
         context.select<AppearanceState, Color>((s) => s.focusColor());
     Color textColor = context
@@ -212,6 +212,7 @@ class _QueueState extends State<Queue> {
                 }
               },
               child: Material(
+                color: Colors.transparent,
                 child: TileBase(
                   title: mi.title,
                   subtitle: mi.subtitle,
@@ -301,8 +302,8 @@ class _QueueState extends State<Queue> {
           },
         );
       }
-      return Container(
-        color: bgColor,
+      return SizedBox(
+        // color: bgColorWithAlpha,
         width: widget.width,
         height: widget.height,
         child: w,

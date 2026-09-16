@@ -239,7 +239,9 @@ class BrowsePluginsState extends State<BrowsePlugins> {
                     color: ColorScheme.of(context).onSurface,
                   ),
                 ),
-                boxBg: appearanceState.lerpBgColor(0.05),
+                boxBg: appearanceState
+                    .lerpBgColor(0.05)
+                    .withAlpha(appearanceState.overBgAlpha),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16),
               ),
             ),
@@ -310,6 +312,7 @@ class _InfoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // TODO: check structure before trying to show
     final d = pluginInfo;
     final unpacked_size = utils.formatBytes(d['unpacked_size']);
     final colorScheme = ColorScheme.of(context);
@@ -412,7 +415,7 @@ class _Description extends StatelessWidget {
     final d = data;
 
     final readme = d['readme_md'];
-    final descr = d['langs_descr'] ?? d['descr'];
+    final String descr = d['langs_descr'] ?? d['descr'];
     Widget w;
     if (readme != null && readme != '' && readme is String) {
       w = MarkdownBody(
@@ -423,8 +426,8 @@ class _Description extends StatelessWidget {
               launchUrl(Uri.parse(href));
             }
           });
-    } else if (descr != null && descr != '') {
-      w = descr;
+    } else if (descr != '') {
+      w = Text(descr);
     } else {
       return const SizedBox();
     }

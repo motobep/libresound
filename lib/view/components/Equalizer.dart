@@ -426,11 +426,12 @@ void showEqualizerContextMenu(BuildContext context, Offset pos) {
               right: right,
               top: top,
               child: Material(
+                color: Colors.transparent,
                 child: Container(
                   width: width,
                   height: height,
                   decoration: BoxDecoration(
-                    color: ColorScheme.of(context).surface,
+                    color: appearanceState.overBgColorWithAlpha(),
                     boxShadow: const [
                       BoxShadow(
                           color: Color(0x20000000),

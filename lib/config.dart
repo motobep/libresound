@@ -232,6 +232,8 @@ const bool isUseNestedPlaylistsDir = mode == VersionMode.dev ? false : false;
 const String syncVersion = '1.0.0';
 
 class Default {
+  static const int bgAlpha = 204;
+  static const int overBgAlpha = 50;
   static const double thumbnailRadius = 4;
   static const double coverRadius = 10;
   static const double iconOverlayRadius = 4;

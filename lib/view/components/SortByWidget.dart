@@ -33,6 +33,7 @@ class SortByWidget extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(left: 6.0, right: 2),
       child: Material(
+        color: Colors.transparent,
         child: InkWell(
           onTapUp: (details) {
             gLogger.debug('sort');
@@ -86,9 +87,9 @@ void showSortByContextMenu(BuildContext context, Offset pos) {
               right: right,
               top: top,
               child: Material(
+                color: appearanceState.overBgColorWithAlpha(),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: ColorScheme.of(context).surface,
                     boxShadow: const [
                       BoxShadow(
                           color: Color(0x20000000),

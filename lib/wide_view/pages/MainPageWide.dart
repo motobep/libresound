@@ -1,3 +1,4 @@
+import 'dart:io' show File;
 import 'dart:math' show max, min;
 
 import 'package:flutter/material.dart';
@@ -123,7 +124,9 @@ class _MainPageWideState extends State<MainPageWide> {
               color: ColorScheme.of(context).onSurface,
             ),
           ),
-          boxBg: appearanceState.lerpBgColor(0.05),
+          boxBg: appearanceState
+              .lerpBgColor(0.05)
+              .withAlpha(appearanceState.overBgAlpha),
           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
         );
         break;
@@ -135,64 +138,88 @@ class _MainPageWideState extends State<MainPageWide> {
     final focusManager = Provider.of<FocusManagerState>(context, listen: false);
 
     return Scaffold(
-      body: Column(
-        children: [
-          Header(
-              title: headlineTitle,
-              upBtn: const UpButton(),
-              width: width,
-              searchWideOrContainer: searchWideOrContainer,
-              isRightPanelOpen: isRightPanelOpen,
-              onRightPanelToggle: () {
-                gLogger.view('(Wide) Right panel toggled');
-                // Toggle queue
-                setState(() {
-                  isRightPanelOpen = !isRightPanelOpen;
-                  config.saveProperty('isRightPanelOpen', isRightPanelOpen);
-                  if (!isRightPanelOpen) focusManager.focusBody();
-                });
-              }),
-          Container(
-            height: 1,
-            color: separatorColor,
-          ),
-          Expanded(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Sidebar(width: width * sidebarWidthPercentage),
-                ResizeableSeparator(
-                    onHorizontalDragUpdate: _updateSidebarWidth,
-                    onHorizontalDragEnd: (details) {
-                      config.saveProperty(
-                          'sidebarWidthPercentage', sidebarWidthPercentage);
-                    },
-                    width: separatorWidth,
-                    height: height,
-                    separatorColor: separatorColor),
-                Expanded(
-                  child: MainPopScope(
-                    child: mainBody,
-                  ),
-                ),
-                if (isRightPanelOpen)
+      body: Container(
+        decoration: appearanceState.bgImagePath != null
+            ? BoxDecoration(
+                image: DecorationImage(
+                    image: FileImage(File(appearanceState.bgImagePath!)),
+                    fit: BoxFit.cover,
+                    colorFilter: ColorFilter.mode(
+                      appearanceState.colors[ColorType.bg]!
+                          .withAlpha(appearanceState.bgAlpha),
+                      BlendMode.srcATop,
+                    ),
+                    onError: (o, s) {
+                      gLogger.error('Error (DecorationImage): $o.\n$s');
+                    }),
+              )
+            : null,
+        child: Column(
+          children: [
+            Header(
+                title: headlineTitle,
+                upBtn: const UpButton(),
+                width: width,
+                searchWideOrContainer: searchWideOrContainer,
+                isRightPanelOpen: isRightPanelOpen,
+                onRightPanelToggle: () {
+                  gLogger.view('(Wide) Right panel toggled');
+                  // Toggle queue
+                  setState(() {
+                    isRightPanelOpen = !isRightPanelOpen;
+                    config.saveProperty('isRightPanelOpen', isRightPanelOpen);
+                    if (!isRightPanelOpen) focusManager.focusBody();
+                  });
+                }),
+            Container(
+              height: 1,
+              color: separatorColor,
+            ),
+            Expanded(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Sidebar(width: width * sidebarWidthPercentage),
                   ResizeableSeparator(
-                      onHorizontalDragUpdate: _updateQueueWidth,
+                      onHorizontalDragUpdate: _updateSidebarWidth,
                       onHorizontalDragEnd: (details) {
-                        config.saveProperty('rightPanelWidthPercentage',
-                            rightPanelWidthPercentage);
+                        config.saveProperty(
+                            'sidebarWidthPercentage', sidebarWidthPercentage);
                       },
                       width: separatorWidth,
                       height: height,
                       separatorColor: separatorColor),
-                if (isRightPanelOpen)
-                  QueueOrLyrics(
-                      width: width * rightPanelWidthPercentage, height: height)
-              ],
+                  Expanded(
+                    child: MainPopScope(
+                      child: Container(
+                        color: appearanceState.bgColorOrTransparent(),
+                        child: mainBody,
+                      ),
+                    ),
+                  ),
+                  if (isRightPanelOpen)
+                    ResizeableSeparator(
+                        onHorizontalDragUpdate: _updateQueueWidth,
+                        onHorizontalDragEnd: (details) {
+                          config.saveProperty('rightPanelWidthPercentage',
+                              rightPanelWidthPercentage);
+                        },
+                        width: separatorWidth,
+                        height: height,
+                        separatorColor: separatorColor),
+                  if (isRightPanelOpen)
+                    Container(
+                      color: appearanceState.bgColorOrTransparent(),
+                      child: QueueOrLyrics(
+                          width: width * rightPanelWidthPercentage,
+                          height: height),
+                    )
+                ],
+              ),
             ),
-          ),
-          const BottomControlsWide(),
-        ],
+            const BottomControlsWide(),
+          ],
+        ),
       ),
     );
   }

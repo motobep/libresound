@@ -62,8 +62,8 @@ class _SidebarState extends State<Sidebar> {
 
   @override
   Widget build(BuildContext context) {
-    Color bgColor =
-        context.select<AppearanceState, Color>((s) => s.colors[ColorType.bg]!);
+    Color bgColorWithAlpha =
+        context.select<AppearanceState, Color>((s) => s.bgColorOrTransparent());
 
     // To update plugin sources list
     context.select<AppState, int>((app) => app.sources.length);
@@ -120,7 +120,7 @@ class _SidebarState extends State<Sidebar> {
         : const EdgeInsets.only(left: 0.0, top: 0.0);
 
     return Container(
-      color: bgColor,
+      color: bgColorWithAlpha,
       width: widget.width,
       padding: padding,
       child: LayoutBuilder(

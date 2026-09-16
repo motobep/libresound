@@ -95,6 +95,7 @@ class PluginInfo {
   }
 }
 
+/// Sorted asc
 List<PluginInfo> getInstalledPluginsFromDir(String pluginsDir) {
   List<PluginInfo> pluginsList = [];
   Directory dir = Directory(pluginsDir);
@@ -115,7 +116,7 @@ List<PluginInfo> getInstalledPluginsFromDir(String pluginsDir) {
       gLogger.warn('Invalid plugin info: ${pluginDir.path}');
     }
   }
-  return pluginsList;
+  return pluginsList..sort((a, b) => a.id.compareTo(b.id));
 }
 
 PluginInfo? _getPluginInfo(String rootDir) {
