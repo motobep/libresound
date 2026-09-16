@@ -1,3 +1,5 @@
+![banner](./assets/docs/banner_mp_1024x500.png)
+
 # LibreSound - Extendable music player
 
 **LibreSound** is a music player that can be easily extended to get more features. **The plugin system** is like a lego set: you can add **new music** sources, **lyrics** and **functionality**. It's all up to you. No ads, no subscriptions; free & open-source.
@@ -21,16 +23,29 @@ Website: [libresound.org](https://libresound.org/).
 - [Official Website](https://libresound.org/#Downloads)
 - [Github releases](https://github.com/motobep/libresound/releases)
 
+## TODO
+
+- [ ] Plugins via shared libraries (.so/.dll)
+- [ ] App's Proxy settings
+- [ ] Transparent/blurred background (PC)
+
+
+## Dependencies
+
+- Flutter 3.41.9
+- Dart 3.11.5
 
 ## Build & Run from source
 
 ### Run
+
 ```bash
 just run # using just
 flutter run --debug --dart-define=build_mode=dev # directly
 ```
 
 ### Build
+
 ```bash
 just build # using just
 flutter build apk --dart-define=build_mode=prod --dart-define=datetime=YYYY_MM_DD–hh:mm # directly
