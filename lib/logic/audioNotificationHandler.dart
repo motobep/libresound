@@ -275,8 +275,8 @@ class MyAudioHandler extends BaseAudioHandler
 
   @override
   Future<void> stop() async {
-    logger.log('stop');
-    await playback.togglePlayback();
+    logger.log('stop\n\tdoing nothing');
+    // await playback.togglePlayback();
   }
 
   @override

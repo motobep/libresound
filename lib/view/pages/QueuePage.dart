@@ -6,6 +6,8 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:music_player/logic/lang.dart';
 
 import 'package:music_player/states/AppState.dart' show AppState;
+import 'package:music_player/states/AppearanceState.dart'
+    show AppearanceState, ColorType;
 
 import 'package:music_player/view/components/SelectionInfo.dart';
 import 'package:music_player/view/components/Queue.dart';
@@ -20,6 +22,9 @@ class QueuePage extends StatelessWidget {
     gLogger.build(runtimeType);
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
+
+    final appearanceState =
+        Provider.of<AppearanceState>(context, listen: false);
 
     return Column(
       children: [
@@ -37,9 +42,12 @@ class QueuePage extends StatelessWidget {
         Stack(
           alignment: Alignment.center,
           children: [
-            Queue(
-              width: width,
-              height: height - appBarHeight,
+            Container(
+              color: appearanceState.colors[ColorType.bg]!,
+              child: Queue(
+                width: width,
+                height: height - appBarHeight,
+              ),
             ),
             const Positioned(bottom: 30 + 40, child: SelectionInfo()),
           ],

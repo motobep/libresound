@@ -510,6 +510,7 @@ class Playback {
   }
 
   Future<void> togglePlayback() async {
+    logger.debug('togglePlayback');
     switch (playState) {
       case PlayState.playing:
         await _pause();

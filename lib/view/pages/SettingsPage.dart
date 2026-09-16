@@ -120,21 +120,22 @@ class SettingsBody extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(lang.Folder_with_music),
-                        const SizedBox(height: 2.0),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 2.0),
-                          child: SelectableText(musicFolder),
-                        ),
-                      ],
+                    Flexible(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(lang.Folder_with_music),
+                          const SizedBox(height: 2.0),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 2.0),
+                            child: SelectableText(musicFolder),
+                          ),
+                        ],
+                      ),
                     ),
-                    Row(
-                      children: [
-                        chooseFolderBtn,
-                      ],
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: chooseFolderBtn,
                     ),
                   ],
                 ),

@@ -176,15 +176,18 @@ class AppearanceBody extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(lang.Dynamic_theme),
-                            SelectInput(
-                              elements: ambientModes,
-                              initial: appearanceState.ambientMode,
-                              onSelect: (mode) {
-                                appearanceState.onAmbientModeChange(mode!);
-                              },
-                              isCompact: true,
-                              width: 220,
+                            Flexible(child: Text(lang.Dynamic_theme, maxLines: 2)),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 8.0),
+                              child: SelectInput(
+                                elements: ambientModes,
+                                initial: appearanceState.ambientMode,
+                                onSelect: (mode) {
+                                  appearanceState.onAmbientModeChange(mode!);
+                                },
+                                isCompact: true,
+                                width: 150,
+                              ),
                             ),
                           ],
                         )
@@ -206,7 +209,8 @@ class AppearanceBody extends StatelessWidget {
                               children: [
                                 Flexible(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       SelectableText(
                                         '${lang.Wallpaper}${appearanceState.bgImagePath != null ? ": ${appearanceState.bgImagePath}" : ""}',
@@ -315,41 +319,44 @@ class AppearanceBody extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                SimpleButton(
-                                    text: lang.Reset,
-                                    icon: const Icon(PhosphorIconsRegular
-                                        .arrowCounterClockwise),
-                                    onTap: () {
-                                      appearanceState.resetFont();
-                                    }),
-                                const SizedBox(width: 10),
-                                SimpleButton(
-                                  text: lang.Choose,
-                                  icon: const Icon(
-                                      PhosphorIconsRegular.folderOpen),
-                                  onTap: () async {
-                                    var messengerFunc =
-                                        getSnackBarMessangerFunc(context);
-                                    FilePickerResult? result =
-                                        await FilePicker.platform.pickFiles();
+                            Padding(
+                              padding: const EdgeInsets.only(left: 8.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  SimpleButton(
+                                    text: lang.Choose,
+                                    icon: const Icon(
+                                        PhosphorIconsRegular.folderOpen),
+                                    onTap: () async {
+                                      var messengerFunc =
+                                          getSnackBarMessangerFunc(context);
+                                      FilePickerResult? result =
+                                          await FilePicker.platform.pickFiles();
 
-                                    if (result != null) {
-                                      String path = result.files.single.path!;
-                                      gLogger.view(path);
-                                      String? err = await appearanceState
-                                          .changeFont(path);
-                                      if (err != null) {
-                                        messengerFunc(err);
+                                      if (result != null) {
+                                        String path = result.files.single.path!;
+                                        gLogger.view(path);
+                                        String? err = await appearanceState
+                                            .changeFont(path);
+                                        if (err != null) {
+                                          messengerFunc(err);
+                                        }
+                                      } else {
+                                        gLogger.view('Canceled choosing font');
                                       }
-                                    } else {
-                                      gLogger.view('Canceled choosing font');
-                                    }
-                                  },
-                                ),
-                              ],
+                                    },
+                                  ),
+                                  const SizedBox(height: 10),
+                                  SimpleButton(
+                                      text: lang.Reset,
+                                      icon: const Icon(PhosphorIconsRegular
+                                          .arrowCounterClockwise),
+                                      onTap: () {
+                                        appearanceState.resetFont();
+                                      }),
+                                ],
+                              ),
                             ),
                           ],
                         ),
