@@ -176,7 +176,8 @@ class AppearanceBody extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Flexible(child: Text(lang.Dynamic_theme, maxLines: 2)),
+                            Flexible(
+                                child: Text(lang.Dynamic_theme, maxLines: 2)),
                             Padding(
                               padding: const EdgeInsets.only(left: 8.0),
                               child: SelectInput(
@@ -620,15 +621,15 @@ class SpaceLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appearanceState =
-        Provider.of<AppearanceState>(context, listen: false);
+    final color =
+        context.select<AppearanceState, Color>((s) => s.lerpBgColor(0.2));
 
     return Padding(
       padding: EdgeInsets.symmetric(vertical: padVer),
       child: Container(
         height: 1,
         width: double.infinity,
-        color: appearanceState.lerpBgColor(0.2),
+        color: color,
       ),
     );
   }

@@ -107,6 +107,8 @@ class SettingsBody extends StatelessWidget {
       isCompact: true,
     );
 
+    // To update boxDecoration
+    context.select<AppearanceState, Color>((s) => s.colors[ColorType.bg]!);
     final boxDecoration = buildBoxDecoration(appearanceState);
 
     List<Widget> widgets = switch (settings.currPage) {

@@ -17,6 +17,9 @@ class Tabs extends StatelessWidget {
     final appearanceState =
         Provider.of<AppearanceState>(context, listen: false);
 
+    Color separatorColor =
+        context.select<AppearanceState, Color>((s) => s.separatorColor());
+
     int currentTabIdx =
         context.select<AppState, int>((app) => app.currentSource.currTabIdx);
 
@@ -36,7 +39,7 @@ class Tabs extends StatelessWidget {
         border: Border(
             top: BorderSide(
           width: 1,
-          color: appearanceState.separatorColor(),
+          color: separatorColor,
         )),
       ),
       child: Row(
