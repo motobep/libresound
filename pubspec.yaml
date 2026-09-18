@@ -18,12 +18,12 @@ dependencies:
   audioplayers: # MIT
     git:
       url: https://github.com/motobep/audioplayers.git
-      ref: 6c0e29f4f329d63ea2b35e8489dcedec09af3e1c
+      ref: 56cbdab131f67807558c792fac401ab1c3c14d18
       path: packages/audioplayers
   audioplayers_android_exo:
     git:
       url: https://github.com/motobep/audioplayers.git
-      ref: 6c0e29f4f329d63ea2b35e8489dcedec09af3e1c
+      ref: 56cbdab131f67807558c792fac401ab1c3c14d18
       path: packages/audioplayers_android_exo
   mp3_info: ^0.2.1 # MIT
   id3tag: ^0.2.0 # MIT
@@ -71,17 +71,17 @@ dependency_overrides:
   audioplayers_platform_interface:
     git:
       url: https://github.com/motobep/audioplayers.git
-      ref: 6c0e29f4f329d63ea2b35e8489dcedec09af3e1c
+      ref: 56cbdab131f67807558c792fac401ab1c3c14d18
       path: packages/audioplayers_platform_interface
   audioplayers_linux:
     git:
       url: https://github.com/motobep/audioplayers.git
-      ref: 6c0e29f4f329d63ea2b35e8489dcedec09af3e1c
+      ref: 56cbdab131f67807558c792fac401ab1c3c14d18
       path: packages/audioplayers_linux
   audioplayers_windows:
     git:
       url: https://github.com/motobep/audioplayers.git
-      ref: 6c0e29f4f329d63ea2b35e8489dcedec09af3e1c
+      ref: 56cbdab131f67807558c792fac401ab1c3c14d18
       path: packages/audioplayers_windows
 
 dev_dependencies:
