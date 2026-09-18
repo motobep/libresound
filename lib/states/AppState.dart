@@ -668,7 +668,7 @@ class AppState extends ChangeNotifier {
       bool isEnabled = isEqEnabled ?? false;
       await equalizer.setEnabled(isEnabled);
 
-      if (CONFIG.isDemo && true) {
+      if (CONFIG.isDemo && false) {
         // if (CONFIG.isDev()) {
         frequencies = [60, 230, 910, 4000, 14000];
         numBands = frequencies.length;

@@ -103,7 +103,7 @@ class _SidebarState extends State<Sidebar> {
         _Btn(
           p.titleTranslated(),
           PhosphorIconsThin.plugs,
-          endWidget: CONFIG.isDev()
+          endWidget: CONFIG.isDev() && !CONFIG.isDemo
               ? IconButton(
                   icon: const Icon(PhosphorIconsThin.arrowCounterClockwise),
                   onPressed: () {

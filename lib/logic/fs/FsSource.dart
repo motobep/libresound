@@ -583,7 +583,7 @@ class FsSource implements Source {
 
       final itemlist = _sortedItemList(_allMusicItems);
       currPage.setFirstItemlist(itemlist);
-      if (CONFIG.isDemo) {
+      if (CONFIG.isDemo && false) {
         _setDemoMainPage();
       }
       return;
@@ -1278,11 +1278,12 @@ class FsSource implements Source {
   Logger logger;
 
   void _setDemoMainPage() {
+    final langDemo = demoFsFuncs.getLangDemo(lang.code_);
     currPage.title = 'Simple client';
     currPage.sectionlist = [
       SectionDescr(
         header: SectionHeaderDescr(
-          title: demoFsFuncs.langDemo['Favorite_Songs'],
+          title: langDemo['Favorite_Songs'],
         ),
         itemlist: _allMusicItems,
         isBigTile: false,
@@ -1291,7 +1292,7 @@ class FsSource implements Source {
       ),
       SectionDescr(
         header: SectionHeaderDescr(
-          title: demoFsFuncs.langDemo['Top_Playlists'],
+          title: langDemo['Top_Playlists'],
         ),
         itemlist: _getGroupList(FsStacks.artists),
         isBigTile: true,
@@ -1299,7 +1300,7 @@ class FsSource implements Source {
       ),
       SectionDescr(
         header: SectionHeaderDescr(
-          title: demoFsFuncs.langDemo['Related_Albums'],
+          title: langDemo['Related_Albums'],
         ),
         itemlist: _getGroupList(FsStacks.albums),
         isBigTile: false,

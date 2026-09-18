@@ -68,4 +68,4 @@ const ru = {
   'Related_Albums': 'Похожие Альбомы',
 };
 
-const langDemo = ru;
+Map<String, String> getLangDemo(String code) => code == 'ru' ? ru : en;

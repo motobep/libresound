@@ -323,7 +323,7 @@ class _SyncButtonsBody extends StatelessWidget {
               ),
             ),
             const SizedBox(height: actionsGap),
-            if (CONFIG.isDev())
+            if (CONFIG.isDev() && !CONFIG.isDemo)
               StandardButton(
                 'Prepare dirs',
                 onTap: () async {

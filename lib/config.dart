@@ -246,7 +246,7 @@ const beforePauseAsyncTimeout = Duration(seconds: 2);
 const bool isDemo = String.fromEnvironment('is_demo') == '1';
 
 const double minQueueSheetChildSize = !isDemo ? 0.085 : 0.1;
-const double tabsHeight = !isDemo ? defaultTabsHeight : 12.0;
+const double tabsHeight = !isDemo ? defaultTabsHeight : defaultTabsHeight + 12;
 const double tabsBottomPad = !isDemo ? 0 : 12;
 
 const double playbackTopPad = !isDemo ? 8 : 8 + 24;
