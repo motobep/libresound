@@ -29,6 +29,7 @@ import 'package:music_player/view/components/KeyBindigsTable.dart';
 import 'package:music_player/view/snackBarFuncs.dart';
 import 'package:music_player/view/components/buttons.dart'
     show chooseMusicDir, ToPageButton, getBackBtn, SimpleButton;
+import 'package:url_launcher/url_launcher.dart' show launchUrl;
 
 final DateFormat _formatter = DateFormat('yy-MM-dd_HH-mm-ss');
 const int lastLogLinesNum = 500;
@@ -182,7 +183,7 @@ class SettingsBody extends StatelessWidget {
                     const SizedBox(height: 4.0),
                     CheckboxInput(
                       initial: config.getProperty('isAutoLoadPluginHomePage',
-                          orElse: true),
+                          orElse: false),
                       onSelect: (b) {
                         gLogger.log('isAutoLoadPluginHomePage: $b');
                         bool ok =
@@ -203,7 +204,7 @@ class SettingsBody extends StatelessWidget {
                     const SizedBox(height: 4.0),
                     CheckboxInput(
                       initial: config.getProperty('isAutoCheckPluginUpdates',
-                          orElse: true),
+                          orElse: false),
                       onSelect: (b) {
                         gLogger.log('isAutoCheckPluginUpdates: $b');
                         bool ok =
@@ -328,6 +329,25 @@ class SettingsBody extends StatelessWidget {
                   settings.currPage = settings.pages[2];
                   appState.update();
                 }),
+                const SizedBox(height: 18.0),
+                Row(
+                  children: [
+                    SimpleButton(
+                        icon: const Icon(PhosphorIconsThin.globe),
+                        text: 'LibreSound',
+                        onTap: () {
+                          launchUrl(Uri.parse('https://libresound.org/'));
+                        }),
+                    const SizedBox(width: 10.0),
+                    SimpleButton(
+                        icon: const Icon(PhosphorIconsThin.githubLogo),
+                        text: 'GitHub',
+                        onTap: () {
+                          launchUrl(Uri.parse(
+                              'https://github.com/motobep/libresound'));
+                        }),
+                  ],
+                ),
               ],
             ),
           ),

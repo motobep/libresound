@@ -72,7 +72,7 @@ class BrowsePluginsState extends State<BrowsePlugins> {
     _pluginsClient = PluginsClient(url);
 
     bool isAutoloadPluginHomePage =
-        config.getProperty('isAutoLoadPluginHomePage', orElse: true);
+        config.getProperty('isAutoLoadPluginHomePage', orElse: false);
     if (isAutoloadPluginHomePage) {
       var appState = Provider.of<AppState>(context, listen: false);
       final pluginsPages = appState.pluginsPages;

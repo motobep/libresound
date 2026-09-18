@@ -146,9 +146,7 @@ class AppState extends ChangeNotifier {
 
   bool isAudioAccessGranted = false;
   bool get isPluginsDisclaimerRead =>
-      config.getProperty('isPluginsDisclaimerRead') ?? false;
-  bool get isPluginsMiniDisclaimerRead =>
-      config.getProperty('isPluginsMiniDisclaimerRead') ?? false;
+      config.getProperty('isPluginsDisclaimerRead_v2') ?? false;
 
   bool get isShowPreloader {
     return currentSource.isShowPreloader;
@@ -338,7 +336,7 @@ class AppState extends ChangeNotifier {
 
     await _loadPlugins(pluginManager.getInstalledPlugins());
     if (!CONFIG.isDisableDownloadPlugins &&
-        config.getProperty('isAutoCheckPluginUpdates', orElse: true)) {
+        config.getProperty('isAutoCheckPluginUpdates', orElse: false)) {
       await pluginManager.checkPluginUpdatesAsync();
     }
 

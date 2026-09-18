@@ -253,6 +253,14 @@ abstract class Lang {
   abstract String phrase__plugin_welcome;
   abstract String Warning;
   abstract String phrase__disclaimer;
+  abstract String phrase__disclaimer_terms_1;
+  abstract String phrase__disclaimer_terms_2;
+  abstract String phrase__disclaimer_end;
+  abstract String Terms_of_Service__ablative;
+  abstract String Privacy_Policy__ablative;
+  abstract String link__Terms_of_Service;
+  abstract String link__Privacy_Policy;
+
   // abstract String Ive_read_and_understood;
   abstract String Plugin_settings;
   abstract String
@@ -260,6 +268,7 @@ abstract class Lang {
   abstract String Automatic_check_for_plugin_updates;
   abstract String This_message_will_not_appear_again;
   abstract String Continue;
+  abstract String Back;
 
   // FsSource
   abstract String Tracks;
@@ -570,7 +579,22 @@ Please add music to this folder or select a different folder in the Settings.'''
       '''Plugins are small programs that expand the music player's capabilities:
 - add new music sources;
 - provide lyrics, etc.
-The music player developer is not responsible for plugins. There is no guarantee of their quality or security. Use only trusted plugins.''';
+For convenience, they can also be installed from a server.
+''';
+  String phrase__disclaimer_terms_1 =
+      'By using the default plugin server (https://plugins.libresound.org), you agree to its';
+  String phrase__disclaimer_terms_2 = ' and ';
+
+  String phrase__disclaimer_end =
+      '''Plugins are provided "as is". The application developer disclaims all liability for plugins and third-party servers, internet resources. You assume all associated risks.
+
+By continuing, you acknowledge that you have read, understood, and agreed to the terms above.''';
+  String Terms_of_Service__ablative = 'Terms of Service';
+  String Privacy_Policy__ablative = 'Privacy Policy';
+  String link__Terms_of_Service =
+      'https://plugins.libresound.org/terms-of-service/';
+  String link__Privacy_Policy =
+      'https://plugins.libresound.org/privacy-policy/';
   // String Ive_read_and_understood = 'I\'ve read and understood';
   String Plugin_settings = 'Plugin settings';
   String Automatically_load_the_home_page_when_entering_the_plugins_page =
@@ -580,6 +604,7 @@ The music player developer is not responsible for plugins. There is no guarantee
   String This_message_will_not_appear_again =
       'This message will not appear again';
   String Continue = 'Continue';
+  String Back = 'Back';
 
   // FsSource
   String Tracks = 'Tracks';
@@ -885,7 +910,25 @@ class RuLang implements Lang {
       'Добро пожаловать на страницу плагинов (расширений).';
   String Warning = 'Предупреждение';
   String phrase__disclaimer =
-      'Плагины — это небольшие программы, которые расширяют возможности плеера:\n- добавляют новые источники музыки;\n- предоставляют тексты для песен и т.п.\nРазработчик плеера не несёт ответственность за плагины. Нет гарантии их качества и безопасности. Используйте только те плагины, которым доверяете.';
+      '''Плагины — это небольшие программы, которые расширяют возможности плеера:
+- добавляют новые источники музыки;
+- предоставляют тексты для песен и т.п.
+Для удобства их также можно установить с сервера.
+''';
+  String phrase__disclaimer_terms_1 =
+      'Используя сервер плагинов по умолчанию (https://plugins.libresound.org), вы соглашаетесь с его';
+  String phrase__disclaimer_terms_2 = ' и ';
+  String phrase__disclaimer_end =
+      '''Плагины предоставляются на условиях «как есть». Разработчик приложения снимает с себя всякую ответственность за плагины, а также за сторонние серверы и интернет-ресурсы. Вы принимаете на себя все сопутствующие риски.
+
+Продолжая, вы подтверждаете, что ознакомились с вышеуказанной информацией, поняли её содержание и соглашаетесь с ней.
+''';
+  String Terms_of_Service__ablative = 'Условиями использования';
+  String Privacy_Policy__ablative = 'Политикой конфиденциальности';
+  String link__Terms_of_Service =
+      'https://plugins.libresound.org/terms-of-service_ru/';
+  String link__Privacy_Policy =
+      'https://plugins.libresound.org/privacy-policy_ru/';
   // String Ive_read_and_understood = 'Я прочитал и понял';
   String Plugin_settings = 'Настройки плагинов';
   String Automatically_load_the_home_page_when_entering_the_plugins_page =
@@ -895,6 +938,7 @@ class RuLang implements Lang {
   String This_message_will_not_appear_again =
       'Это сообщение не будет показываться повторно';
   String Continue = 'Продолжить';
+  String Back = 'Назад';
 
   // FsSource
   String Tracks = 'Треки';

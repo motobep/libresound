@@ -1,6 +1,8 @@
+import 'package:flutter/gestures.dart' show TapGestureRecognizer;
 import 'package:music_player/config.dart' as CONFIG;
 import 'package:music_player/logic/lang.dart';
 import 'package:music_player/states/AppearanceState.dart';
+import 'package:music_player/states/FocusState.dart' show FocusManagerState;
 import 'package:music_player/view/components/ScrollingPageWrapper.dart';
 import 'package:music_player/view/components/TopTabs.dart';
 import 'package:music_player/view/components/buttons.dart';
@@ -15,6 +17,7 @@ import 'package:music_player/states/AppState.dart';
 import 'package:flutter/material.dart';
 import 'package:music_player/view/snackBarFuncs.dart' show showSnackBar;
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart' show launchUrl;
 
 const int myPluginsIdx = 0;
 const int browsePluginsIdx = 1;
@@ -101,8 +104,6 @@ class _PluginsBodyState extends State<PluginsBody> {
     var appState = Provider.of<AppState>(context, listen: false);
     bool isPluginsDisclaimerRead =
         context.select<AppState, bool>((s) => s.isPluginsDisclaimerRead);
-    bool isPluginsMiniDisclaimerRead =
-        context.select<AppState, bool>((s) => s.isPluginsMiniDisclaimerRead);
 
     // To update
     context.select<AppState, String>((s) => s.pluginsPages.currPage);
@@ -191,68 +192,68 @@ class _PluginsBodyState extends State<PluginsBody> {
                         ),
                         const SizedBox(height: 8.0),
                         SelectableText(
-                          '${lang.phrase__disclaimer}',
+                          lang.phrase__disclaimer,
                           style: const TextStyle(height: 1.6),
                           // softWrap: true,
                         ),
-                        const SizedBox(height: 18.0),
-                        Text(
-                          lang.Plugin_settings,
-                          // softWrap: true,
-                          style: const TextStyle(fontSize: 16),
+                        RichText(
+                          text: TextSpan(
+                            // style: TextStyle(color: Colors.black),
+                            children: [
+                              TextSpan(
+                                  text: '${lang.phrase__disclaimer_terms_1} '),
+                              TextSpan(
+                                text: lang.Terms_of_Service__ablative,
+                                style: const TextStyle(
+                                  color: Colors.blue,
+                                  decoration: TextDecoration.underline,
+                                ),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    launchUrl(
+                                        Uri.parse(lang.link__Terms_of_Service));
+                                  },
+                              ),
+                              TextSpan(text: lang.phrase__disclaimer_terms_2),
+                              TextSpan(
+                                text: lang.Privacy_Policy__ablative,
+                                style: const TextStyle(
+                                  color: Colors.blue,
+                                  decoration: TextDecoration.underline,
+                                ),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    launchUrl(
+                                        Uri.parse(lang.link__Privacy_Policy));
+                                  },
+                              ),
+                              const TextSpan(text: '.\n'),
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 8.0),
+                        SelectableText(
+                          '${lang.phrase__disclaimer_end}',
+                          style: const TextStyle(height: 1.6),
+                          // softWrap: true,
+                        ),
+                        const SizedBox(height: 14.0),
                         Row(
                           children: [
-                            CheckboxInput(
-                              initial: config.getProperty(
-                                  'isAutoLoadPluginHomePage',
-                                  orElse: true),
-                              onSelect: (b) {
-                                gLogger.log('isAutoLoadPluginHomePage: $b');
-                                bool ok = config.saveProperty(
-                                    'isAutoLoadPluginHomePage', b);
-                                return ok;
-                              },
-                            ),
-                            const SizedBox(width: 8.0),
-                            Flexible(
-                              child: Text(
-                                lang.Automatically_load_the_home_page_when_entering_the_plugins_page,
-                                softWrap: true,
-                                maxLines: 2,
-                              ),
-                            ),
+                            StandardButton(lang.Continue, onTap: () {
+                              config.saveProperty(
+                                  'isPluginsDisclaimerRead_v2', true);
+                              appState.update();
+                            }),
+                            const SizedBox(width: 12.0),
+                            StandardButton(lang.Back, onTap: () {
+                              FocusManagerState focusState =
+                                  Provider.of<FocusManagerState>(context,
+                                      listen: false);
+                              focusState.onSidebarClick(4);
+                              // appState.update();
+                            }),
                           ],
                         ),
-                        const SizedBox(height: 8.0),
-                        Row(children: [
-                          CheckboxInput(
-                            initial: config.getProperty(
-                                'isAutoCheckPluginUpdates',
-                                orElse: true),
-                            onSelect: (b) {
-                              gLogger.log('isAutoCheckPluginUpdates: $b');
-                              bool ok = config.saveProperty(
-                                  'isAutoCheckPluginUpdates', b);
-                              return ok;
-                            },
-                          ),
-                          const SizedBox(width: 8.0),
-                          Flexible(
-                            child: Text(
-                              lang.Automatic_check_for_plugin_updates,
-                              softWrap: true,
-                            ),
-                          ),
-                        ]),
-                        const SizedBox(height: 20.0),
-                        Text('${lang.This_message_will_not_appear_again}.'),
-                        const SizedBox(height: 14.0),
-                        StandardButton(lang.Continue, onTap: () {
-                          config.saveProperty('isPluginsDisclaimerRead', true);
-                          appState.update();
-                        }),
                         const SizedBox(height: 6.0),
                       ],
                     ),
