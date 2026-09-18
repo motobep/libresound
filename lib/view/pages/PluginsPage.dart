@@ -198,7 +198,8 @@ class _PluginsBodyState extends State<PluginsBody> {
                         ),
                         RichText(
                           text: TextSpan(
-                            // style: TextStyle(color: Colors.black),
+                            style: TextStyle(
+                                color: appearanceState.colors[ColorType.text]),
                             children: [
                               TextSpan(
                                   text: '${lang.phrase__disclaimer_terms_1} '),
