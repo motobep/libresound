@@ -30,22 +30,22 @@ Website: [libresound.org](https://libresound.org/).
 #### Desktop
 
 **Lyrics via a Plugin**
-![lyrics](./docs/desktop/lyrics.png)
+![lyrics](./assets/docs/desktop/lyrics.png)
 
 **Custom Background Image**
-![background_image](./docs/desktop/background_image.png)
+![background_image](./assets/docs/desktop/background_image.png)
 
 **Customizable Colors, Fonts & Thumbnail corners**
-![orange](./docs/desktop/customization/orange.png)
+![orange](./assets/docs/desktop/customization/orange.png)
 
 **Dynamic Theme**
-![dynamic](./docs/desktop/customization/dynamic.png)
+![dynamic](./assets/docs/desktop/customization/dynamic.png)
 
 **Plugins**
-![plugins](./docs/desktop/plugins.png)
+![plugins](./assets/docs/desktop/plugins.png)
 
 **Equalizer**
-![equalizer](./docs/desktop/equalizer.png)
+![equalizer](./assets/docs/desktop/equalizer.png)
 
 
 ## TODO
