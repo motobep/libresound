@@ -25,7 +25,7 @@ Website: [libresound.org](https://libresound.org/).
 
 #### Mobile
 
-![five](./docs/five.png)
+![five](./assets/docs/five.png)
 
 #### Desktop
 
