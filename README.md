@@ -21,6 +21,33 @@ Website: [libresound.org](https://libresound.org/).
 - [Official Website](https://libresound.org/#Downloads)
 - [Github releases](https://github.com/motobep/libresound/releases)
 
+## Screenshots
+
+#### Mobile
+
+![five](./docs/five.png)
+
+#### Desktop
+
+**Lyrics via a Plugin**
+![lyrics](./docs/desktop/lyrics.png)
+
+**Custom Background Image**
+![background_image](./docs/desktop/background_image.png)
+
+**Customizable Colors, Fonts & Thumbnail corners**
+![orange](./docs/desktop/customization/orange.png)
+
+**Dynamic Theme**
+![dynamic](./docs/desktop/customization/dynamic.png)
+
+**Plugins**
+![plugins](./docs/desktop/plugins.png)
+
+**Equalizer**
+![equalizer](./docs/desktop/equalizer.png)
+
+
 ## TODO
 
 - [ ] Plugins via shared libraries (.so/.dll)
@@ -37,12 +64,16 @@ Website: [libresound.org](https://libresound.org/).
 
 ### Run
 
+On Windows: set GSTREAMER_ROOT_X86 env variable before run.
+
 ```bash
 just run # using just
 flutter run --debug --dart-define=build_mode=dev # directly
 ```
 
 ### Build
+
+On Windows: set GSTREAMER_ROOT_X86 env variable before build.
 
 ```bash
 just build # using just

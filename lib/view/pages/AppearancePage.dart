@@ -215,6 +215,7 @@ class AppearanceBody extends StatelessWidget {
                                     children: [
                                       SelectableText(
                                         '${lang.Wallpaper}${appearanceState.bgImagePath != null ? ": ${appearanceState.bgImagePath}" : ""}',
+                                        // '${lang.Wallpaper}${appearanceState.bgImagePath != null ? ": /path/to/image.png" : ""}',
                                         minLines: 1,
                                         maxLines: 3,
                                       ),

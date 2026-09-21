@@ -37,7 +37,7 @@ class _DemoThemeButtonsState extends State<DemoThemeButtons> {
         TextButton(
           child: Text('toggle',
               style: TextStyle(
-                  color: !isShow ? ColorScheme.of(context).surface : null)),
+                  color: !isShow ? Colors.transparent : null)),
           onPressed: () {
             isShow = !isShow;
             setState(() {});
