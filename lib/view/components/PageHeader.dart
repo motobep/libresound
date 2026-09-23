@@ -17,19 +17,20 @@ import 'package:music_player/view/components/iconsMap.dart';
 const double titleHeight = 36;
 const double subtitleHeight = 23;
 const double actionBtnHeight = 32;
+const double paddingBtnBottom = 4;
 
 double calcPageHeaderHeight(PageHeaderDescr header) {
   if (header.picture != null) {
     return CONFIG.pageHeaderHeight;
   }
-  double h = titleHeight;
+  double h = titleHeight * 2;
   if (header.subtitle != null) {
     h += subtitleHeight + 4.0; // subtitle padding
   }
   if (header.actionBtn != null) {
     h += actionBtnHeight + 8.0; // btn padding
   }
-  h += 4.0; // bottom padding
+  h += 4.0 + paddingBtnBottom; // bottom padding
   return h;
 }
 
@@ -114,7 +115,7 @@ class PageHeader extends StatelessWidget {
                         height: 8,
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(left: 4.0),
+                        padding: const EdgeInsets.only(left: 4.0, bottom: paddingBtnBottom),
                         child: OutlinedStandardButton(
                           header.actionBtn!.text,
                           fontSize: 14,

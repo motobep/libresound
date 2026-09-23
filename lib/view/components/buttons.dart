@@ -299,6 +299,10 @@ class OutlinedStandardButton extends StatelessWidget {
         onPressed: onTap,
         icon: icon!,
         iconSize: 22,
+        visualDensity: const VisualDensity(
+          horizontal: VisualDensity.minimumDensity,
+          vertical: VisualDensity.minimumDensity,
+        ),
         style: ButtonStyle(
           fixedSize: WidgetStateProperty.all(const Size.fromRadius(16)),
           minimumSize: WidgetStateProperty.all(Size.zero),
