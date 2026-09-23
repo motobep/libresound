@@ -57,7 +57,7 @@ class Atom {
     return len;
   }
 
-  // Given a child path, separated by dots, return that child, or recursively create it
+  /// Given a child path, separated by dots, return that child, or recursively create it
   Atom ensureChild(String childName) {
     List<String> pathArray = childName.split('.');
     final String firstChild = pathArray[0];
@@ -73,7 +73,7 @@ class Atom {
     return child;
   }
 
-  // Get child
+  /// Get child
   int getChildIdx(String name) {
     int idx = children.indexWhere((child) => child.name == name);
     return idx;
@@ -96,7 +96,7 @@ class Atom {
     return getChildIdx(name) != -1;
   }
 
-  // Add/insert child
+  /// Add/insert child
   Atom addChild(String name) {
     Atom atom = Atom(name, this);
     children.add(atom);

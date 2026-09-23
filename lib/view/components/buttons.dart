@@ -265,6 +265,7 @@ class OutlinedStandardButton extends StatelessWidget {
     this.text, {
     super.key,
     required this.onTap,
+    this.icon,
     this.fgColor,
     this.borderColor,
     this.borderWidth = 1,
@@ -278,6 +279,7 @@ class OutlinedStandardButton extends StatelessWidget {
             );
 
   final String text;
+  final Icon? icon;
   final void Function()? onTap;
   final Color? fgColor;
   final Color? borderColor;
@@ -292,7 +294,27 @@ class OutlinedStandardButton extends StatelessWidget {
     Color _fgColor = fgColor ?? ColorScheme.of(context).primary;
     Color _borderColor = borderColor ?? ColorScheme.of(context).primary;
 
-    return TextButton(
+    if (text == '' && icon != null) {
+      return IconButton(
+        onPressed: onTap,
+        icon: icon!,
+        iconSize: 22,
+        style: ButtonStyle(
+          fixedSize: WidgetStateProperty.all(const Size.fromRadius(16)),
+          minimumSize: WidgetStateProperty.all(Size.zero),
+          foregroundColor: WidgetStateColor.resolveWith((states) => _fgColor),
+          shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+              RoundedRectangleBorder(
+            side: BorderSide(width: borderWidth, color: _borderColor),
+            borderRadius:
+                BorderRadius.circular(CONFIG.Default.iconOverlayRadius),
+          )),
+          padding: const WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(0)),
+        ),
+      );
+    }
+
+    return TextButton.icon(
       onPressed: onTap,
       style: ButtonStyle(
           overlayColor:
@@ -304,7 +326,8 @@ class OutlinedStandardButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(18.0),
           )),
           padding: WidgetStatePropertyAll<EdgeInsets>(padding)),
-      child: Text(text,
+      icon: icon,
+      label: Text(text,
           style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.normal)),
     );
   }

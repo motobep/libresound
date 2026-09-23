@@ -37,6 +37,7 @@ class M4aTagsHandler {
           tagLength <= atomData.lengthInBytes &&
           atom.name != 'sbgp') {
         if (tagLength == 0 || tagLength == 1) {
+          // TODO: consider supporting 64-bit box length
           var msg = '0 and 1 length not supported. Tag "$tagName" [$tagLength]';
           log(msg);
           throw M4aException(msg);
@@ -148,7 +149,11 @@ class M4aTagsHandler {
   // Adds/sets iTunes mp4 tags
   M4aTagsHandler setTags(Tags tags) {
     log('setTags()');
-    var offset = root.ensureChild('moov.udta').getByteLength();
+    final moov = root.getChild('moov');
+    var offset = 0;
+    if (moov.hasChild('udta')) {
+      offset = root.ensureChild('moov.udta').getByteLength();
+    }
 
     final hdlr = root.ensureChild('moov.udta.meta.hdlr');
     var adata = AtomData(Uint8List(25));

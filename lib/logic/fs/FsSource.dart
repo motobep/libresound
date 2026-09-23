@@ -628,7 +628,7 @@ class FsSource implements Source {
       subtitle: '${tracklist.length} ${lang.songs}',
       picture: item.picture,
       actionBtn: ActionBtnDescr(
-          text: lang.Actions,
+          icon: IconName.dots_three_vertical,
           onTap: () {
             showItemDialog(-1, item, sectionIndex: 0);
           }),

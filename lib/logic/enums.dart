@@ -189,6 +189,8 @@ enum IconName {
   heart,
   thumbs_up,
   thumbs_down,
+  dots_three_vertical,
+  dots_three_horizontal,
 }
 
 IconName? toIconNameOrNull(String? s) {

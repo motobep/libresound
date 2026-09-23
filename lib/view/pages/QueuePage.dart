@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:music_player/logger.dart';
+import 'package:music_player/view/App.dart' show gPadding;
 import 'package:provider/provider.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -46,7 +47,7 @@ class QueuePage extends StatelessWidget {
               color: appearanceState.colors[ColorType.bg]!,
               child: Queue(
                 width: width,
-                height: height - appBarHeight,
+                height: height - appBarHeight - gPadding.top,
               ),
             ),
             const Positioned(bottom: 30 + 40, child: SelectionInfo()),

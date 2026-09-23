@@ -22,4 +22,6 @@ final iconsMap = {
   IconName.heart: PhI.heartStraight,
   IconName.thumbs_up: PhI.thumbsUp,
   IconName.thumbs_down: PhI.thumbsDown,
+  IconName.dots_three_vertical: PhI.dotsThreeVertical,
+  IconName.dots_three_horizontal: PhI.dotsThree,
 };

@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:music_player/logger.dart' show gLogger;
 import 'package:provider/provider.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart' show PhosphorIconsStyle;
 
 import 'package:music_player/config.dart' as CONFIG;
+import 'package:music_player/logger.dart' show gLogger;
 import 'package:music_player/logic/lang.dart';
 import 'package:music_player/logic/PageDescr.dart';
 
 import 'package:music_player/states/AppearanceState.dart';
 
 import 'package:music_player/view/components/parts.dart';
+import 'package:music_player/view/components/buttons.dart'
+    show OutlinedStandardButton;
+import 'package:music_player/view/components/iconsMap.dart';
 
 const double titleHeight = 36;
 const double subtitleHeight = 23;
@@ -111,27 +115,20 @@ class PageHeader extends StatelessWidget {
                       ),
                       Padding(
                         padding: const EdgeInsets.only(left: 4.0),
-                        child: TextButton(
-                          onPressed: header.actionBtn!.onTap,
-                          style: ButtonStyle(
-                            padding: WidgetStateProperty.all(
-                                const EdgeInsets.symmetric(horizontal: 14.0)),
-                            foregroundColor: WidgetStateProperty.all(
-                                ColorScheme.of(context).onSurface),
-                            side: WidgetStateProperty.all(
-                              BorderSide(
-                                width: 1.0,
-                                color: appearanceState.lerpBgColor(0.05),
-                              ),
-                            ),
-                            shape:
-                                WidgetStateProperty.all(RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(40),
-                            )),
-                          ),
-                          child: Text(header.actionBtn!.text,
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.normal)),
+                        child: OutlinedStandardButton(
+                          header.actionBtn!.text,
+                          fontSize: 14,
+                          icon: header.actionBtn!.icon != null
+                              ? Icon(
+                                  iconsMap[header.actionBtn!.icon]!(
+                                      PhosphorIconsStyle.regular),
+                                  color: ColorScheme.of(context).onSurface,
+                                )
+                              : null,
+                          fgColor: ColorScheme.of(context).onSurface,
+                          borderColor: appearanceState.lerpBgColor(0.07),
+                          borderWidth: 1.0,
+                          onTap: header.actionBtn!.onTap,
                         ),
                       ),
                     ],
